@@ -1,0 +1,1 @@
+# pojedynczy osobnik z genotypem i oceną

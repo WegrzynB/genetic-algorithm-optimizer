@@ -1,0 +1,1 @@
+# Implementuje selekcję najlepszych osobników według fitness

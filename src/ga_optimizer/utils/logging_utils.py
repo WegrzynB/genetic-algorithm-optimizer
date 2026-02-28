@@ -1,0 +1,1 @@
+# Zawiera konfigurację logowania i pomocnicze funkcje raportowania przebiegu

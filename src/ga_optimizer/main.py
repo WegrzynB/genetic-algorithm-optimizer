@@ -1,0 +1,1 @@
+# główny punkt wejścia aplikacji

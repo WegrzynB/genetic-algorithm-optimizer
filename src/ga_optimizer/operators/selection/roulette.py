@@ -1,0 +1,1 @@
+# Implementuje selekcję ruletkową proporcjonalną do fitness

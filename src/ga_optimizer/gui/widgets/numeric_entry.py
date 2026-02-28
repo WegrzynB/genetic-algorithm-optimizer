@@ -1,0 +1,1 @@
+# Implementuje pole wejściowe z walidacją wartości liczbowych

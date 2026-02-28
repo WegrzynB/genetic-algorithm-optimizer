@@ -1,0 +1,1 @@
+# Uruchamia serie testów porównawczych dla różnych konfiguracji algorytmu

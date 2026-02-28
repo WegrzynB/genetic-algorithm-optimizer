@@ -1,0 +1,1 @@
+# dekodowanie chromosomu do wartości wejściowych funkcji celu

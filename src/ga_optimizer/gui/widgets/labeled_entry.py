@@ -1,0 +1,1 @@
+# Implementuje pole wejściowe z etykietą jako jeden komponent

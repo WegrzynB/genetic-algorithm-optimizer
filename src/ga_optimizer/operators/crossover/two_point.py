@@ -1,0 +1,1 @@
+# Implementuje krzyżowanie dwupunktowe

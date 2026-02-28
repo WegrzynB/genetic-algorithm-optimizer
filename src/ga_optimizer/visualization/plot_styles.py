@@ -1,0 +1,1 @@
+# Zawiera wspólne ustawienia stylu i formatowania wykresów matplotlib

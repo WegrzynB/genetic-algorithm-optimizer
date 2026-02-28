@@ -1,0 +1,1 @@
+# Składa aplikację GUI, inicjalizuje okno główne i uruchamia pętlę Tkintera

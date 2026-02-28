@@ -1,0 +1,1 @@
+# Implementuje operator inwersji fragmentu chromosomu

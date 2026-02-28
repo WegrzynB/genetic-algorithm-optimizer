@@ -1,0 +1,1 @@
+# Definiuje panel wyświetlania wykresów i wizualizacji wyników

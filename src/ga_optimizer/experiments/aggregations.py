@@ -1,0 +1,1 @@
+# Agreguje wyniki wielu uruchomień do postaci tabel i podsumowań

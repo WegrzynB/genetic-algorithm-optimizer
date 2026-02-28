@@ -1,0 +1,1 @@
+# Implementuje pasek statusu do komunikatów i informacji o stanie aplikacji

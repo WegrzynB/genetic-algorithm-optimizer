@@ -1,0 +1,1 @@
+# Eksportuje konfiguracje i metryki do formatu JSON

@@ -1,0 +1,1 @@
+# Implementuje selekcję turniejową na podstawie losowanych grup osobników

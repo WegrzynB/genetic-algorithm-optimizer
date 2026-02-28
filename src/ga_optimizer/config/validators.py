@@ -1,0 +1,1 @@
+# sprawdza poprawność wartości konfiguracyjnych (zakresy, typy, zależności)

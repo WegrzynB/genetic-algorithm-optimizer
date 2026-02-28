@@ -1,0 +1,1 @@
+# uruchamia całą aplikację (główny skrypt)

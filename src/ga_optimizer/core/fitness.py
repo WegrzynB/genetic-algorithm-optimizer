@@ -1,0 +1,1 @@
+# logika przeliczania wartości funkcji celu na fitness (transformuje jeżeli to konieczne)

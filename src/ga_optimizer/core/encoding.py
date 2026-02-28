@@ -1,0 +1,1 @@
+# kodowanie wartości zmiennych do postaci chromosomu

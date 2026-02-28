@@ -1,0 +1,1 @@
+# Zapisuje wyniki uruchomień do plików i odpowiednich folderów

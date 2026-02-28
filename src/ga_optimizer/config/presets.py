@@ -1,0 +1,1 @@
+# wybrane konfiguracje parametrów (np. do testów)

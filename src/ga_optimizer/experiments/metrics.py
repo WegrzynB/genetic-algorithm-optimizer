@@ -1,0 +1,1 @@
+# Definiuje i oblicza metryki porównawcze dla przebiegów algorytmu

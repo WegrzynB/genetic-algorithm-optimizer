@@ -1,0 +1,1 @@
+# zarządza kolejnymi etapami generacji (selekcja, krzyżowanie, mutacja, elitaryzm)

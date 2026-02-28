@@ -1,0 +1,1 @@
+# Definiuje panel sterowania uruchomieniem oraz podglądu statusu/czasu

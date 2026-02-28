@@ -1,0 +1,1 @@
+# możemy tutaj dorobić jakiś benchmark dla różnych parametrów

@@ -1,0 +1,1 @@
+# Tworzy wykresy zbieżności (np. fitness best/avg/worst po epokach)

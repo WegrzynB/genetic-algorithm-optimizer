@@ -1,0 +1,1 @@
+# Obsługuje uruchamianie/zatrzymywanie obliczeń oraz aktualizację statusu biegu

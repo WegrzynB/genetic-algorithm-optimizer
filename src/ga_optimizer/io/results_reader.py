@@ -1,0 +1,1 @@
+# Wczytuje zapisane wyniki uruchomień do dalszej analizy

@@ -1,0 +1,1 @@
+# obsługa tworzenia, przechowywania i operacji na populacji osobników

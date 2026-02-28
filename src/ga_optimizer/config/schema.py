@@ -1,0 +1,1 @@
+# definiuje strukturę konfiguracji (jakie pola i typy są dozwolone)

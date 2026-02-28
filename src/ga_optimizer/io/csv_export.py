@@ -1,0 +1,1 @@
+# Eksportuje dane wynikowe i historię przebiegu do formatu CSV

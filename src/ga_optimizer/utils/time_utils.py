@@ -1,0 +1,1 @@
+# Zawiera narzędzia do pomiaru czasu i formatowania czasu wykonania

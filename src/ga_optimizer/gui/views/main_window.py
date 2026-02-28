@@ -1,0 +1,1 @@
+# Definiuje główne okno aplikacji i układ nadrzędny interfejsu

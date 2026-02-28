@@ -1,0 +1,1 @@
+# główna pętla algorytmu genetycznego, cały przebieg epok

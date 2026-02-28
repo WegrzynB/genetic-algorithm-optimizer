@@ -1,0 +1,1 @@
+# Przechowuje i synchronizuje stan interfejsu między widokami a kontrolerami

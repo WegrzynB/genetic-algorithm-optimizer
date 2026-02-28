@@ -1,0 +1,1 @@
+# Implementuje niestandardowe krzyżowanie ziarniste

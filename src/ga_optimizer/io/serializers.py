@@ -1,0 +1,1 @@
+# Serializuje i deserializuje obiekty domenowe (np. konfiguracje, wyniki)

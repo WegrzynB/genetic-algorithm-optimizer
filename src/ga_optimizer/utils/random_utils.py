@@ -1,0 +1,1 @@
+# Zawiera pomocnicze funkcje do losowania i kontroli ziaren generatora

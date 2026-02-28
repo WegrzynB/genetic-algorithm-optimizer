@@ -1,0 +1,1 @@
+# Definiuje panel prezentacji wyników liczbowych i podsumowania runa

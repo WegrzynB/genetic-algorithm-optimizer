@@ -1,0 +1,1 @@
+# Implementuje zachowanie najlepszych osobników między epokami

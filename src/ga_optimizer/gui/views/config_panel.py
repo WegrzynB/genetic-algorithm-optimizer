@@ -1,0 +1,1 @@
+# Definiuje panel ustawień parametrów algorytmu i problemu

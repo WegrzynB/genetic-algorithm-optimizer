@@ -1,0 +1,1 @@
+# ocena osobników na podstawie wybranego problemu / funkcji celu

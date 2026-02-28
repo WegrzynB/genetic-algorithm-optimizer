@@ -1,0 +1,1 @@
+# chromosom i podstawowe operacje na jego strukturze

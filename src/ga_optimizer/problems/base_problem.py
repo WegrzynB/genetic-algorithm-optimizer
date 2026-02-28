@@ -1,0 +1,1 @@
+# Definiuje wspólny interfejs/kontrakt dla wszystkich problemów optymalizacyjnych

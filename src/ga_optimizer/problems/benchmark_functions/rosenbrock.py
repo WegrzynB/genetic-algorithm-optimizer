@@ -1,0 +1,1 @@
+# Implementuje funkcję Rosenbrocka jako problem testowy
