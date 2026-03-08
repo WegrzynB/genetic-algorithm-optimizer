@@ -1,9 +1,8 @@
 # główny punkt wejścia aplikacji
 
-import sys
 import traceback
 
-from gui.app import run_app
+from ga_optimizer.gui.app import run_app
 
 
 def main() -> int:
