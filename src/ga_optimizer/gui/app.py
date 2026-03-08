@@ -1,7 +1,8 @@
 # Składa aplikację GUI, inicjalizuje okno główne i uruchamia pętlę Tkintera
 
 import tkinter as tk
-from gui.views.main_window import MainWindow
+
+from ga_optimizer.gui.views.main_window import MainWindow
 
 
 def run_app() -> None:
