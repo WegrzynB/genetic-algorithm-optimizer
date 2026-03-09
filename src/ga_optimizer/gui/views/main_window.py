@@ -1,7 +1,7 @@
 # main_window.py
 # Definiuje główne okno aplikacji i układ nadrzędny interfejsu
 
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 from ga_optimizer.gui.state.view_model import ViewModel
 from ga_optimizer.gui.views.config_panel import ConfigPanel
@@ -43,7 +43,7 @@ class MainWindow:
         self.root.title("GA Optimizer")
         self.root.geometry("1600x900")
         self.root.minsize(1400, 800)
-        self.root.state('zoomed')
+        self.root.state("zoomed")
 
     def _build_layout(self) -> None:
         # Kontener główny (padding) oraz podział na nagłówek i ciało
@@ -100,6 +100,28 @@ class MainWindow:
         self.results_panel.frame.grid(row=2, column=0, sticky="ew")
 
     def _on_start(self) -> None:
+        # Najpierw uruchamiamy walidację formularza.
+        # Jeśli są błędy, nie przechodzimy dalej do właściwego startu algorytmu.
+        errors = self.vm.validate_all()
+
+        if errors:
+            self.config_panel.show_validation_errors(errors)
+
+            error_text = "\n".join(f"- {message}" for message in errors.values())
+            messagebox.showerror(
+                "Błędne dane wejściowe",
+                f"Popraw pola formularza przed uruchomieniem algorytmu:\n\n{error_text}",
+            )
+
+            self.run_panel.set_progress(0)
+            self.run_panel.enable_save(False)
+            self.run_panel.set_status("Błąd walidacji formularza - popraw zaznaczone pola.")
+            return
+
+        # Jeśli walidacja przeszła, czyścimy stare oznaczenia błędów
+        # i wykonujemy placeholder dalszego przebiegu.
+        self.config_panel.clear_validation_errors()
+
         # Placeholder: tutaj docelowo uruchomiony zostanie silnik GA i aktualizacja UI
         self.run_panel.set_status("Uruchomiono (placeholder)")
         self.run_panel.set_progress(35)

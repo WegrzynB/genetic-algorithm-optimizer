@@ -12,24 +12,21 @@ FIELDS_GENERAL = {
         "values": ["Rosenbrock", "Sphere", "Rastrigin"],
         "default": "Rosenbrock",
     },
-
     "n_vars": {
         "label": "Liczba zmiennych",
         "type": "int",
         "min": 1,
-        "default": 5
+        "default": 5,
     },
-
     "range_start": {
         "label": "Przedział: Początek",
         "type": "float",
-        "default": -5.0
+        "default": -5.0,
     },
-
     "range_end": {
         "label": "Przedział: Koniec",
         "type": "float",
-        "default": 5.0
+        "default": 5.0,
     },
 }
 
@@ -37,7 +34,12 @@ FIELDS_GENERAL = {
 FIELDS_GA_MAIN = {
     "population": {"label": "Wielkość populacji", "type": "int", "min": 2, "default": 100},
     "epochs": {"label": "Liczba epok", "type": "int", "min": 1, "default": 200},
-    "epsilon": {"label": "Epsilon (tolerancja / warunek stopu)", "type": "float", "default": 0.0001},
+    "epsilon": {
+        "label": "Epsilon (tolerancja / warunek stopu)",
+        "type": "float",
+        "min_exclusive": 0.0,
+        "default": 0.0001,
+    },
     "seed": {"label": "Seed", "type": "int", "default": 42},
 }
 
@@ -49,7 +51,12 @@ FIELDS_PRECISION = {
         "values": ["Dokładność liczbowa", "Liczba bitów"],
         "default": "Dokładność liczbowa",
     },
-    "precision_numeric": {"label": "Dokładność (np. 0.001)", "type": "float", "min": 0.0, "default": 0.001},
+    "precision_numeric": {
+        "label": "Dokładność (np. 0.001)",
+        "type": "float",
+        "min_exclusive": 0.0,
+        "default": 0.001,
+    },
     "precision_bits": {"label": "Liczba bitów", "type": "int", "min": 1, "default": 16},
 }
 
@@ -160,6 +167,11 @@ class ViewModel:
         self.method_params = {}
         self._init_method_params(root)
 
+        # Rejestr specyfikacji i powiązanych zmiennych.
+        # Dzięki temu GUI może łatwo pytać VM o reguły walidacji dla konkretnego pola.
+        self.field_specs = self._build_field_specs()
+        self.field_vars = self._build_field_vars()
+
     def _init_method_params(self, root: tk.Misc) -> None:
         # Tworzy tk.StringVar dla każdego parametru metod, aby GUI mogło łatwo wiązać pola z danymi
         for group, methods in METHOD_PARAM_SPECS.items():
@@ -169,3 +181,172 @@ class ViewModel:
                     if key in self.method_params:
                         continue
                     self.method_params[key] = tk.StringVar(root, value=str(p.get("default", "")))
+
+    def _build_field_specs(self) -> dict:
+        # Spłaszcza wszystkie specyfikacje do jednego słownika:
+        # key -> spec. Ułatwia to późniejszą walidację i budowę widgetów.
+        specs = {}
+        specs.update(FIELDS_GENERAL)
+        specs.update(FIELDS_GA_MAIN)
+        specs.update(FIELDS_PRECISION)
+
+        for methods in METHOD_PARAM_SPECS.values():
+            for params in methods.values():
+                for param in params:
+                    specs[param["key"]] = param
+
+        return specs
+
+    def _build_field_vars(self) -> dict:
+        # Mapowanie klucz pola -> tk.Variable.
+        # To jest główny punkt dostępu dla logiki walidacji.
+        vars_map = {
+            "problem": self.problem,
+            "n_vars": self.n_vars,
+            "range_start": self.range_start,
+            "range_end": self.range_end,
+            "population": self.population,
+            "epochs": self.epochs,
+            "epsilon": self.epsilon,
+            "seed": self.seed,
+            "precision_mode": self.precision_mode,
+            "precision_numeric": self.precision_numeric,
+            "precision_bits": self.precision_bits,
+        }
+        vars_map.update(self.method_params)
+        return vars_map
+
+    def get_field_spec(self, key: str) -> dict | None:
+        # Zwraca specyfikację danego pola albo None, jeśli pole nie jest zarejestrowane.
+        return self.field_specs.get(key)
+
+    def get_field_label(self, key: str) -> str:
+        # Przyjazna nazwa pola do pokazania w komunikacie błędu.
+        spec = self.get_field_spec(key)
+        return spec.get("label", key) if spec else key
+
+    def get_active_method_param_keys(self) -> list[str]:
+        # Zwraca tylko parametry aktywne dla aktualnie wybranych metod.
+        keys = []
+
+        selection_params = METHOD_PARAM_SPECS["selection"].get(self.selection_method.get(), [])
+        crossover_params = METHOD_PARAM_SPECS["crossover"].get(self.crossover_method.get(), [])
+        mutation_params = METHOD_PARAM_SPECS["mutation"].get(self.mutation_method.get(), [])
+
+        keys.extend([param["key"] for param in selection_params])
+        keys.extend([param["key"] for param in crossover_params])
+        keys.extend([param["key"] for param in mutation_params])
+
+        return keys
+
+    def get_active_field_keys(self) -> list[str]:
+        # Zwraca wszystkie pola, które aktualnie biorą udział w walidacji.
+        # Np. z precyzji walidujemy tylko aktywne pole zależne od radiobuttona.
+        keys = [
+            "n_vars",
+            "range_start",
+            "range_end",
+            "population",
+            "epochs",
+            "epsilon",
+            "seed",
+        ]
+
+        if self.precision_mode.get() == "Dokładność liczbowa":
+            keys.append("precision_numeric")
+        else:
+            keys.append("precision_bits")
+
+        keys.extend(self.get_active_method_param_keys())
+        return keys
+
+    def is_allowed_partial_value(self, key: str, value: str) -> bool:
+        # Walidacja "na żywo" dla wpisywania do Entry.
+        # Tutaj nie sprawdzamy jeszcze min/max, bo użytkownik może być w trakcie pisania.
+        # Blokujemy jedynie ewidentnie nie-numeryczne znaki.
+        spec = self.get_field_spec(key)
+        if not spec:
+            return True
+
+        field_type = spec.get("type")
+        if field_type == "int":
+            if value in ("", "-"):
+                return True
+            try:
+                int(value)
+                return True
+            except ValueError:
+                return False
+
+        if field_type == "float":
+            # Dopuszczamy stany przejściowe podczas pisania liczby.
+            if value in ("", "-", ".", "-."):
+                return True
+            try:
+                float(value)
+                return True
+            except ValueError:
+                return False
+
+        return True
+
+    def validate_all(self) -> dict[str, str]:
+        # Główna walidacja uruchamiana po kliknięciu Start.
+        # Zwraca słownik: key -> komunikat błędu.
+        errors: dict[str, str] = {}
+
+        for key in self.get_active_field_keys():
+            value = self.field_vars[key].get()
+            spec = self.get_field_spec(key)
+            error = self._validate_value_against_spec(key=key, value=value, spec=spec)
+            if error:
+                errors[key] = error
+
+        # Walidacja zależności między polami przedziału.
+        if "range_start" not in errors and "range_end" not in errors:
+            start = float(self.range_start.get())
+            end = float(self.range_end.get())
+            if start >= end:
+                msg = 'Pole "Przedział (Start / koniec)" wymaga, aby Start był mniejszy od końca.'
+                errors["range_start"] = msg
+                errors["range_end"] = msg
+
+        return errors
+
+    def _validate_value_against_spec(self, key: str, value: str, spec: dict | None) -> str | None:
+        # Walidacja pełnej wartości pola względem specyfikacji:
+        # - czy nie jest puste,
+        # - czy da się sparsować,
+        # - czy mieści się w min/max.
+        if spec is None:
+            return None
+
+        label = spec.get("label", key)
+        field_type = spec.get("type")
+
+        if field_type not in {"int", "float"}:
+            return None
+
+        if value.strip() == "":
+            return f'Pole "{label}" nie może być puste.'
+
+        try:
+            parsed_value = int(value) if field_type == "int" else float(value)
+        except ValueError:
+            expected = "liczbą całkowitą" if field_type == "int" else "liczbą zmiennoprzecinkową"
+            return f'Pole "{label}" musi być {expected}.'
+
+        min_value = spec.get("min")
+        min_exclusive = spec.get("min_exclusive")
+        max_value = spec.get("max")
+
+        if min_value is not None and parsed_value < min_value:
+            return f'Pole "{label}" musi mieć wartość >= {min_value}.'
+
+        if min_exclusive is not None and parsed_value <= min_exclusive:
+            return f'Pole "{label}" musi mieć wartość > {min_exclusive}.'
+
+        if max_value is not None and parsed_value > max_value:
+            return f'Pole "{label}" musi mieć wartość <= {max_value}.'
+
+        return None
