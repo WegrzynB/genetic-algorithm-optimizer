@@ -1,52 +1,58 @@
 # main_window.py
-# Definiuje główne okno aplikacji i układ nadrzędny interfejsu
+# Główne okno aplikacji. Na Start składamy config z GUI i walidujemy go.
 
 from tkinter import messagebox, ttk
 
+from ga_optimizer.config.validators import build_config_from_payload
 from ga_optimizer.gui.state.view_model import ViewModel
 from ga_optimizer.gui.views.config_panel import ConfigPanel
-from ga_optimizer.gui.views.run_panel import RunPanel
 from ga_optimizer.gui.views.plots_panel import PlotsPanel
 from ga_optimizer.gui.views.results_panel import ResultsPanel
+from ga_optimizer.gui.views.run_panel import RunPanel
 
 
 class MainWindow:
     def __init__(self, root):
-        # Przechowuje obiekt okna głównego oraz wspólny model stanu GUI
+        # Referencja do głównego okna Tkinter.
         self.root = root
+
+        # Wspólny model stanu GUI.
         self.vm = ViewModel(root)
 
-        # Główne kontenery layoutu
+        # Główne kontenery układu okna.
         self.main_frame = None
         self.header_frame = None
         self.body_frame = None
 
-        # Kolumny: lewa (konfiguracja) i prawa (wyniki/wykresy/sterowanie)
+        # Lewa i prawa część głównego widoku.
         self.left_frame = None
         self.right_frame = None
 
-        # Panele GUI
+        # Panele składowe GUI.
         self.config_panel = None
         self.run_panel = None
         self.plots_panel = None
         self.results_panel = None
 
+        # Ostatni poprawnie zwalidowany config.
+        self.last_validated_config = None
+
     def build(self) -> None:
-        # Buduje całe okno: ustawienia, layout, nagłówek oraz panele
+        # Buduje całe okno aplikacji.
         self._configure_root()
         self._build_layout()
         self._build_header()
         self._build_panels()
 
     def _configure_root(self) -> None:
-        # Ustawia tytuł i podstawowe rozmiary okna
+        # Ustawia podstawowe parametry okna.
         self.root.title("GA Optimizer")
         self.root.geometry("1600x900")
         self.root.minsize(1400, 800)
         self.root.state("zoomed")
 
     def _build_layout(self) -> None:
-        # Kontener główny (padding) oraz podział na nagłówek i ciało
+        # Tworzy główny układ okna: nagłówek + ciało.
         self.main_frame = ttk.Frame(self.root, padding=12)
         self.main_frame.pack(fill="both", expand=True)
 
@@ -56,17 +62,17 @@ class MainWindow:
         self.body_frame = ttk.Frame(self.main_frame)
         self.body_frame.pack(fill="both", expand=True)
 
-        # Układ siatki: kolumna 0 (lewa) stała, kolumna 1 (prawa) rozciągliwa
+        # Konfiguruje siatkę dla sekcji głównej.
         self.body_frame.columnconfigure(0, weight=0)
         self.body_frame.columnconfigure(1, weight=1)
         self.body_frame.rowconfigure(0, weight=1)
 
-        # Lewy panel (konfiguracja) ma stałą szerokość i nie dopasowuje się do zawartości
+        # Lewa kolumna ma stałą szerokość i zawiera konfigurację.
         self.left_frame = ttk.Frame(self.body_frame, width=620)
         self.left_frame.grid(row=0, column=0, sticky="nsw", padx=(0, 12))
         self.left_frame.grid_propagate(False)
 
-        # Prawy panel wypełnia resztę przestrzeni
+        # Prawa kolumna zajmuje resztę przestrzeni.
         self.right_frame = ttk.Frame(self.body_frame)
         self.right_frame.grid(row=0, column=1, sticky="nsew")
         self.right_frame.columnconfigure(0, weight=1)
@@ -75,60 +81,68 @@ class MainWindow:
         self.right_frame.rowconfigure(2, weight=0)
 
     def _build_header(self) -> None:
-        # Nagłówek okna (tytuł interfejsu)
+        # Buduje pasek nagłówka okna.
         ttk.Label(self.header_frame, text="Algorytm genetyczny - GUI", style="Header.TLabel").pack(side="left")
 
     def _build_panels(self) -> None:
-        # Panel konfiguracji po lewej stronie
+        # Buduje panel konfiguracji po lewej stronie.
         self.config_panel = ConfigPanel(self.left_frame, self.vm)
         self.config_panel.build()
         self.config_panel.frame.pack(fill="both", expand=True)
 
-        # Panel sterowania uruchomieniem (góra prawej strony)
+        # Buduje panel sterowania uruchomieniem.
         self.run_panel = RunPanel(self.right_frame, on_start=self._on_start, on_save=self._on_save)
         self.run_panel.build()
         self.run_panel.frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
 
-        # Panel wykresu/historii (środek prawej strony)
+        # Buduje panel wykresów / historii.
         self.plots_panel = PlotsPanel(self.right_frame)
         self.plots_panel.build()
         self.plots_panel.frame.grid(row=1, column=0, sticky="nsew", pady=(0, 10))
 
-        # Panel wyników końcowych i tabeli najlepszych osobników (dół prawej strony)
+        # Buduje panel wyników końcowych.
         self.results_panel = ResultsPanel(self.right_frame)
         self.results_panel.build()
         self.results_panel.frame.grid(row=2, column=0, sticky="ew")
 
     def _on_start(self) -> None:
-        # Najpierw uruchamiamy walidację formularza.
-        # Jeśli są błędy, nie przechodzimy dalej do właściwego startu algorytmu.
-        errors = self.vm.validate_all()
+        # Składa payload z aktualnych wartości GUI.
+        payload = self.vm.get_payload()
 
-        if errors:
-            self.config_panel.show_validation_errors(errors)
+        # Buduje config i uruchamia walidację.
+        config, validation = build_config_from_payload(payload)
 
-            error_text = "\n".join(f"- {message}" for message in errors.values())
+        # Jeśli są błędy, zaznacza pola i pokazuje komunikat.
+        if not validation.ok:
+            self.config_panel.show_validation_errors(validation.errors)
+
+            error_lines = "\n".join(f"- {message}" for message in validation.errors.values())
             messagebox.showerror(
-                "Błędne dane wejściowe",
-                f"Popraw pola formularza przed uruchomieniem algorytmu:\n\n{error_text}",
+                "Błędna konfiguracja",
+                f"Popraw konfigurację przed uruchomieniem:\n\n{error_lines}",
             )
 
             self.run_panel.set_progress(0)
             self.run_panel.enable_save(False)
-            self.run_panel.set_status("Błąd walidacji formularza - popraw zaznaczone pola.")
+            self.run_panel.set_status("Błąd walidacji konfiguracji.")
             return
 
-        # Jeśli walidacja przeszła, czyścimy stare oznaczenia błędów
-        # i wykonujemy placeholder dalszego przebiegu.
+        # Zapamiętuje ostatni poprawny config.
+        self.last_validated_config = config
+
+        # Czyści oznaczenia błędów po poprawnej walidacji.
         self.config_panel.clear_validation_errors()
 
-        # Placeholder: tutaj docelowo uruchomiony zostanie silnik GA i aktualizacja UI
-        self.run_panel.set_status("Uruchomiono (placeholder)")
-        self.run_panel.set_progress(35)
-        self.run_panel.enable_save(True)
-        self.results_panel.set_termination_reason("Zakończenie: (placeholder) Epoki / Epsilon")
+        # Placeholder pod dalsze uruchamianie GA.
+        self.run_panel.set_progress(5)
+        self.run_panel.enable_save(False)
+        self.run_panel.set_status(
+            f'Konfiguracja poprawna: {config.problem_name}, n={config.n_vars} (placeholder bez startu GA).'
+        )
+
+        self.results_panel.set_termination_reason("Konfiguracja zwalidowana - uruchamianie GA jeszcze niepodłączone.")
         self.results_panel.set_summary(best="-", avg="-", worst="-", elapsed="-")
 
     def _on_save(self) -> None:
-        # Placeholder: tutaj docelowo zapis wyników do pliku/bazy
+        # Placeholder pod zapis wyników.
         self.run_panel.set_status("Zapisano (placeholder)")

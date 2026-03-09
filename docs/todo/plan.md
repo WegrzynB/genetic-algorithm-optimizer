@@ -93,45 +93,73 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 4 — konfiguracja (jedno źródło prawdy)
+## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy)
 
 ### Branch: `feature/config-model`
+
 **Co robimy**
-- `config/defaults.py`: sensowne domyślne wartości.
-- `config/schema.py`: struktura konfiguracji (pola, typy).
-- `config/validators.py`: walidacja zakresów i zależności.
-- `config/presets.py`: 2–3 presety (np. szybki/standard/dokładny).
+- Przenosimy specyfikacje pól i domyślne wartości z GUI do `config/`.
+- Dodajemy:
+  - `config/schema.py` — struktura konfiguracji, specyfikacje pól i osobne stałe dla parametrów selekcji / krzyżowania / mutacji,
+  - `config/defaults.py` — budowanie domyślnego configu,
+  - `config/validators.py` — składanie configu z GUI i walidacja.
+- `config/presets.py` na razie pomijamy.
+- Dodajemy w `problems/` katalog funkcji testowych jako jedyne źródło informacji o funkcjach dostępnych w GUI.
+- GUI ma tylko trzymać `tk.Variable`, budować formularz z configu i składać config po kliknięciu `Start`.
+- Po wyborze funkcji GUI automatycznie podmienia dedykowany zakres i domyślną liczbę zmiennych; jeśli funkcja ma stałą liczbę zmiennych, pole jest blokowane.
+- Parametry metod mają działać automatycznie na podstawie aktualnie wybranej metody selekcji / krzyżowania / mutacji.
+- Poprawiamy też scroll notebooka, żeby działał nad całym obszarem zakładki, także nad `Entry`, `Combobox` itd.
 
 **Jak testować**
-- W Python REPL / krótkim skrypcie:
-  - tworzysz config z defaultów,
-  - podmieniasz kilka pól,
-  - validator zwraca OK / błąd.
-- Dodatkowo: GUI odpala walidację configu po kliknięciu Start (na razie bez uruchamiania GA).
+- W REPL:
+  - tworzysz config z `build_default_config()`,
+  - zmieniasz kilka pól,
+  - uruchamiasz validator i dostajesz `OK` albo listę błędów.
+- W GUI:
+  - wybierasz funkcję,
+  - sprawdzasz automatyczną zmianę zakresu i liczby zmiennych,
+  - klikasz `Start` i GUI waliduje już złożony config.
 
 **Merge warunek**
-- Da się zbudować config z GUI i walidacja działa spójnie.
+- GUI potrafi złożyć spójny config z jednego źródła prawdy, a walidacja działa tak samo dla GUI i dla kodu.
 
 ---
 
-## Krok 5 — problemy i rejestr problemów (dla GUI)
+## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline
 
-### Branch: `feature/problems-registry`
+### Branch: `feature/problem-pool-pipeline-ready`
+
 **Co robimy**
-- `problems/base_problem.py`: interfejs problemu (nazwa, bounds, evaluate()).
-- `problems/registry.py`: rejestr dostępnych problemów.
-- `problems/benchmark_functions/rosenbrock.py` + ewentualnie `sphere.py`, `rastrigin.py` (po jednym pliku na funkcję).
+- Rozszerzamy pulę problemów w `src/ga_optimizer/problems/`.
+- Porządkujemy warstwę problemów tak, żeby była gotowa do użycia przez dalsze moduły projektu.
+- Dodajemy / porządkujemy:
+  - plik z implementacjami funkcji problemowych,
+  - katalog / rejestr problemów dostępnych w aplikacji,
+  - wspólny sposób pobierania problemu po nazwie,
+  - placeholdery funkcji i klas, które będą później wywoływane przez dalsze etapy programu.
+- Przygotowujemy przepływ tak, żeby po kliknięciu `Start` aplikacja nie kończyła się tylko na walidacji, ale wywoływała już kolejną funkcję w pipeline.
+- Na tym etapie ta dalsza funkcja może być jeszcze placeholderem, ale ma już mieć poprawny podpis, argumenty i typ zwracanych danych.
+- Nowe problemy dodajemy już tylko przez warstwę `problems/`, bez hardcode w GUI.
+- Robimy to tak, żeby kolejne kroki mogły działać już na jednym, spójnym modelu problemu.
 
 **Jak testować**
-- Krótki test manualny:
-  - import registry,
-  - pobierz problem,
-  - policz `evaluate()` dla przykładowego wektora.
-- GUI:
-  - combobox problemów ładuje listę z `registry` (bez GA).
+- W konsoli / prostym skrypcie:
+  - pobierz problem z rejestru,
+  - wywołaj jego funkcję dla przykładowego wektora,
+  - wypisz wynik przez `print()`.
+- Sprawdź też:
+  - czy rejestr zwraca listę dostępnych problemów,
+  - czy da się pobrać pojedynczy problem po nazwie,
+  - czy placeholder dalszego etapu przyjmuje config/problem i zwraca obiekt w oczekiwanym formacie.
+- W GUI:
+  - wybierz problem,
+  - kliknij `Start`,
+  - sprawdź, czy po walidacji wywoływana jest już kolejna funkcja, a nie tylko sam placeholder statusu.
 
 **Merge warunek**
-- GUI widzi listę problemów z rejestru i nie ma “hardcode” w combobox.
+- Problemy są ładowane z jednej warstwy `problems/`.
+- GUI nie trzyma listy problemów na sztywno.
+- Po kliknięciu `Start` przepływ przechodzi o krok dalej i wywołuje przygotowaną funkcję pipeline, nawet jeśli jej logika jest jeszcze tymczasowa.
 
 ---
 
@@ -143,16 +171,21 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 - `core/encoding.py` i `core/decoding.py`: mapowanie genotyp → wartości zmiennych (z uwzględnieniem bounds).
 - `core/individual.py`: osobnik (chromosom + cached fitness).
 - `core/population.py`: lista osobników + inicjalizacja populacji.
+- Przygotowujemy te moduły jako samodzielną warstwę logiki, jeszcze bez integracji z GUI.
 
 **Jak testować**
-- Skrypt w `scripts/` typu `scripts/run_experiment.py` (tymczasowo) lub mały snippet:
+- W prostym skrypcie albo w konsoli:
   - stwórz populację,
   - zdekoduj kilka osobników,
+  - wypisz wyniki przez `print()`,
   - sprawdź, że wartości mieszczą się w bounds.
-- Minimum test jednostkowy: `decoding` nigdy nie wychodzi poza zakres.
+- Minimum:
+  - dekodowanie nigdy nie wychodzi poza zakres,
+  - wynik jest powtarzalny przy ustawionym seed.
 
 **Merge warunek**
-- Reprezentacje działają bez engine i są deterministyczne przy ustawionym seed.
+- Reprezentacje działają bez engine i bez GUI.
+- Moduły mają czytelny kontrakt i nadają się do użycia w kolejnych krokach.
 
 ---
 
@@ -161,42 +194,50 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 ### Branch: `feature/core-evaluator`
 **Co robimy**
 - `core/evaluator.py`: wyliczanie wartości funkcji celu dla osobnika.
-- `core/fitness.py`: mapowanie min/max do fitness (np. unifikacja porządku).
-- Wspólny format “wyniku osobnika”: raw objective i fitness.
+- `core/fitness.py`: mapowanie min/max do fitness.
+- Ustalamy wspólny format wyniku osobnika: raw objective i fitness.
+- Spinamy evaluator z aktualną warstwą problemów z `problems/`.
 
 **Jak testować**
-- Manualnie:
-  - problem z registry,
-  - populacja,
-  - evaluator liczy fitness,
-  - porównaj kilka wartości (czy sensownie rośnie/maleje zgodnie z trybem min/max).
-- Minimum test jednostkowy: min/max daje odwrócony porządek rankingowy.
+- W konsoli / prostym skrypcie:
+  - pobierz problem,
+  - przygotuj przykładowe wektory lub osobniki,
+  - policz objective i fitness,
+  - wypisz wyniki przez `print()`.
+- Sprawdź ręcznie:
+  - czy ranking ma sens,
+  - czy min/max działa zgodnie z oczekiwaniem.
 
 **Merge warunek**
-- Na tej warstwie nadal brak operatorów; działa sama ocena.
+- Działa sama ocena osobników.
+- Warstwa oceny jest niezależna od GUI i operatorów.
 
 ---
 
-## Krok 8 — operators v1: kontrakt i selekcja (pierwsza)
+## Krok 8 — operators v1: kontrakt i selekcja
 
 ### Branch: `feature/operators-selection-v1`
 **Co robimy**
-- Kontrakt funkcji selekcji (np. `select(population, k, rng, ...) -> list[Individual]`).
+- Definiujemy kontrakt funkcji selekcji.
 - Implementacje w `operators/selection/`:
   - `best.py`
   - `tournament.py`
-  - `roulette.py` (jeśli fitness dodatni lub znormalizowany — ująć w kodzie).
+  - `roulette.py`
+- Robimy to tak, żeby selekcja działała na aktualnych obiektach core i dało się ją później łatwo podpiąć do lifecycle.
 
 **Jak testować**
-- Testy:
-  - `best` zawsze zwraca najlepszych,
+- W konsoli / prostym skrypcie:
+  - przygotuj małą populację o znanych fitness,
+  - uruchom każdą metodę selekcji,
+  - wypisz wyniki przez `print()`.
+- Sprawdź ręcznie:
+  - `best` zwraca najlepszych,
   - `tournament` zwraca poprawną liczbę osobników,
-  - `roulette` nie wywala błędów dla skrajnych przypadków.
-- Manualnie:
-  - uruchom selekcję na małej populacji o znanych fitness.
+  - `roulette` działa dla prostych przypadków i się nie wywala.
 
 **Merge warunek**
-- Selekcje działają na “gołych” populacjach i mają testy jednostkowe.
+- Selekcje działają na “gołych” populacjach.
+- Każda metoda ma spójne wejście i wyjście.
 
 ---
 
@@ -204,23 +245,27 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ### Branch: `feature/operators-crossover-v1`
 **Co robimy**
-- Kontrakt krzyżowania (np. `crossover(parent1, parent2, rng, ...) -> (child1, child2)`).
+- Definiujemy kontrakt krzyżowania.
 - Implementacje:
   - `one_point.py`
   - `two_point.py`
   - `uniform.py`
-  - `granular.py` (jeśli macie w wymaganiach własny wariant).
+  - `granular.py`
+- Przygotowujemy operator tak, żeby zwracał poprawne dzieci i dawał się później wpiąć w lifecycle bez przeróbek kontraktu.
 
 **Jak testować**
-- Testy:
-  - dzieci mają identyczną długość chromosomu,
-  - geny pochodzą tylko od rodziców,
-  - brak out-of-range na punktach cięcia.
-- Manualnie:
-  - na krótkim chromosomie wydrukuj rodziców i dzieci.
+- W konsoli / prostym skrypcie:
+  - przygotuj krótkie chromosomy rodziców,
+  - wykonaj krzyżowanie,
+  - wypisz rodziców i dzieci przez `print()`.
+- Sprawdź ręcznie:
+  - dzieci mają poprawną długość,
+  - geny pochodzą od rodziców,
+  - nie ma błędów na punktach cięcia.
 
 **Merge warunek**
-- Krzyżowanie jest czyste i nie zależy od engine.
+- Krzyżowanie działa samodzielnie.
+- Implementacje nie zależą od engine ani GUI.
 
 ---
 
@@ -234,17 +279,21 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
   - `mutation/edge.py`
 - `operators/inversion.py`
 - `operators/elitism.py`
+- Domykamy podstawowy zestaw operatorów potrzebny do złożenia pełnego przebiegu generacji.
 
 **Jak testować**
-- Testy:
-  - mutacja zmienia geny zgodnie z definicją i nie psuje długości,
-  - inwersja odwraca fragment,
-  - elitaryzm zawsze przenosi top-N.
-- Manualnie:
-  - na znanym chromosomie pokaż efekt mutacji/inwersji.
+- W konsoli / prostym skrypcie:
+  - uruchom mutację i inwersję na znanym chromosomie,
+  - wypisz wynik przed i po przez `print()`,
+  - sprawdź elitaryzm na małej populacji.
+- Sprawdź ręcznie:
+  - długość chromosomu się nie psuje,
+  - inwersja odwraca właściwy fragment,
+  - elitaryzm przenosi najlepszych.
 
 **Merge warunek**
-- Operatory nie ingerują w GUI; działają na obiektach core.
+- Operatory działają na obiektach core.
+- Warstwa operatorów jest gotowa do spięcia w lifecycle.
 
 ---
 
@@ -253,21 +302,23 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 ### Branch: `feature/core-engine-loop`
 **Co robimy**
 - `core/lifecycle.py`: składanie operatorów w generację (select → crossover → mutation → inversion → elitism).
-- `core/termination.py`: warunki stopu (liczba epok + opcjonalnie brak poprawy).
+- `core/termination.py`: warunki stopu.
 - `core/engine.py`: pętla epok, historia best/avg/worst, pomiar czasu.
+- Składamy w końcu działający pipeline obliczeń, ale jeszcze bez pełnej integracji GUI.
 
 **Jak testować**
-- Skrypt `scripts/run_experiment.py`:
+- W skrypcie lub konsoli:
   - wybierz problem,
   - uruchom engine na małych parametrach,
-  - wypisz best fitness i kilka punktów historii.
+  - wypisz kilka epok i końcowy wynik przez `print()`.
 - Sprawdź:
   - engine zwraca wynik i historię,
   - wynik jest powtarzalny przy seed,
   - brak crashy na różnych operatorach.
 
 **Merge warunek**
-- Engine działa bez GUI i daje wynik na co najmniej jednym problemie.
+- Engine działa bez GUI.
+- Da się wykonać pełny run na co najmniej jednym problemie.
 
 ---
 
@@ -280,15 +331,20 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
   - `data/output/runs/<timestamp>_<id>/config.json`
   - `metrics.json`
   - `history.csv`
+- Przygotowujemy trwały zapis wyników tak, żeby później GUI tylko korzystało z gotowej warstwy IO.
 
 **Jak testować**
-- Po uruchomieniu `scripts/run_experiment.py`:
+- Po uruchomieniu prostego runa:
+  - wypisz ścieżkę zapisu przez `print()`,
   - sprawdź, że folder runa powstał,
-  - pliki mają sensowną zawartość,
-  - `history.csv` ma tyle wierszy, ile epok.
+  - sprawdź zawartość plików.
+- Minimum:
+  - `history.csv` ma tyle wierszy, ile epok,
+  - zapis nie nadpisuje poprzednich wyników.
 
 **Merge warunek**
-- Zapis jest deterministyczny i nie nadpisuje poprzednich runów.
+- Zapis działa niezależnie od GUI.
+- Format plików jest spójny i gotowy do dalszego użycia.
 
 ---
 
@@ -299,15 +355,19 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 - `visualization/convergence_plots.py` generuje wykres best/avg/worst.
 - Zapisuje wykres do folderu runa `plots/`.
 - `visualization/plot_styles.py` trzyma wspólne ustawienia.
+- Przygotowujemy wizualizację jako osobną warstwę nad zapisanymi danymi.
 
 **Jak testować**
 - Po runie:
-  - w `plots/` jest PNG,
-  - wykres ma podpisane osie i legendę,
-  - wartości zgadzają się z `history.csv`.
+  - wypisz lokalizację wykresu przez `print()`,
+  - sprawdź, że PNG istnieje,
+  - porównaj dane z `history.csv`.
+- Minimum:
+  - wykres ma sensowne osie, legendę i wartości zgodne z historią.
 
 **Merge warunek**
-- Wykres powstaje bez udziału GUI (na danych z runa).
+- Wykres powstaje bez udziału GUI.
+- Moduł działa na danych z runa lub historii zwróconej przez engine.
 
 ---
 
@@ -318,88 +378,126 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 - `gui/controllers/run_controller.py` buduje config, uruchamia engine i odbiera wynik.
 - GUI:
   - Start uruchamia obliczenia,
-  - Stop przerywa (na początek: flaga w engine sprawdzana co epokę),
-  - Wynik trafia do `results_panel` i do logu.
+  - Stop przerywa,
+  - wynik trafia do `results_panel` i do logu.
+- Na tym etapie dopiero spinamy gotową logikę z interfejsem.
 
 **Jak testować**
-- Z GUI:
-  - ustaw parametry, Start,
-  - obserwuj log (np. co N epok),
-  - po zakończeniu widzisz best wynik i czas.
-- Sprawdź, że UI nie zawiesza się (jeśli jest wątek/after, upewnić się że aktualizacja UI jest bezpieczna).
+- Najpierw upewnij się, że sam engine działa poprawnie poza GUI.
+- Potem z GUI:
+  - ustaw parametry,
+  - kliknij Start,
+  - obserwuj komunikaty i końcowy wynik.
+- Sprawdź:
+  - czy przepływ od GUI do engine działa,
+  - czy wynik wraca do GUI,
+  - czy UI nie zawiesza się.
 
 **Merge warunek**
-- Użytkownik może wykonać pełny run z GUI i zobaczyć rezultat.
+- Użytkownik może wykonać pełny run z GUI.
+- GUI korzysta z gotowych modułów logiki, a nie zawiera ich kopii.
 
 ---
 
-## Krok 15 — GUI: wykresy i przycisk “Zapisz”
+## Krok 15 — GUI: wyniki, wykresy i przycisk “Zapisz”
 
 ### Branch: `feature/gui-results-and-plots`
 **Co robimy**
 - `results_panel` pokazuje best/avg/worst, czas, parametry runa.
-- `plots_panel` pokazuje wykres (na początek: wczytany z PNG z folderu runa).
-- Przycisk “Zapisz wynik” w GUI wywołuje `results_writer`.
+- `plots_panel` pokazuje wykres.
+- Przycisk “Zapisz wynik” w GUI wywołuje warstwę `io`.
+- Domykamy prezentację wyników w GUI na bazie wcześniej przygotowanej logiki, IO i wizualizacji.
 
 **Jak testować**
-- Z GUI: uruchom run, kliknij “Zapisz”, sprawdź folder runa i obraz wykresu.
-- Upewnij się, że zapis nie blokuje UI (jeśli trzeba: zapis po zakończeniu runa).
+- Najpierw sprawdź dane i zapis po stronie logiki / plików.
+- Potem z GUI:
+  - uruchom run,
+  - kliknij “Zapisz”,
+  - sprawdź folder runa i obraz wykresu.
+- Sprawdź:
+  - czy GUI poprawnie pokazuje wyniki,
+  - czy wykres odpowiada historii runa,
+  - czy zapis działa bez ręcznych poprawek.
 
 **Merge warunek**
-- Wyniki i wykresy są dostępne w GUI oraz zapisują się do `data/output`.
+- Wyniki i wykresy są dostępne w GUI.
+- GUI korzysta z gotowych danych i zapisuje je do `data/output`.
 
 ---
 
-## Krok 16 — eksperymenty (opcjonalne, ale wspierają sprawozdanie)
+## Krok 16 — eksperymenty i porównania konfiguracji
 
 ### Branch: `feature/experiments-benchmark`
 **Co robimy**
-- `scripts/batch_benchmark.py` odpala serię runów dla listy konfiguracji (np. różne selekcje/mutacje/krzyżowania).
-- `experiments/metrics.py` i `aggregations.py` tworzą podsumowanie (CSV/JSON).
+- `scripts/batch_benchmark.py` odpala serię runów dla listy konfiguracji.
+- `experiments/metrics.py` i `aggregations.py` zbierają i agregują wyniki.
 - `visualization/comparison_plots.py` generuje wykresy porównawcze.
+- Przygotowujemy tę warstwę tak, żeby dało się łatwo porównywać operatory, ustawienia i problemy bez ręcznego grzebania w kodzie.
 
 **Jak testować**
 - Uruchom `python scripts/batch_benchmark.py`.
 - Sprawdź:
-  - powstało kilka folderów runów,
-  - jest summary (np. `data/output/summaries/...`),
-  - wykres porównawczy istnieje i ma sens.
+  - czy powstało kilka folderów runów,
+  - czy zapisują się podsumowania,
+  - czy da się wypisać zagregowane wyniki przez `print()`,
+  - czy wykres porównawczy istnieje i ma sens.
+- Na tym etapie nie trzeba jeszcze spinać tego z GUI.
 
 **Merge warunek**
-- Benchmark nie wymaga ręcznej edycji kodu (konfiguracje z pliku lub listy w skrypcie).
+- Benchmark działa z poziomu skryptu.
+- Da się uruchomić serię eksperymentów bez ręcznej edycji logiki wewnątrz modułów.
 
 ---
 
-## Krok 17 — rozszerzenia operatorów (w dowolnej kolejności)
+## Krok 17 — rozszerzenia operatorów i problemów
 
-### Branch template: `feature/operators-<typ>-<nazwa>`
+### Branch template: `feature/extensions-<obszar>-<nazwa>`
 **Co robimy**
-- Dodajemy nowe metody selekcji/krzyżowania/mutacji bez ruszania engine.
-- Aktualizujemy mapowanie w config/presetach i widoczność w GUI.
+- Dodajemy nowe metody selekcji / krzyżowania / mutacji albo nowe problemy.
+- Aktualizujemy odpowiednie mapowania w configu i rejestrach.
+- Trzymamy się istniejących kontraktów, żeby nowe elementy dało się podpiąć bez przerabiania engine.
+- Jeśli trzeba, uzupełniamy też warstwę eksperymentów i konfiguracji o nowe opcje.
 
 **Jak testować**
-- Test jednostkowy dla operatora.
-- Run na małej konfiguracji, sprawdzenie że działa i nie psuje historii.
+- W konsoli / prostym skrypcie:
+  - uruchom nowy operator albo nowy problem,
+  - wypisz wyniki przez `print()`,
+  - sprawdź, że działa z aktualnym pipeline.
+- Potem zrób mały run na jednej konfiguracji i sprawdź, czy historia i wynik wyglądają sensownie.
 
 **Merge warunek**
-- Operator jest wybieralny konfiguracją i ma test.
+- Nowy element jest wybieralny z konfiguracji.
+- Nie psuje istniejącego pipeline i działa w ramach obecnych kontraktów.
 
 ---
 
-## Krok 18 — stabilizacja
+## Krok 18 — stabilizacja i porządki końcowe
 
 ### Branch: `refactor/stabilization`
 **Co robimy**
-- Porządki importów, spójne nazwy parametrów.
-- Minimalne testy integracyjne:
-  - uruchomienie engine na 2–3 problemach,
-  - kilka konfiguracji operatorów.
-- Upewnienie się, że `__pycache__` i outputy nie są w repo.
+- Porządki importów, nazw, komentarzy i zależności między modułami.
+- Usuwamy zbędne fragmenty tymczasowe i placeholdery, które nie są już potrzebne.
+- Sprawdzamy spójność warstw:
+  - `config`,
+  - `problems`,
+  - `core`,
+  - `operators`,
+  - `io`,
+  - `visualization`,
+  - `gui`.
+- Upewniamy się, że `__pycache__`, outputy i śmieci robocze nie trafiają do repo.
 
 **Jak testować**
-- `python scripts/run_gui.py`
-- `python scripts/run_experiment.py`
-- uruchomienie kilku runów i sprawdzenie folderów output.
+- Uruchom:
+  - `python scripts/run_gui.py`
+  - `python scripts/run_experiment.py`
+  - `python scripts/batch_benchmark.py`
+- Sprawdź:
+  - czy pełny run działa,
+  - czy zapis wyników działa,
+  - czy benchmark działa,
+  - czy GUI korzysta z tej samej logiki co skrypty.
 
 **Merge warunek**
-- `main` uruchamia GUI i wykonuje run bez ręcznych poprawek.
+- `main` uruchamia GUI i wykonuje pełny run bez ręcznych poprawek.
+- Projekt jest spójny, a przepływ od configu do wyniku działa end-to-end.

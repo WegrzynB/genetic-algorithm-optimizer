@@ -1,5 +1,5 @@
 # app.py
-# Składa aplikację GUI, inicjalizuje okno główne i uruchamia pętlę Tkintera
+# Start aplikacji GUI.
 
 import tkinter as tk
 from tkinter import ttk
@@ -10,26 +10,24 @@ from ga_optimizer.gui.views.main_window import MainWindow
 
 
 def run_app() -> None:
-    # Tworzy główne okno aplikacji (root) dla Tkintera
+    # Tworzy główne okno aplikacji Tkinter.
     root = tk.Tk()
 
-    # Ustawia motyw dla widgetów ttk (można przełączyć na jasny)
+    # Ustawia motyw widgetów ttk.
     sv_ttk.set_theme("dark")
     # sv_ttk.set_theme("light")
 
-    # Konfiguracja podstawowych stylów (np. nagłówki i etykiety ramek)
+    # Konfiguruje podstawowe style używane w GUI.
     style = ttk.Style(root)
     style.configure("TLabelframe.Label", font=("Segoe UI", 10, "bold"))
     style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"))
 
-    # Styl dla pól z błędem walidacji.
-    # W zależności od aktywnego motywu sv_ttk efekt może być delikatny,
-    # ale pole nadal zostanie oznaczone własnym stylem.
+    # Styl dla pól oznaczonych jako błędne po walidacji.
     style.configure("Invalid.TEntry", fieldbackground="#5A1E1E")
 
-    # Buduje i wyświetla główne okno aplikacji
+    # Buduje główne okno aplikacji i wszystkie panele.
     app = MainWindow(root)
     app.build()
 
-    # Startuje główną pętlę zdarzeń GUI
+    # Uruchamia pętlę zdarzeń GUI.
     root.mainloop()

@@ -1,1 +1,0 @@
-# Rejestruje dostępne funkcje/problemy, aby łatwo je wybierać
