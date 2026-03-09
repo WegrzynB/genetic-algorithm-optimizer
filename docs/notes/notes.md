@@ -25,7 +25,7 @@ Struktura projektu: `tree /F /A`
 - `git checkout -b feature/nazwa-tematu` — tworzy branch i przełącza na niego.
 
 ### Dodawanie zmian i commit
-- `git add .` — dodaje wszystkie zmiany do stage.
+- `git add -A` — dodaje wszystkie zmiany do stage.
 - `git add <plik>` — dodaje konkretny plik.
 - `git commit -m "Add: opis zmiany"` — zapisuje commit.
 
