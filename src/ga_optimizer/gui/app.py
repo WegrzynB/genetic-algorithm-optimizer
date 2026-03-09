@@ -22,6 +22,11 @@ def run_app() -> None:
     style.configure("TLabelframe.Label", font=("Segoe UI", 10, "bold"))
     style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"))
 
+    # Styl dla pól z błędem walidacji.
+    # W zależności od aktywnego motywu sv_ttk efekt może być delikatny,
+    # ale pole nadal zostanie oznaczone własnym stylem.
+    style.configure("Invalid.TEntry", fieldbackground="#5A1E1E")
+
     # Buduje i wyświetla główne okno aplikacji
     app = MainWindow(root)
     app.build()

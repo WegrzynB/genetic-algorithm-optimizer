@@ -1,1 +1,0 @@
-# Implementuje ramkę grupującą logicznie powiązane parametry

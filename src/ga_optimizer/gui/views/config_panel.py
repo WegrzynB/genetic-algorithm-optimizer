@@ -95,6 +95,11 @@ class ConfigPanel:
 
         # Referencje do dynamicznie tworzonych ramek parametrów metod
         self._dynamic_frames = {"selection": None, "crossover": None, "mutation": None}
+        self._dynamic_field_keys = {"selection": [], "crossover": [], "mutation": []}
+
+        # Rejestr widgetów powiązanych z polami.
+        # Dzięki temu możemy potem oznaczyć błędne Entry i ustawić focus.
+        self.field_widgets = {}
 
         # Widgety dla pól zależnych od trybu dokładności (pokazywane/ukrywane)
         self.precision_numeric_label = None
@@ -120,21 +125,27 @@ class ConfigPanel:
         r = self._add_combo(
             top, r, FIELDS_GENERAL["problem"]["label"], self.vm.problem, FIELDS_GENERAL["problem"]["values"]
         )
-        r = self._add_entry(top, r, FIELDS_GENERAL["n_vars"]["label"], self.vm.n_vars)
+        r = self._add_entry(top, r, FIELDS_GENERAL["n_vars"]["label"], self.vm.n_vars, field_key="n_vars")
         r = self._add_range(top, r)
 
         # Separator po ustawieniach przedziału
         r = self._add_separator(top, r)
 
-        r = self._add_entry(top, r, FIELDS_GA_MAIN["population"]["label"], self.vm.population)
+        r = self._add_entry(
+            top,
+            r,
+            FIELDS_GA_MAIN["population"]["label"],
+            self.vm.population,
+            field_key="population",
+        )
         r = self._add_precision_block(top, r)
 
         # Separator po polu dokładności / liczby bitów
         r = self._add_separator(top, r)
 
-        r = self._add_entry(top, r, FIELDS_GA_MAIN["epochs"]["label"], self.vm.epochs)
-        r = self._add_entry(top, r, FIELDS_GA_MAIN["epsilon"]["label"], self.vm.epsilon)
-        r = self._add_entry(top, r, FIELDS_GA_MAIN["seed"]["label"], self.vm.seed)
+        r = self._add_entry(top, r, FIELDS_GA_MAIN["epochs"]["label"], self.vm.epochs, field_key="epochs")
+        r = self._add_entry(top, r, FIELDS_GA_MAIN["epsilon"]["label"], self.vm.epsilon, field_key="epsilon")
+        r = self._add_entry(top, r, FIELDS_GA_MAIN["seed"]["label"], self.vm.seed, field_key="seed")
 
         # Separator po polu seed
         r = self._add_separator(top, r)
@@ -203,10 +214,17 @@ class ConfigPanel:
         ttk.Separator(parent, orient="horizontal").grid(row=row, column=0, columnspan=2, sticky="ew", pady=(10, 10))
         return row + 1
 
-    def _add_entry(self, parent, row, label, var):
-        # Dodaje wiersz Label + Entry (powiązany z tk.Variable)
+    def _add_entry(self, parent, row, label, var, field_key=None):
+        # Dodaje wiersz Label + Entry (powiązany z tk.Variable).
+        # Jeśli pole jest numeryczne, dostaje walidację na poziomie wpisywania.
         ttk.Label(parent, text=label + ":").grid(row=row, column=0, sticky="w", pady=4, padx=(0, 12))
-        ttk.Entry(parent, textvariable=var).grid(row=row, column=1, sticky="ew", pady=4)
+
+        entry = ttk.Entry(parent, textvariable=var)
+        entry.grid(row=row, column=1, sticky="ew", pady=4)
+
+        if field_key is not None:
+            self._register_entry_widget(field_key, entry)
+
         return row + 1
 
     def _add_combo(self, parent, row, label, var, values):
@@ -225,8 +243,15 @@ class ConfigPanel:
         box.grid(row=row, column=1, sticky="ew", pady=4)
         box.columnconfigure(0, weight=1)
         box.columnconfigure(1, weight=1)
-        ttk.Entry(box, textvariable=self.vm.range_start).grid(row=0, column=0, sticky="ew", padx=(0, 10))
-        ttk.Entry(box, textvariable=self.vm.range_end).grid(row=0, column=1, sticky="ew")
+
+        start_entry = ttk.Entry(box, textvariable=self.vm.range_start)
+        start_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        self._register_entry_widget("range_start", start_entry)
+
+        end_entry = ttk.Entry(box, textvariable=self.vm.range_end)
+        end_entry.grid(row=0, column=1, sticky="ew")
+        self._register_entry_widget("range_end", end_entry)
+
         return row + 1
 
     def _add_precision_block(self, parent, row):
@@ -257,6 +282,7 @@ class ConfigPanel:
         self.precision_numeric_label.grid(row=row, column=0, sticky="w", pady=4, padx=(0, 12))
         self.precision_numeric_entry = ttk.Entry(parent, textvariable=self.vm.precision_numeric)
         self.precision_numeric_entry.grid(row=row, column=1, sticky="ew", pady=4)
+        self._register_entry_widget("precision_numeric", self.precision_numeric_entry)
 
         row += 1
 
@@ -265,9 +291,27 @@ class ConfigPanel:
         self.precision_bits_label.grid(row=row, column=0, sticky="w", pady=4, padx=(0, 12))
         self.precision_bits_entry = ttk.Entry(parent, textvariable=self.vm.precision_bits)
         self.precision_bits_entry.grid(row=row, column=1, sticky="ew", pady=4)
+        self._register_entry_widget("precision_bits", self.precision_bits_entry)
 
         row += 1
         return row
+
+    def _register_entry_widget(self, field_key: str, entry: ttk.Entry) -> None:
+        # Rejestruje Entry w słowniku pól i podłącza walidację "na wpisywanie"
+        # dla pól liczbowych. Dzięki temu litery są blokowane od razu.
+        self.field_widgets[field_key] = entry
+
+        spec = self.vm.get_field_spec(field_key)
+        if not spec:
+            return
+
+        if spec.get("type") in {"int", "float"}:
+            vcmd = (entry.register(lambda proposed, key=field_key: self._validate_numeric_keystroke(key, proposed)), "%P")
+            entry.configure(validate="key", validatecommand=vcmd)
+
+    def _validate_numeric_keystroke(self, field_key: str, proposed_value: str) -> bool:
+        # Deleguje walidację pojedynczego wpisywanego znaku do ViewModelu.
+        return self.vm.is_allowed_partial_value(field_key, proposed_value)
 
     def _refresh_precision_visibility(self) -> None:
         # Przełącza widoczność pola dokładności: liczbowej albo liczby bitów
@@ -284,6 +328,9 @@ class ConfigPanel:
             self.precision_numeric_label.grid_remove()
             self.precision_numeric_entry.grid_remove()
 
+        # Po zmianie trybu czyścimy stare oznaczenia błędów.
+        self.clear_validation_errors()
+
     def _refresh_method_params(self, group: str) -> None:
         # Odświeża zakładkę parametrów dla wybranej metody (na podstawie METHOD_PARAM_SPECS)
         if group == "selection":
@@ -295,6 +342,11 @@ class ConfigPanel:
         else:
             tab = self.mutation_tab.inner
             method = self.vm.mutation_method.get()
+
+        # Usuwamy widgety starej sekcji z rejestru pól.
+        for key in self._dynamic_field_keys[group]:
+            self.field_widgets.pop(key, None)
+        self._dynamic_field_keys[group] = []
 
         old = self._dynamic_frames.get(group)
         if old is not None:
@@ -320,9 +372,57 @@ class ConfigPanel:
                     )
                     cb.grid(row=r, column=1, sticky="ew", pady=4)
                 else:
-                    ttk.Entry(frame, textvariable=self.vm.method_params[p["key"]]).grid(
-                        row=r, column=1, sticky="ew", pady=4
-                    )
+                    entry = ttk.Entry(frame, textvariable=self.vm.method_params[p["key"]])
+                    entry.grid(row=r, column=1, sticky="ew", pady=4)
+                    self._register_entry_widget(p["key"], entry)
+                    self._dynamic_field_keys[group].append(p["key"])
                 r += 1
 
         self._dynamic_frames[group] = frame
+        self.clear_validation_errors()
+
+    def clear_validation_errors(self) -> None:
+        # Czyści styl "błędnego pola" z wszystkich zarejestrowanych Entry.
+        for widget in self.field_widgets.values():
+            try:
+                widget.configure(style="TEntry")
+            except tk.TclError:
+                pass
+
+    def show_validation_errors(self, errors: dict[str, str]) -> None:
+        # Oznacza błędne pola wizualnie i ustawia focus na pierwszym z nich.
+        self.clear_validation_errors()
+
+        if not errors:
+            return
+
+        first_widget = None
+        first_key = next(iter(errors.keys()))
+
+        for key in errors:
+            widget = self.field_widgets.get(key)
+            if widget is None:
+                continue
+
+            try:
+                widget.configure(style="Invalid.TEntry")
+            except tk.TclError:
+                pass
+
+            if first_widget is None:
+                first_widget = widget
+
+        # Jeśli błąd dotyczy dynamicznych zakładek metod, przełącz odpowiednią kartę.
+        active_selection_keys = set(self._dynamic_field_keys["selection"])
+        active_crossover_keys = set(self._dynamic_field_keys["crossover"])
+        active_mutation_keys = set(self._dynamic_field_keys["mutation"])
+
+        if first_key in active_selection_keys:
+            self.nb.select(self.selection_tab)
+        elif first_key in active_crossover_keys:
+            self.nb.select(self.crossover_tab)
+        elif first_key in active_mutation_keys:
+            self.nb.select(self.mutation_tab)
+
+        if first_widget is not None:
+            first_widget.focus_set()

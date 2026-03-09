@@ -79,12 +79,9 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ### Branch: `feature/gui-widgets-validation`
 **Co robimy**
-- W `widgets/`:
-  - `numeric_entry.py` (weryfikacja liczby, min/max, int/float),
-  - `labeled_entry.py`, `parameter_frame.py`, `status_bar.py`.
 - W GUI:
-  - pola typu populacja/epoki/probability itp. walidują się od razu,
-  - błędy pokazujemy w status bar (bez messageboxów na start).
+  - w pola numeryczne jest zablokowana możliwość wpisywania innych wartości niż liczby, albo jest to jakoś dobrze i szybko weryfikowane,
+  - błędy pokazujemy w messagebox po kliknięciu w "Start".
 
 **Jak testować**
 - Uruchom GUI.
