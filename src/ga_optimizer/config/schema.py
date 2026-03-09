@@ -211,30 +211,30 @@ SELECTION_METHOD_PARAM_SPECS = {
 CROSSOVER_METHOD_PARAM_SPECS = {
     "One point": [
         {
-            "key": "crossover_p",
+            "key": "crossover_p_one",
             "label": "P (krzyżowanie)",
             "type": "float",
-            "default": 0.8,
+            "default": 0.2,
             "min": 0.0,
             "max": 1.0,
         },
     ],
     "Two point": [
         {
-            "key": "crossover_p",
+            "key": "crossover_p_two",
             "label": "P (krzyżowanie)",
             "type": "float",
-            "default": 0.8,
+            "default": 0.4,
             "min": 0.0,
             "max": 1.0,
         },
     ],
     "Uniform": [
         {
-            "key": "crossover_p",
+            "key": "crossover_p_uniform",
             "label": "P (krzyżowanie)",
             "type": "float",
-            "default": 0.8,
+            "default": 0.3,
             "min": 0.0,
             "max": 1.0,
         },
@@ -249,7 +249,7 @@ CROSSOVER_METHOD_PARAM_SPECS = {
     ],
     "Granular": [
         {
-            "key": "crossover_p",
+            "key": "crossover_p_granular",
             "label": "P (krzyżowanie)",
             "type": "float",
             "default": 0.8,
@@ -270,7 +270,7 @@ CROSSOVER_METHOD_PARAM_SPECS = {
 MUTATION_METHOD_PARAM_SPECS = {
     "Edge": [
         {
-            "key": "mutation_p",
+            "key": "mutation_p_edge",
             "label": "P (mutacja)",
             "type": "float",
             "default": 0.02,
@@ -287,20 +287,20 @@ MUTATION_METHOD_PARAM_SPECS = {
     ],
     "One point": [
         {
-            "key": "mutation_p",
+            "key": "mutation_p_one",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.02,
+            "default": 0.05,
             "min": 0.0,
             "max": 1.0,
         },
     ],
     "Two point": [
         {
-            "key": "mutation_p",
+            "key": "mutation_p_two",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.02,
+            "default": 0.07,
             "min": 0.0,
             "max": 1.0,
         },
