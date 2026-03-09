@@ -6,6 +6,26 @@ Struktura projektu: `tree /F /A`
 
 ---
 
+## Schemat działania
+1. Poniższe komendy:
+  - `git checkout main`
+  - `git pull origin main`
+  - `git checkout -b feature/nazwa-brancha`
+  - `git status`
+2. Pracujemy sobie normalnie na plikach.
+3. Dodajemy wszystko co zmienione:
+  - `git add -A`
+  - `git status`
+  - `git commit -m "Add: opis zmian"`
+  - `git push -u origin feature/nazwa-brancha`
+4. Czekacie aż wam to zaakceptuje na githubie.
+5. Wpisujecie te komendy:
+  - `git checkout main`
+  - `git pull origin main`
+  - `git branch -d feature/nazwa-brancha`
+
+---
+
 ## Podstawowe komendy GIT (ściąga)
 
 ### Sprawdzenie stanu repo
