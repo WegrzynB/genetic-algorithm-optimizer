@@ -10,7 +10,7 @@ Struktura projektu: `tree /F /A`
 1. Poniższe komendy:
   - `git checkout main`
   - `git pull origin main`
-  - `git checkout -b feature/nazwa-brancha`
+  - stworzenie nowego brancha:`git checkout -b feature/nazwa-brancha`; wczytanie istniejącego brancha: `git checkout feature/nazwa-brancha`
   - `git status`
 2. Pracujemy sobie normalnie na plikach.
 3. Dodajemy wszystko co zmienione:
