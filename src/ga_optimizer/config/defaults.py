@@ -20,6 +20,7 @@ from ga_optimizer.problems.function_catalog import (
 
 DEFAULT_GA_VALUES = {
     "population": GA_MAIN_FIELD_SPECS["population"]["default"],
+    "objective_mode": GA_MAIN_FIELD_SPECS["objective_mode"]["default"],
     "epochs": GA_MAIN_FIELD_SPECS["epochs"]["default"],
     "epsilon": GA_MAIN_FIELD_SPECS["epsilon"]["default"],
     "seed": GA_MAIN_FIELD_SPECS["seed"]["default"],
@@ -67,6 +68,7 @@ def build_default_config(problem_name: str | None = None) -> GAConfig:
 
     return GAConfig(
         problem_name=problem.key,
+        objective_mode=DEFAULT_GA_VALUES["objective_mode"],
         n_vars=problem.default_n_vars,
         range_start=problem.suggested_range[0],
         range_end=problem.suggested_range[1],

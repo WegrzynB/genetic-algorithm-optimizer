@@ -20,6 +20,8 @@ from ga_optimizer.config.schema import (
     SELECTION_METHOD_LABELS,
     SELECTION_METHOD_LABELS_REVERSED,
     SELECTION_METHOD_PARAM_SPECS,
+    OBJECTIVE_MODE_LABELS,
+    OBJECTIVE_MODE_LABELS_REVERSED,
 )
 from ga_optimizer.gui.state.view_model import ViewModel
 
@@ -160,7 +162,18 @@ class ConfigPanel:
             self.vm.problem_name,
             self.vm.get_problem_names(),
         )
+
         row = self._add_entry(top, row, GENERAL_FIELD_SPECS["n_vars"]["label"], self.vm.n_vars, "n_vars", store_as="n_vars")
+
+        row = self._add_labeled_combo(
+            top,
+            row,
+            GA_MAIN_FIELD_SPECS["objective_mode"]["label"],
+            self.vm.objective_mode,
+            OBJECTIVE_MODE_LABELS,
+            OBJECTIVE_MODE_LABELS_REVERSED,
+        )
+        
         row = self._add_range(top, row)
         row = self._add_separator(top, row)
 

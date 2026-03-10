@@ -31,6 +31,14 @@ PRECISION_MODE_LABELS = {
 PRECISION_MODE_OPTIONS = list(PRECISION_MODE_LABELS.keys())
 PRECISION_MODE_LABELS_REVERSED = build_reverse_labels_map(PRECISION_MODE_LABELS)
 
+OBJECTIVE_MODE_LABELS = {
+    "min": "Minimum",
+    "max": "Maksimum",
+}
+
+OBJECTIVE_MODE_OPTIONS = list(OBJECTIVE_MODE_LABELS.keys())
+OBJECTIVE_MODE_LABELS_REVERSED = build_reverse_labels_map(OBJECTIVE_MODE_LABELS)
+
 SELECTION_METHOD_OPTIONS = list(SELECTION_METHOD_PARAM_SPECS.keys())
 SELECTION_METHOD_LABELS_REVERSED = build_reverse_labels_map(SELECTION_METHOD_LABELS)
 
@@ -67,6 +75,12 @@ GENERAL_FIELD_SPECS = {
 }
 
 GA_MAIN_FIELD_SPECS = {
+    "objective_mode": {
+        "label": "Szukane ekstremum",
+        "type": "enum",
+        "values": OBJECTIVE_MODE_OPTIONS,
+        "default": "min",
+    },
     "population": {
         "label": "Wielkość populacji",
         "type": "int",
@@ -155,6 +169,7 @@ METHOD_PARAM_SPECS = {
 class GAConfig:
     # Główny model konfiguracji aplikacji.
     problem_name: str
+    objective_mode: str
     n_vars: int
     range_start: float
     range_end: float

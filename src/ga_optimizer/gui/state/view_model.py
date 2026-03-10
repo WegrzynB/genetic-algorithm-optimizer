@@ -33,6 +33,7 @@ class ViewModel:
 
         # Zmienne podstawowych ustawień problemu.
         self.problem_name = tk.StringVar(root, value=self._base_config.problem_name)
+        self.objective_mode = tk.StringVar(root, value=self._base_config.objective_mode)
         self.n_vars = tk.StringVar(root, value=str(self._base_config.n_vars))
         self.range_start = tk.StringVar(root, value=str(self._base_config.range_start))
         self.range_end = tk.StringVar(root, value=str(self._base_config.range_end))
@@ -97,6 +98,7 @@ class ViewModel:
         # Składa wszystkie zmienne GUI do jednej mapy key -> tk.Variable.
         vars_map = {
             "problem_name": self.problem_name,
+            "objective_mode": self.objective_mode,
             "n_vars": self.n_vars,
             "range_start": self.range_start,
             "range_end": self.range_end,
@@ -164,6 +166,7 @@ class ViewModel:
 
         return {
             "problem_name": self.problem_name.get(),
+            "objective_mode": self.objective_mode.get(),
             "n_vars": self.n_vars.get(),
             "range_start": self.range_start.get(),
             "range_end": self.range_end.get(),
