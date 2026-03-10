@@ -1,5 +1,6 @@
 # uruchamia całą aplikację (główny skrypt)
 # `py scripts\run_gui.py`
+# `python scripts\run_gui.py`
 
 import sys
 from pathlib import Path
