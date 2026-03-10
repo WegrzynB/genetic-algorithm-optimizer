@@ -4,30 +4,41 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from ga_optimizer.config.method_crossover import (
+    CROSSOVER_METHOD_LABELS,
+    CROSSOVER_METHOD_PARAM_SPECS,
+)
+from ga_optimizer.config.method_mutation import (
+    MUTATION_METHOD_LABELS,
+    MUTATION_METHOD_PARAM_SPECS,
+)
+from ga_optimizer.config.method_selection import (
+    SELECTION_METHOD_LABELS,
+    SELECTION_METHOD_PARAM_SPECS,
+)
 
-PRECISION_MODE_OPTIONS = [
-    "Dokładność liczbowa",
-    "Liczba bitów",
-]
 
-SELECTION_METHOD_OPTIONS = [
-    "Best",
-    "Roulette",
-    "Tournament",
-]
+def build_reverse_labels_map(labels_map: dict[str, str]) -> dict[str, str]:
+    # Buduje mapowanie odwrotne: label -> key.
+    return {label: key for key, label in labels_map.items()}
 
-CROSSOVER_METHOD_OPTIONS = [
-    "One point",
-    "Two point",
-    "Uniform",
-    "Granular",
-]
 
-MUTATION_METHOD_OPTIONS = [
-    "Edge",
-    "One point",
-    "Two point",
-]
+PRECISION_MODE_LABELS = {
+    "numeric": "Dokładność liczbowa",
+    "bits": "Liczba bitów",
+}
+
+PRECISION_MODE_OPTIONS = list(PRECISION_MODE_LABELS.keys())
+PRECISION_MODE_LABELS_REVERSED = build_reverse_labels_map(PRECISION_MODE_LABELS)
+
+SELECTION_METHOD_OPTIONS = list(SELECTION_METHOD_PARAM_SPECS.keys())
+SELECTION_METHOD_LABELS_REVERSED = build_reverse_labels_map(SELECTION_METHOD_LABELS)
+
+CROSSOVER_METHOD_OPTIONS = list(CROSSOVER_METHOD_PARAM_SPECS.keys())
+CROSSOVER_METHOD_LABELS_REVERSED = build_reverse_labels_map(CROSSOVER_METHOD_LABELS)
+
+MUTATION_METHOD_OPTIONS = list(MUTATION_METHOD_PARAM_SPECS.keys())
+MUTATION_METHOD_LABELS_REVERSED = build_reverse_labels_map(MUTATION_METHOD_LABELS)
 
 
 GENERAL_FIELD_SPECS = {
@@ -86,7 +97,7 @@ PRECISION_FIELD_SPECS = {
         "label": "Rodzaj dokładności",
         "type": "enum",
         "values": PRECISION_MODE_OPTIONS,
-        "default": "Dokładność liczbowa",
+        "default": "numeric",
     },
     "precision_numeric": {
         "label": "Dokładność (np. 0.001)",
@@ -107,19 +118,19 @@ OPERATOR_FIELD_SPECS = {
         "label": "Metoda selekcji",
         "type": "enum",
         "values": SELECTION_METHOD_OPTIONS,
-        "default": "Tournament",
+        "default": "roulette",
     },
     "crossover_method": {
         "label": "Metoda krzyżowania",
         "type": "enum",
         "values": CROSSOVER_METHOD_OPTIONS,
-        "default": "Two point",
+        "default": "one_point",
     },
     "mutation_method": {
         "label": "Metoda mutacji",
         "type": "enum",
         "values": MUTATION_METHOD_OPTIONS,
-        "default": "One point",
+        "default": "one_point",
     },
     "inversion_enabled": {
         "label": "Wybór operatora inwersji",
@@ -131,180 +142,6 @@ OPERATOR_FIELD_SPECS = {
         "type": "bool",
         "default": False,
     },
-}
-
-# Parametry metod selekcji.
-SELECTION_METHOD_PARAM_SPECS = {
-    "Best": [
-        {
-            "key": "best_k",
-            "label": "K (ile najlepszych)",
-            "type": "int",
-            "default": 2,
-            "min": 1,
-        },
-    ],
-    "Roulette": [
-        {
-            "key": "roulette_eps",
-            "label": "Eps (stabilizacja)",
-            "type": "float",
-            "default": 1e-9,
-            "min_exclusive": 0.0,
-        },
-    ],
-    "Tournament": [
-        {
-            "key": "tournament_k",
-            "label": "K (rozmiar turnieju)",
-            "type": "int",
-            "default": 3,
-            "min": 2,
-        },
-        {
-            "key": "tournament_2",
-            "label": "K2",
-            "type": "int",
-            "default": 3,
-            "min": 2,
-        },
-        {
-            "key": "tournament_3",
-            "label": "K3",
-            "type": "int",
-            "default": 23,
-            "min": 2,
-        },
-        {
-            "key": "tournament_4",
-            "label": "K4",
-            "type": "int",
-            "default": 63,
-            "min": 2,
-        },
-        {
-            "key": "tournament_5",
-            "label": "K5",
-            "type": "int",
-            "default": 33,
-            "min": 2,
-        },
-        {
-            "key": "tournament_6",
-            "label": "K6",
-            "type": "int",
-            "default": 3,
-            "min": 2,
-        },
-        {
-            "key": "tournament_7",
-            "label": "K7",
-            "type": "int",
-            "default": 7,
-            "min": 2,
-        },
-        
-    ],
-}
-
-# Parametry metod krzyżowania.
-CROSSOVER_METHOD_PARAM_SPECS = {
-    "One point": [
-        {
-            "key": "crossover_p",
-            "label": "P (krzyżowanie)",
-            "type": "float",
-            "default": 0.8,
-            "min": 0.0,
-            "max": 1.0,
-        },
-    ],
-    "Two point": [
-        {
-            "key": "crossover_p",
-            "label": "P (krzyżowanie)",
-            "type": "float",
-            "default": 0.8,
-            "min": 0.0,
-            "max": 1.0,
-        },
-    ],
-    "Uniform": [
-        {
-            "key": "crossover_p",
-            "label": "P (krzyżowanie)",
-            "type": "float",
-            "default": 0.8,
-            "min": 0.0,
-            "max": 1.0,
-        },
-        {
-            "key": "uniform_gene_p",
-            "label": "P (gen od rodzica A)",
-            "type": "float",
-            "default": 0.5,
-            "min": 0.0,
-            "max": 1.0,
-        },
-    ],
-    "Granular": [
-        {
-            "key": "crossover_p",
-            "label": "P (krzyżowanie)",
-            "type": "float",
-            "default": 0.8,
-            "min": 0.0,
-            "max": 1.0,
-        },
-        {
-            "key": "granularity",
-            "label": "Ziarnistość",
-            "type": "int",
-            "default": 2,
-            "min": 1,
-        },
-    ],
-}
-
-# Parametry metod mutacji.
-MUTATION_METHOD_PARAM_SPECS = {
-    "Edge": [
-        {
-            "key": "mutation_p",
-            "label": "P (mutacja)",
-            "type": "float",
-            "default": 0.02,
-            "min": 0.0,
-            "max": 1.0,
-        },
-        {
-            "key": "edge_mode",
-            "label": "Tryb brzegowy",
-            "type": "enum",
-            "values": ["Ends", "First_last", "Both"],
-            "default": "Ends",
-        },
-    ],
-    "One point": [
-        {
-            "key": "mutation_p",
-            "label": "P (mutacja)",
-            "type": "float",
-            "default": 0.02,
-            "min": 0.0,
-            "max": 1.0,
-        },
-    ],
-    "Two point": [
-        {
-            "key": "mutation_p",
-            "label": "P (mutacja)",
-            "type": "float",
-            "default": 0.02,
-            "min": 0.0,
-            "max": 1.0,
-        },
-    ],
 }
 
 METHOD_PARAM_SPECS = {

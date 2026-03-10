@@ -1,5 +1,6 @@
 # main_window.py
-# Główne okno aplikacji. Na Start składamy config z GUI i walidujemy go.
+# Główne okno aplikacji. Na Start składamy config z GUI, walidujemy go
+# i przekazujemy dalej do warstwy pipeline.
 
 from tkinter import messagebox, ttk
 
@@ -9,6 +10,7 @@ from ga_optimizer.gui.views.config_panel import ConfigPanel
 from ga_optimizer.gui.views.plots_panel import PlotsPanel
 from ga_optimizer.gui.views.results_panel import ResultsPanel
 from ga_optimizer.gui.views.run_panel import RunPanel
+from ga_optimizer.pipeline.pipeline import run_pipeline
 
 
 class MainWindow:
@@ -37,6 +39,9 @@ class MainWindow:
         # Ostatni poprawnie zwalidowany config.
         self.last_validated_config = None
 
+        # Ostatni wynik pipeline.
+        self.last_pipeline_result = None
+
     def build(self) -> None:
         # Buduje całe okno aplikacji.
         self._configure_root()
@@ -49,7 +54,7 @@ class MainWindow:
         self.root.title("GA Optimizer")
         self.root.geometry("1600x900")
         self.root.minsize(1400, 800)
-        self.root.state("zoomed")
+        # self.root.state("zoomed")
 
     def _build_layout(self) -> None:
         # Tworzy główny układ okna: nagłówek + ciało.
@@ -133,15 +138,30 @@ class MainWindow:
         # Czyści oznaczenia błędów po poprawnej walidacji.
         self.config_panel.clear_validation_errors()
 
-        # Placeholder pod dalsze uruchamianie GA.
-        self.run_panel.set_progress(5)
+        # Przekazuje sterowanie do warstwy pipeline.
+        self.run_panel.set_progress(10)
         self.run_panel.enable_save(False)
-        self.run_panel.set_status(
-            f'Konfiguracja poprawna: {config.problem_name}, n={config.n_vars} (placeholder bez startu GA).'
-        )
+        self.run_panel.set_status("Walidacja zakończona. Uruchamianie pipeline ...")
 
-        self.results_panel.set_termination_reason("Konfiguracja zwalidowana - uruchamianie GA jeszcze niepodłączone.")
-        self.results_panel.set_summary(best="-", avg="-", worst="-", elapsed="-")
+        pipeline_result = run_pipeline(config)
+        self.last_pipeline_result = pipeline_result
+
+        # Aktualizuje GUI po wykonaniu pipeline.
+        self.run_panel.set_progress(100)
+        self.run_panel.enable_save(True)
+        self.run_panel.set_status(pipeline_result["message"])
+
+        engine_result = pipeline_result.get("engine_result", {})
+
+        self.results_panel.set_termination_reason(
+            "Konfiguracja zwalidowana i przekazana do pipeline / engine placeholder."
+        )
+        self.results_panel.set_summary(
+            best=engine_result.get("best", "-"),
+            avg=engine_result.get("avg", "-"),
+            worst=engine_result.get("worst", "-"),
+            elapsed=engine_result.get("elapsed", "-"),
+        )
 
     def _on_save(self) -> None:
         # Placeholder pod zapis wyników.

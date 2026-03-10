@@ -5,12 +5,12 @@ import tkinter as tk
 
 from ga_optimizer.config.defaults import build_default_config
 from ga_optimizer.config.schema import (
+    CROSSOVER_METHOD_PARAM_SPECS,
     GA_MAIN_FIELD_SPECS,
     GENERAL_FIELD_SPECS,
+    MUTATION_METHOD_PARAM_SPECS,
     OPERATOR_FIELD_SPECS,
     PRECISION_FIELD_SPECS,
-    CROSSOVER_METHOD_PARAM_SPECS,
-    MUTATION_METHOD_PARAM_SPECS,
     SELECTION_METHOD_PARAM_SPECS,
     get_all_static_field_specs,
 )
