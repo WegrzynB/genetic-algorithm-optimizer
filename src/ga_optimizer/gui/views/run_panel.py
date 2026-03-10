@@ -60,9 +60,9 @@ class RunPanel:
         self.save_btn.configure(state=tk.NORMAL if enabled else tk.DISABLED)
 
     def _start(self) -> None:
-        # Obsługa kliknięcia Start (na razie wywołuje callback bez logiki algorytmu)
+        # Obsługa kliknięcia Start
         self.set_progress(0)
-        self.set_status("Uruchamianie (placeholder)...")
+        self.set_status("Uruchamianie ...")
         if callable(self.on_start):
             self.on_start()
 

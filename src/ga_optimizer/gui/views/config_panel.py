@@ -5,12 +5,20 @@ import tkinter as tk
 from tkinter import ttk
 
 from ga_optimizer.config.schema import (
+    CROSSOVER_METHOD_LABELS,
+    CROSSOVER_METHOD_LABELS_REVERSED,
+    CROSSOVER_METHOD_PARAM_SPECS,
     GA_MAIN_FIELD_SPECS,
     GENERAL_FIELD_SPECS,
+    MUTATION_METHOD_LABELS,
+    MUTATION_METHOD_LABELS_REVERSED,
+    MUTATION_METHOD_PARAM_SPECS,
     OPERATOR_FIELD_SPECS,
     PRECISION_FIELD_SPECS,
-    CROSSOVER_METHOD_PARAM_SPECS,
-    MUTATION_METHOD_PARAM_SPECS,
+    PRECISION_MODE_LABELS,
+    PRECISION_MODE_LABELS_REVERSED,
+    SELECTION_METHOD_LABELS,
+    SELECTION_METHOD_LABELS_REVERSED,
     SELECTION_METHOD_PARAM_SPECS,
 )
 from ga_optimizer.gui.state.view_model import ViewModel
@@ -165,26 +173,29 @@ class ConfigPanel:
         row = self._add_entry(top, row, GA_MAIN_FIELD_SPECS["seed"]["label"], self.vm.seed, "seed")
         row = self._add_separator(top, row)
 
-        row = self._add_combo(
+        row = self._add_labeled_combo(
             top,
             row,
             OPERATOR_FIELD_SPECS["selection_method"]["label"],
             self.vm.selection_method,
-            OPERATOR_FIELD_SPECS["selection_method"]["values"],
+            SELECTION_METHOD_LABELS,
+            SELECTION_METHOD_LABELS_REVERSED,
         )
-        row = self._add_combo(
+        row = self._add_labeled_combo(
             top,
             row,
             OPERATOR_FIELD_SPECS["crossover_method"]["label"],
             self.vm.crossover_method,
-            OPERATOR_FIELD_SPECS["crossover_method"]["values"],
+            CROSSOVER_METHOD_LABELS,
+            CROSSOVER_METHOD_LABELS_REVERSED,
         )
-        row = self._add_combo(
+        row = self._add_labeled_combo(
             top,
             row,
             OPERATOR_FIELD_SPECS["mutation_method"]["label"],
             self.vm.mutation_method,
-            OPERATOR_FIELD_SPECS["mutation_method"]["values"],
+            MUTATION_METHOD_LABELS,
+            MUTATION_METHOD_LABELS_REVERSED,
         )
         row = self._add_separator(top, row)
 
@@ -261,10 +272,33 @@ class ConfigPanel:
         return row + 1
 
     def _add_combo(self, parent, row, label, var, values):
-        # Dodaje pole combobox z etykietą.
+        # Dodaje zwykły combobox z etykietą.
         ttk.Label(parent, text=label + ":").grid(row=row, column=0, sticky="w", pady=4, padx=(0, 12))
         cb = ttk.Combobox(parent, textvariable=var, values=values, state="readonly")
         cb.grid(row=row, column=1, sticky="ew", pady=4)
+        return row + 1
+
+    def _add_labeled_combo(self, parent, row, label, var, labels_map, reversed_labels_map):
+        # Dodaje combobox, który pokazuje polskie etykiety,
+        # ale wewnętrznie zapisuje techniczny klucz do zmiennej.
+        ttk.Label(parent, text=label + ":").grid(row=row, column=0, sticky="w", pady=4, padx=(0, 12))
+
+        display_var = tk.StringVar(value=labels_map.get(var.get(), var.get()))
+        cb = ttk.Combobox(parent, textvariable=display_var, values=list(labels_map.values()), state="readonly")
+        cb.grid(row=row, column=1, sticky="ew", pady=4)
+
+        def _sync_from_gui(_event=None):
+            selected_label = display_var.get()
+            selected_key = reversed_labels_map.get(selected_label)
+            if selected_key is not None:
+                var.set(selected_key)
+
+        def _sync_from_model(*_args):
+            display_var.set(labels_map.get(var.get(), var.get()))
+
+        cb.bind("<<ComboboxSelected>>", _sync_from_gui)
+        var.trace_add("write", _sync_from_model)
+
         return row + 1
 
     def _add_range(self, parent, row):
@@ -305,18 +339,34 @@ class ConfigPanel:
         box = ttk.Frame(parent)
         box.grid(row=row, column=1, sticky="ew", pady=4)
 
+        precision_display_var = tk.StringVar(
+            value=PRECISION_MODE_LABELS.get(self.vm.precision_mode.get(), self.vm.precision_mode.get())
+        )
+
+        def _sync_precision_from_model(*_args):
+            precision_display_var.set(
+                PRECISION_MODE_LABELS.get(self.vm.precision_mode.get(), self.vm.precision_mode.get())
+            )
+
+        def _set_precision_mode(mode_key: str):
+            self.vm.precision_mode.set(mode_key)
+
+        self.vm.precision_mode.trace_add("write", _sync_precision_from_model)
+
         ttk.Radiobutton(
             box,
-            text="Dokładność liczbowa",
-            value="Dokładność liczbowa",
-            variable=self.vm.precision_mode,
+            text=PRECISION_MODE_LABELS["numeric"],
+            value=PRECISION_MODE_LABELS["numeric"],
+            variable=precision_display_var,
+            command=lambda: _set_precision_mode(PRECISION_MODE_LABELS_REVERSED[precision_display_var.get()]),
         ).pack(anchor="w")
 
         ttk.Radiobutton(
             box,
-            text="Liczba bitów",
-            value="Liczba bitów",
-            variable=self.vm.precision_mode,
+            text=PRECISION_MODE_LABELS["bits"],
+            value=PRECISION_MODE_LABELS["bits"],
+            variable=precision_display_var,
+            command=lambda: _set_precision_mode(PRECISION_MODE_LABELS_REVERSED[precision_display_var.get()]),
         ).pack(anchor="w")
 
         row += 1
@@ -375,7 +425,7 @@ class ConfigPanel:
 
     def _refresh_precision_visibility(self) -> None:
         # Pokazuje tylko to pole dokładności, które jest aktywne.
-        if self.vm.precision_mode.get() == "Dokładność liczbowa":
+        if self.vm.precision_mode.get() == "numeric":
             self.precision_numeric_label.grid()
             self.precision_numeric_entry.grid()
             self.precision_bits_label.grid_remove()
