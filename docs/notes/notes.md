@@ -143,6 +143,12 @@ Opcja B (rebase) — używać tylko jeśli zespół się na to umawia:
 - `git diff --staged` — różnice w staged.
 - `git diff main..origin/main` — różnice lokalnego main vs zdalnego.
 
+### Czyszczenie (ustawienia fabryczne)
+1. `git checkout main`
+2. `git fetch origin`
+3. `git restore .`
+4. `git clean -fd`
+5. `git reset --hard origin/main`
 ---
 
 ## Zasady pracy zespołowej (krótko i konkretnie)
