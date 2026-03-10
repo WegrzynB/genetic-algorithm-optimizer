@@ -219,10 +219,10 @@ def validate_config(
         validation.add_error("range_start", message)
         validation.add_error("range_end", message)
 
-    if config.precision_mode == "Dokładność liczbowa" and config.precision_numeric <= 0.0:
+    if config.precision_mode == "numeric" and config.precision_numeric <= 0.0:
         validation.add_error("precision_numeric", 'Pole "Dokładność (np. 0.001)" musi mieć wartość > 0.0.')
 
-    if config.precision_mode == "Liczba bitów" and config.precision_bits < 1:
+    if config.precision_mode == "bits" and config.precision_bits < 1:
         validation.add_error("precision_bits", 'Pole "Liczba bitów" musi mieć wartość >= 1.')
 
     if problem.fixed_n_vars and config.n_vars != problem.default_n_vars:
@@ -231,7 +231,7 @@ def validate_config(
             f'Funkcja "{problem.display_name}" wymaga dokładnie {problem.default_n_vars} zmiennych.',
         )
 
-    if config.selection_method == "Tournament":
+    if config.selection_method == "tournament":
         tournament_k = config.method_params.get("tournament_k")
         if isinstance(tournament_k, int) and tournament_k > config.population:
             validation.add_error(
@@ -239,7 +239,7 @@ def validate_config(
                 'Pole "K (rozmiar turnieju)" nie może być większe niż wielkość populacji.',
             )
 
-    if config.selection_method == "Best":
+    if config.selection_method == "best":
         best_k = config.method_params.get("best_k")
         if isinstance(best_k, int) and best_k > config.population:
             validation.add_error(
@@ -247,7 +247,7 @@ def validate_config(
                 'Pole "K (ile najlepszych)" nie może być większe niż wielkość populacji.',
             )
 
-    if config.crossover_method == "Granular":
+    if config.crossover_method == "granular":
         granularity = config.method_params.get("granularity")
         if isinstance(granularity, int) and granularity > config.n_vars:
             validation.add_error(
