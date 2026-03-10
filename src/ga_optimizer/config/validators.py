@@ -117,6 +117,13 @@ def build_config_from_payload(payload: dict[str, Any]) -> tuple[GAConfig | None,
         result,
     )
 
+    parsed_objective_mode = _parse_value(
+        "objective_mode",
+        payload.get("objective_mode"),
+        GA_MAIN_FIELD_SPECS["objective_mode"],
+        result,
+    )
+
     parsed_n_vars = _parse_value("n_vars", payload.get("n_vars"), GENERAL_FIELD_SPECS["n_vars"], result)
     parsed_range_start = _parse_value("range_start", payload.get("range_start"), GENERAL_FIELD_SPECS["range_start"], result)
     parsed_range_end = _parse_value("range_end", payload.get("range_end"), GENERAL_FIELD_SPECS["range_end"], result)
@@ -176,6 +183,7 @@ def build_config_from_payload(payload: dict[str, Any]) -> tuple[GAConfig | None,
 
     config = GAConfig(
         problem_name=parsed_problem_name,
+        objective_mode=parsed_objective_mode,
         n_vars=parsed_n_vars,
         range_start=parsed_range_start,
         range_end=parsed_range_end,

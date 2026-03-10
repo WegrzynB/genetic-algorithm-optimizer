@@ -19,6 +19,7 @@ def build_pipeline_input_dict(config: GAConfig) -> dict[str, Any]:
     data = {
         "problem_name": config.problem_name,
         "n_vars": config.n_vars,
+        "objective_mode": config.objective_mode,
         "range_start": config.range_start,
         "range_end": config.range_end,
         "population": config.population,

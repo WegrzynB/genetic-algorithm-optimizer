@@ -52,9 +52,9 @@ class MainWindow:
     def _configure_root(self) -> None:
         # Ustawia podstawowe parametry okna.
         self.root.title("GA Optimizer")
-        self.root.geometry("1600x900")
+        self.root.geometry("1700x900")
         self.root.minsize(1400, 800)
-        # self.root.state("zoomed")
+        self.root.state("zoomed")
 
     def _build_layout(self) -> None:
         # Tworzy główny układ okna: nagłówek + ciało.
