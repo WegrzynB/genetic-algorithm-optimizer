@@ -10,32 +10,27 @@ from ga_optimizer.core.population import Population
 from ga_optimizer.core.decoding import decode_chromosome
 
 
-def run_engine(config: GAConfig, problem: ProblemDefinition, params: dict) -> dict:
+def run_engine(config: GAConfig, problem: ProblemDefinition) -> dict:
 
-    n_vars = params["n_vars"]
-    range_start = params["range_start"]
-    range_end = params["range_end"]
-    population_size = params["population"]
-    seed = params["seed"]
+    n_vars = config.n_vars
+    range_start = config.range_start
+    range_end = config.range_end
+    population_size = config.population
+    seed = config.seed
 
-    precision_mode = params["precision_mode"]
-
-    if precision_mode == "numeric":
-        precision = params["precision_numeric"]
+    if config.precision_mode == "numeric":
+        precision = config.precision_numeric
     else:
-        precision = (range_end - range_start) / (2 ** params["precision_bits"])
+        precision = (range_end - range_start) / (2 ** config.precision_bits)
 
     bounds = [(range_start, range_end)] * n_vars
 
     bits = bits_required(bounds, precision)
-
     chrom_length = chromosome_length(bits)
 
-    print("=== ENGINE ===")
-    print("Liczba bitów na zmienną:", bits)
+    print("\n=== ENGINE INPUT ===")
     print("Długość chromosomu:", chrom_length)
     print("Rozmiar populacji:", population_size)
-    print()
 
     population = Population.random(
         size=population_size,
@@ -43,13 +38,12 @@ def run_engine(config: GAConfig, problem: ProblemDefinition, params: dict) -> di
         seed=seed
     )
 
+    chromosomes = []
     decoded_population = []
 
-    sample_size = 10
+    for individual in population:
 
-    print("Pierwsze osobniki populacji:\n")
-
-    for i, individual in enumerate(population):
+        chrom_str = "".join(map(str, individual.chromosome.genes))
 
         decoded = decode_chromosome(
             individual.chromosome,
@@ -57,19 +51,20 @@ def run_engine(config: GAConfig, problem: ProblemDefinition, params: dict) -> di
             bits
         )
 
+        chromosomes.append(chrom_str)
         decoded_population.append(decoded)
 
-        if i < sample_size:
-            print(f"Osobnik {i + 1}")
-            print("Chromosom:", individual.chromosome)
-            print("Zdekodowane wartości:", decoded)
-            print()
+    print("\nPopulacja:")
+    print(", ".join(chromosomes))
+
+    print("\nZdekodowane wartości:")
+    print(", ".join(str(v) for v in decoded_population))
+    print("======================\n")
 
     return {
-        "status": "ok",
-        "message": "Populacja wygenerowana.",
         "population_size": population_size,
         "chromosome_length": chrom_length,
         "bits_per_variable": bits,
-        "decoded_population_sample": decoded_population[:5],
+        "chromosomes": chromosomes,
+        "decoded_population": decoded_population,
     }

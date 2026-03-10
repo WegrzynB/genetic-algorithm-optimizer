@@ -54,7 +54,6 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
     engine_result = run_engine(
         config=config,
         problem=problem,
-        params=input_dict
     )
 
     return {
