@@ -189,333 +189,17 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 7 — core: evaluator + fitness
-
-### Branch: `feature/core-evaluator`
-**Co robimy**
-- `core/evaluator.py`: wyliczanie wartości funkcji celu dla osobnika.
-- `core/fitness.py`: mapowanie min/max do fitness.
-- Ustalamy wspólny format wyniku osobnika: raw objective i fitness.
-- Spinamy evaluator z aktualną warstwą problemów z `problems/`.
-
-**Jak testować**
-- W konsoli / prostym skrypcie:
-  - pobierz problem,
-  - przygotuj przykładowe wektory lub osobniki,
-  - policz objective i fitness,
-  - wypisz wyniki przez `print()`.
-- Sprawdź ręcznie:
-  - czy ranking ma sens,
-  - czy min/max działa zgodnie z oczekiwaniem.
-
-**Merge warunek**
-- Działa sama ocena osobników.
-- Warstwa oceny jest niezależna od GUI i operatorów.
-
----
-
-## Krok 8 — operators v1: kontrakt i selekcja
-
-### Branch: `feature/operators-selection-v1`
-**Co robimy**
-- Definiujemy kontrakt funkcji selekcji.
-- Implementacje w `operators/selection/`:
-  - `best.py`
-  - `tournament.py`
-  - `roulette.py`
-- Robimy to tak, żeby selekcja działała na aktualnych obiektach core i dało się ją później łatwo podpiąć do lifecycle.
-
-**Jak testować**
-- W konsoli / prostym skrypcie:
-  - przygotuj małą populację o znanych fitness,
-  - uruchom każdą metodę selekcji,
-  - wypisz wyniki przez `print()`.
-- Sprawdź ręcznie:
-  - `best` zwraca najlepszych,
-  - `tournament` zwraca poprawną liczbę osobników,
-  - `roulette` działa dla prostych przypadków i się nie wywala.
-
-**Merge warunek**
-- Selekcje działają na “gołych” populacjach.
-- Każda metoda ma spójne wejście i wyjście.
-
----
-
-## Krok 9 — operators v1: krzyżowanie
-
-### Branch: `feature/operators-crossover-v1`
-**Co robimy**
-- Definiujemy kontrakt krzyżowania.
-- Implementacje:
-  - `one_point.py`
-  - `two_point.py`
-  - `uniform.py`
-  - `granular.py`
-- Przygotowujemy operator tak, żeby zwracał poprawne dzieci i dawał się później wpiąć w lifecycle bez przeróbek kontraktu.
-
-**Jak testować**
-- W konsoli / prostym skrypcie:
-  - przygotuj krótkie chromosomy rodziców,
-  - wykonaj krzyżowanie,
-  - wypisz rodziców i dzieci przez `print()`.
-- Sprawdź ręcznie:
-  - dzieci mają poprawną długość,
-  - geny pochodzą od rodziców,
-  - nie ma błędów na punktach cięcia.
-
-**Merge warunek**
-- Krzyżowanie działa samodzielnie.
-- Implementacje nie zależą od engine ani GUI.
-
----
-
-## Krok 10 — operators v1: mutacje + inwersja + elitaryzm
-
-### Branch: `feature/operators-mutation-v1`
-**Co robimy**
-- Mutacje:
-  - `mutation/one_point.py`
-  - `mutation/two_point.py`
-  - `mutation/edge.py`
-- `operators/inversion.py`
-- `operators/elitism.py`
-- Domykamy podstawowy zestaw operatorów potrzebny do złożenia pełnego przebiegu generacji.
-
-**Jak testować**
-- W konsoli / prostym skrypcie:
-  - uruchom mutację i inwersję na znanym chromosomie,
-  - wypisz wynik przed i po przez `print()`,
-  - sprawdź elitaryzm na małej populacji.
-- Sprawdź ręcznie:
-  - długość chromosomu się nie psuje,
-  - inwersja odwraca właściwy fragment,
-  - elitaryzm przenosi najlepszych.
-
-**Merge warunek**
-- Operatory działają na obiektach core.
-- Warstwa operatorów jest gotowa do spięcia w lifecycle.
-
----
-
-## Krok 11 — core: lifecycle + engine (pętla epok)
-
-### Branch: `feature/core-engine-loop`
-**Co robimy**
-- `core/lifecycle.py`: składanie operatorów w generację (select → crossover → mutation → inversion → elitism).
-- `core/termination.py`: warunki stopu.
-- `core/engine.py`: pętla epok, historia best/avg/worst, pomiar czasu.
-- Składamy w końcu działający pipeline obliczeń, ale jeszcze bez pełnej integracji GUI.
-
-**Jak testować**
-- W skrypcie lub konsoli:
-  - wybierz problem,
-  - uruchom engine na małych parametrach,
-  - wypisz kilka epok i końcowy wynik przez `print()`.
-- Sprawdź:
-  - engine zwraca wynik i historię,
-  - wynik jest powtarzalny przy seed,
-  - brak crashy na różnych operatorach.
-
-**Merge warunek**
-- Engine działa bez GUI.
-- Da się wykonać pełny run na co najmniej jednym problemie.
-
----
-
-## Krok 12 — IO: zapis runów
-
-### Branch: `feature/io-results`
-**Co robimy**
-- `io/results_writer.py`, `io/json_export.py`, `io/csv_export.py`, `io/serializers.py`.
-- Folder runa:
-  - `data/output/runs/<timestamp>_<id>/config.json`
-  - `metrics.json`
-  - `history.csv`
-- Przygotowujemy trwały zapis wyników tak, żeby później GUI tylko korzystało z gotowej warstwy IO.
-
-**Jak testować**
-- Po uruchomieniu prostego runa:
-  - wypisz ścieżkę zapisu przez `print()`,
-  - sprawdź, że folder runa powstał,
-  - sprawdź zawartość plików.
-- Minimum:
-  - `history.csv` ma tyle wierszy, ile epok,
-  - zapis nie nadpisuje poprzednich wyników.
-
-**Merge warunek**
-- Zapis działa niezależnie od GUI.
-- Format plików jest spójny i gotowy do dalszego użycia.
-
----
-
-## Krok 13 — visualization: wykres zbieżności + zapis
-
-### Branch: `feature/visualization-convergence`
-**Co robimy**
-- `visualization/convergence_plots.py` generuje wykres best/avg/worst.
-- Zapisuje wykres do folderu runa `plots/`.
-- `visualization/plot_styles.py` trzyma wspólne ustawienia.
-- Przygotowujemy wizualizację jako osobną warstwę nad zapisanymi danymi.
-
-**Jak testować**
-- Po runie:
-  - wypisz lokalizację wykresu przez `print()`,
-  - sprawdź, że PNG istnieje,
-  - porównaj dane z `history.csv`.
-- Minimum:
-  - wykres ma sensowne osie, legendę i wartości zgodne z historią.
-
-**Merge warunek**
-- Wykres powstaje bez udziału GUI.
-- Moduł działa na danych z runa lub historii zwróconej przez engine.
-
----
-
-## Krok 14 — integracja GUI ↔ engine
-
-### Branch: `feature/gui-run-integration`
-**Co robimy**
-- `gui/controllers/run_controller.py` buduje config, uruchamia engine i odbiera wynik.
-- GUI:
-  - Start uruchamia obliczenia,
-  - Stop przerywa,
-  - wynik trafia do `results_panel` i do logu.
-- Na tym etapie dopiero spinamy gotową logikę z interfejsem.
-
-**Jak testować**
-- Najpierw upewnij się, że sam engine działa poprawnie poza GUI.
-- Potem z GUI:
-  - ustaw parametry,
-  - kliknij Start,
-  - obserwuj komunikaty i końcowy wynik.
-- Sprawdź:
-  - czy przepływ od GUI do engine działa,
-  - czy wynik wraca do GUI,
-  - czy UI nie zawiesza się.
-
-**Merge warunek**
-- Użytkownik może wykonać pełny run z GUI.
-- GUI korzysta z gotowych modułów logiki, a nie zawiera ich kopii.
-
----
-
-## Krok 15 — GUI: wyniki, wykresy i przycisk “Zapisz”
-
-### Branch: `feature/gui-results-and-plots`
-**Co robimy**
-- `results_panel` pokazuje best/avg/worst, czas, parametry runa.
-- `plots_panel` pokazuje wykres.
-- Przycisk “Zapisz wynik” w GUI wywołuje warstwę `io`.
-- Domykamy prezentację wyników w GUI na bazie wcześniej przygotowanej logiki, IO i wizualizacji.
-
-**Jak testować**
-- Najpierw sprawdź dane i zapis po stronie logiki / plików.
-- Potem z GUI:
-  - uruchom run,
-  - kliknij “Zapisz”,
-  - sprawdź folder runa i obraz wykresu.
-- Sprawdź:
-  - czy GUI poprawnie pokazuje wyniki,
-  - czy wykres odpowiada historii runa,
-  - czy zapis działa bez ręcznych poprawek.
-
-**Merge warunek**
-- Wyniki i wykresy są dostępne w GUI.
-- GUI korzysta z gotowych danych i zapisuje je do `data/output`.
-
----
-
-## Krok 16 — eksperymenty i porównania konfiguracji
-
-### Branch: `feature/experiments-benchmark`
-**Co robimy**
-- `scripts/batch_benchmark.py` odpala serię runów dla listy konfiguracji.
-- `experiments/metrics.py` i `aggregations.py` zbierają i agregują wyniki.
-- `visualization/comparison_plots.py` generuje wykresy porównawcze.
-- Przygotowujemy tę warstwę tak, żeby dało się łatwo porównywać operatory, ustawienia i problemy bez ręcznego grzebania w kodzie.
-
-**Jak testować**
-- Uruchom `python scripts/batch_benchmark.py`.
-- Sprawdź:
-  - czy powstało kilka folderów runów,
-  - czy zapisują się podsumowania,
-  - czy da się wypisać zagregowane wyniki przez `print()`,
-  - czy wykres porównawczy istnieje i ma sens.
-- Na tym etapie nie trzeba jeszcze spinać tego z GUI.
-
-**Merge warunek**
-- Benchmark działa z poziomu skryptu.
-- Da się uruchomić serię eksperymentów bez ręcznej edycji logiki wewnątrz modułów.
-
----
-
-## Krok 17 — rozszerzenia operatorów i problemów
-
-### Branch template: `feature/extensions-<obszar>-<nazwa>`
-**Co robimy**
-- Dodajemy nowe metody selekcji / krzyżowania / mutacji albo nowe problemy.
-- Aktualizujemy odpowiednie mapowania w configu i rejestrach.
-- Trzymamy się istniejących kontraktów, żeby nowe elementy dało się podpiąć bez przerabiania engine.
-- Jeśli trzeba, uzupełniamy też warstwę eksperymentów i konfiguracji o nowe opcje.
-
-**Jak testować**
-- W konsoli / prostym skrypcie:
-  - uruchom nowy operator albo nowy problem,
-  - wypisz wyniki przez `print()`,
-  - sprawdź, że działa z aktualnym pipeline.
-- Potem zrób mały run na jednej konfiguracji i sprawdź, czy historia i wynik wyglądają sensownie.
-
-**Merge warunek**
-- Nowy element jest wybieralny z konfiguracji.
-- Nie psuje istniejącego pipeline i działa w ramach obecnych kontraktów.
-
----
-
-## Krok 18 — stabilizacja i porządki końcowe
-
-### Branch: `refactor/stabilization`
-**Co robimy**
-- Porządki importów, nazw, komentarzy i zależności między modułami.
-- Usuwamy zbędne fragmenty tymczasowe i placeholdery, które nie są już potrzebne.
-- Sprawdzamy spójność warstw:
-  - `config`,
-  - `problems`,
-  - `core`,
-  - `operators`,
-  - `io`,
-  - `visualization`,
-  - `gui`.
-- Upewniamy się, że `__pycache__`, outputy i śmieci robocze nie trafiają do repo.
-
-**Jak testować**
-- Uruchom:
-  - `python scripts/run_gui.py`
-  - `python scripts/run_experiment.py`
-  - `python scripts/batch_benchmark.py`
-- Sprawdź:
-  - czy pełny run działa,
-  - czy zapis wyników działa,
-  - czy benchmark działa,
-  - czy GUI korzysta z tej samej logiki co skrypty.
-
-**Merge warunek**
-- `main` uruchamia GUI i wykonuje pełny run bez ręcznych poprawek.
-- Projekt jest spójny, a przepływ od configu do wyniku działa end-to-end.
-
-
-                                  **NOWA WERSJA**
-
-# Krok 7 — ocena osobników (objective + fitness)
+# Krok 7 — ocena osobników (objective + fitness) (Ukończono)
 
 ### Branch: `feature/core-evaluation`
 
 ### Co robimy
 1. Tworzymy moduł odpowiedzialny za **liczenie wartości funkcji celu i fitnessu**.
 2. Dodajemy pliki:
-   core/evaluator.py
-   core/fitness.py
+   `core/evaluator.py`
+   `core/fitness.py`
 
- **evaluator.py:**
+ **evaluator.py**:
   - przyjmuje osobnika
   - dekoduje jego chromosom
   - wywołuje funkcję problemu
@@ -553,33 +237,27 @@ Sprawdź:
 
 ### Branch: `feature/operators-selection`
 
-### Co robimy:
-1. Dodajemy operatory selekcji.
-   Nowy katalog:
-   operators/selection/
-   - best.py
-   - tournament.py
-   - roulette.py
+### Co robimy
 
-2. Implementujemy:
- - Best selection (best.py) - zwraca najlepszych osobników
- - Tournament selection (tournament.py) -losuje kilka osobników i wybiera najlepszego
- - Roulette selection (roulette.py) - prawdopodobieństwo wyboru zależy od fitness
+1. Dodaj katalog `operators/selection/`.
+        oraz plik:
+    `operators/selection/roulette.py`
+2. Implementujemy **selekcję ruletkową** (roulette.py).
+    - każdy osobnik posiada wartość `fitness`
+    - prawdopodobieństwo wyboru osobnika jest proporcjonalne do jego fitness
+    - osobniki o wyższym fitness mają większą szansę zostać wybrane
 
-### Jak testować
-W skrypcie:
-1. stwórz populację o znanych fitness
-2. uruchom selekcję
-3. wypisz wybranych osobników
+Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następnym etapie algorytmu.
 
-Sprawdź:
- - czy `best` zwraca najlepszych
- - czy `tournament` działa poprawnie
- - czy `roulette` nie powoduje błędów
+**Jak testować**
+- Stwórz populację o znanych fitnessach
+- Wykonaj selekcję
+- Sprawdź, czy osobniki z wyższym fitness pojawiają się częściej
 
-### Merge warunek
- - każda metoda działa
- - wszystkie mają ten sam kontrakt wejścia/wyjścia
+**Merge warunek**
+- Selekcja działa poprawnie
+- Kontrakt wejścia/wyjścia spójny
+- Działa bez engine
 
 ---
 
@@ -588,71 +266,67 @@ Sprawdź:
 ### Branch: `feature/operators-crossover`
 
 ### Co robimy
-1. Dodajemy operatory krzyżowania:
-   operators/crossover/
-   - one_point.py
-   - two_point.py
-   - uniform.py
-   - granular.py
-
- Każdy operator działa tak:
-	 rodzic1 + rodzic2
-		       ↓
-  dziecko1 + dziecko2
+1. Dodaj katalog `operators/crossover/`.
+2. Implementujemy **krzyżowanie jednopunktowe** (`one_point.py`):
+   - losowany punkt podziału chromosomu
+   - wymiana fragmentów między rodzicami
+   - zachowana długość chromosomu
 
 ### Jak testować
-W skrypcie:
 1. stwórz dwóch rodziców
-2. wykonaj crossover
-3. wypisz rodziców i dzieci
+2. Wykonaj krzyżowanie
+3. Sprawdź, czy długość chromosomu się nie zmienia i geny dzieci pochodzą od rodziców
 
-Sprawdź:
-- długość chromosomu
-- czy geny pochodzą od rodziców
-
-### Merge warunek
-- krzyżowanie działa bez engine
-- nie zmienia długości chromosomu
+**Merge warunek**
+ - Krzyżowanie działa bez engine
+  Długość chromosomu dzieci = rodziców
 
 ---
 
-# Krok 10 — mutacja + inwersja + elitaryzm
+# Krok 10 — mutacja
 
 ### Branch: `feature/operators-mutation`
 
 ### Co robimy
-1. Dodajemy operatory modyfikujące chromosom:
-
-  mutation/
-  - one_point.py
-  - two_point.py
-  - edge.py
-
-  operators/
-  - inversion.py
-  - elitism.py
-
- Mutacja: losowa zmiana genów.
- Inwersja: odwrócenie fragmentu chromosomu.
- Elitaryzm: przeniesienie najlepszych osobników do następnej generacji.
+1. Dodaj katalog `operators/mutation/`.
+2. Implementujemy **mutację jednopunktową** (`one_point.py`):
+   - losowo zmieniany jeden gen w chromosomie
+   - wprowadza różnorodność genetyczną
 
 ### Jak testować
-W skrypcie:
 1. stwórz chromosom
 2. wykonaj mutację
-3. wykonaj inwersję
-4. wypisz przed i po
+3. wypisz chromosom przed i po mutacji
 
 Sprawdź:
-- długość chromosomu się nie zmienia
-- elitaryzm zachowuje najlepszych
+- czy długość chromosomu się nie zmienia
+- czy przynajmniej jeden gen może się zmienić
 
-### Merge warunek:
-operatory działają na obiektach `core`
+### Merge warunek
+- mutacja działa poprawnie
+- operuje na obiektach `core`
+- długość chromosomu nie ulega zmianie
 
 ---
 
-# Krok 11 — lifecycle generacji
+# Krok 11 - operatory inwersji i elitaryzm:
+### Branch: `feature/operators-inversion-elitism`
+
+**Co robimy**
+1. Dodaj pliki:
+   - `operators/inversion.py` — odwraca fragment chromosomu
+   - `operators/elitism.py` — przenosi najlepszych osobników do następnej generacji 
+  
+**Jak testować**
+- Stwórz populację
+- Zastosuj inwersję i elitaryzm
+- Sprawdź zmiany w chromosomach i zachowanie najlepszych osobników
+
+**Merge warunek**
+- Operatory działają poprawnie
+- Zachowana spójność populacji
+
+# Krok 12 — lifecycle generacji
 
 ### Branch: `feature/core-lifecycle`
 
@@ -660,26 +334,10 @@ operatory działają na obiektach `core`
 1. Tworzymy logikę **jednej generacji algorytmu**.
    Plik: core/lifecycle.py
 
-  Przepływ generacji:
-      populacja
-      ↓
-      selekcja
-      ↓
-      krzyżowanie
-      ↓
-      mutacja
-      ↓
-      inwersja
-      ↓
-      elitaryzm
-      ↓
-      nowa populacja
-
-To jest **jedna epoka GA**.
+  Przepływ generacji: populacja → selekcja → krzyżowanie → mutacja → inwersja → elitaryzm → nowa populacja
+  To jest **jedna epoka GA**.
 
 ### Jak testować
-W skrypcie:
-
 1. stwórz populację
 2. wykonaj lifecycle
 3. wypisz nową populację
@@ -690,23 +348,15 @@ W skrypcie:
 
 ---
 
-# Krok 12 — engine (pętla epok)
+# Krok 13 — engine (pętla epok)
 
 ### Branch: `feature/core-engine`
 
 ### Co robimy
 1. Dodajemy główny silnik algorytmu.
-   Plik: core/engine.py
+   Plik: `core/engine.py`
  Engine wykonuje:
-
-	inicjalizacja populacji
-	          ↓
-        for epoch:
-        lifecycle
-        evaluator
-        zapis historii
-	          ↓
-	      return wynik
+  inicjalizacja populacji → for epoch: lifecycle → evaluator → zapis historii → return wynik
 
   Historia zawiera:
   - best
@@ -718,7 +368,7 @@ W skrypcie:
     population = 20
     epochs = 30
 2. Wypisać:
-best fitness
+    best fitness
 
 ### Merge warunek
 - engine działa
@@ -726,7 +376,25 @@ best fitness
 
 ---
 
-# Krok 13 — zapis wyników
+# Krok 14 - Rozszerzenie selekcji, krzyżowania, mutacji
+
+### Branch: `feature/operators-extended`
+
+**Co robimy**
+Dodatkowe metody selekcji:
+ - `best.py`, `tournament.py`
+
+ Dodatkowe metody krzyżowania:
+ -  `two_point.py`, `uniform.py`, `granular.py`
+ Dodatkowe metody mutacji:
+ - `two_point.py`, `edge.py`
+
+
+**Merge warunek**
+  Nowe operatory działają poprawnie i kompatybilnie z engine
+
+
+# Krok 15 — zapis wyników
 
 ### Branch: `feature/io-results`
 
@@ -734,10 +402,9 @@ best fitness
 1. Dodajemy zapis runów.
   - Nowy folder: io/
   - Pliki:
-
-	  results_writer.py
-	  json_export.py
-	  csv_export.py
+	  `results_writer.py`
+	  `json_export.py`
+	  `csv_export.py`
 
   Struktura zapisu: data/output/runs/ run_2026_01/
   - config.json
@@ -754,13 +421,13 @@ Po runie:
 
 ---
 
-# Krok 14 — wykres zbieżności
+# Krok 16 — wykres zbieżności
 
 ### Branch: `feature/visualization`
 
 ### Co robimy
 1. Dodajemy wykresy.
- - visualization/convergence_plot.py
+ - `visualization/convergence_plot.py`
 
 Wykres przedstawia:
  - best
@@ -777,21 +444,14 @@ Po runie sprawdzić czy powstał plik PNG.
 
 ---
 
-# Krok 15 — integracja GUI z engine
+# Krok 17 — integracja GUI z engine
 
 ### Branch: `feature/gui-engine-integration`
 
 ### Co robimy
 1. GUI zaczyna uruchamiać algorytm.
   
-  Przepływ:
-     GUI
-      ↓
-    config
-      ↓
-    engine
-      ↓
-    wynik
+  Przepływ: `GUI → config → engine → wynik`
 
 Controller: gui/controllers/run_controller.py
 
@@ -809,7 +469,7 @@ Sprawdzić:
 
 ---
 
-# Krok 16 — wyniki w GUI
+# Krok 18 — wyniki w GUI
 
 ### Branch: `feature/gui-results`
 
@@ -833,7 +493,7 @@ Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
 
 ---
 
-# Krok 17 — eksperymenty
+# Krok 19 — Eksperymenty / batch runy
 
 ### Branch: `feature/experiments`
 
@@ -854,12 +514,11 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
 
 ---
 
-# Krok 18 — stabilizacja projektu
+# Krok 20 — stabilizacja projektu
 
 ### Branch: `refactor/stabilization`
 
 ### Co robimy
-
 1. Końcowe porządki:
   - poprawa importów
   - poprawa nazw
