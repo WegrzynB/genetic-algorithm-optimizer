@@ -15,8 +15,7 @@ from ga_optimizer.problems.function_catalog import get_problem_definition
 
 
 def build_pipeline_input_dict(config: GAConfig) -> dict[str, Any]:
-    # Składa wszystkie wartości z configu do jednego dużego słownika.
-    # Parametry metod są spłaszczane do poziomu głównego.
+
     data = {
         "problem_name": config.problem_name,
         "n_vars": config.n_vars,
@@ -36,16 +35,15 @@ def build_pipeline_input_dict(config: GAConfig) -> dict[str, Any]:
         "elitism_enabled": config.elitism_enabled,
     }
 
-    # Dorzuca aktywne parametry metod jako zwykłe pola słownika.
     data.update(config.method_params)
 
     return data
 
 
 def run_pipeline(config: GAConfig) -> dict[str, Any]:
-    # Główny punkt wejścia pojedynczego uruchomienia z GUI.
-    # Docelowo tutaj będzie pełna orkiestracja kolejnych etapów.
+
     problem = get_problem_definition(config.problem_name)
+
     input_dict = build_pipeline_input_dict(config)
 
     print("\n=== PIPELINE INPUT ===")
@@ -53,8 +51,11 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
         print(f"{key}: {value}")
     print("======================\n")
 
-    # Placeholder wywołania silnika.
-    engine_result = run_engine(config=config, problem=problem)
+    engine_result = run_engine(
+        config=config,
+        problem=problem,
+        params=input_dict
+    )
 
     return {
         "status": "ok",

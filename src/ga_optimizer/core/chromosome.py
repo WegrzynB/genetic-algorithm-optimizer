@@ -23,4 +23,4 @@ class Chromosome:
         return len(self.genes)
 
     def __repr__(self) -> str:
-        return f"Chromosom({''.join(map(str, self.genes))})"
+        return "".join(map(str, self.genes))

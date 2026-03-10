@@ -62,6 +62,17 @@ Struktura projektu: `tree /F /A`
   - `git branch -d feature/nazwa-brancha`
 ---
 
+---
+## Schemat działania jak chcemy pobrać z main do siebie i zaaktualizować
+1. Wczytujemy istniejącego brancha:
+  - `git checkout feature/nazwa-brancha`
+2. Pobieramy informacje o nowych commitach:
+  - `git fetch origin`
+3. Robimy merge aktualnego brancha z main:
+  - `git merge origin/main`
+4. Wpisujemy do komórki np. "Aktualizuję branch" i klikamy "Commit" (prawy dolny róg).
+---
+
 
 ## Podstawowe komendy GIT (ściąga)
 

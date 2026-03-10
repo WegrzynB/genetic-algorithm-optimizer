@@ -20,7 +20,7 @@ def testing():
 
 
     pop = Population.random(
-        size=5,
+        size=10,
         chromosome_length=length,
         seed=42,
     )
