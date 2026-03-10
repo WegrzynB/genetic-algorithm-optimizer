@@ -15,7 +15,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 0 — `docs/plan.md` i porządek startowy
+## Krok 0 — `docs/plan.md` i porządek startowy (Ukończono)
 
 ### Branch: `docs/plan-initial`
 **Co robimy**
@@ -31,7 +31,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 1 — uruchamialny szkielet aplikacji
+## Krok 1 — uruchamialny szkielet aplikacji (Ukończono)
 
 ### Branch: `feature/app-entrypoint`
 **Co robimy**
@@ -51,7 +51,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 2 — GUI: layout i panele (bez logiki GA)
+## Krok 2 — GUI: layout i panele (bez logiki GA) (Ukończono)
 
 ### Branch: `feature/gui-layout`
 **Co robimy**
@@ -75,7 +75,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 3 — GUI: widgety i walidacja pól (lokalnie)
+## Krok 3 — GUI: widgety i walidacja pól (lokalnie) (Ukończono)
 
 ### Branch: `feature/gui-widgets-validation`
 **Co robimy**
@@ -93,7 +93,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy)
+## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy) (Ukończono)
 
 ### Branch: `feature/config-model`
 
@@ -125,7 +125,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline
+## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline (Ukończono)
 
 ### Branch: `feature/problem-pool-pipeline-ready`
 
@@ -163,7 +163,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok)
+## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok) (Ukończono)
 
 ### Branch: `feature/core-representation`
 **Co robimy**
@@ -501,3 +501,383 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 **Merge warunek**
 - `main` uruchamia GUI i wykonuje pełny run bez ręcznych poprawek.
 - Projekt jest spójny, a przepływ od configu do wyniku działa end-to-end.
+
+
+                                  **NOWA WERSJA**
+
+# Krok 7 — ocena osobników (objective + fitness)
+
+### Branch: `feature/core-evaluation`
+
+### Co robimy
+1. Tworzymy moduł odpowiedzialny za **liczenie wartości funkcji celu i fitnessu**.
+2. Dodajemy pliki:
+   core/evaluator.py
+   core/fitness.py
+
+ **evaluator.py:**
+  - przyjmuje osobnika
+  - dekoduje jego chromosom
+  - wywołuje funkcję problemu
+
+ **fitness.py:**
+  - zamienia wartość funkcji celu na fitness
+  - obsługuje:
+    - minimalizację
+    - maksymalizację
+
+Po tym kroku każdy osobnik ma:
+  - objective_value
+  - fitness
+
+### Testy (czy działa)
+W prostym skrypcie:
+  1. pobierz problem z `problems/`
+  2. stwórz osobnika
+  3. zdekoduj chromosom
+  4. policz objective
+  5. policz fitness
+  6. wypisz wynik przez `print()`
+
+Sprawdź:
+- czy wynik funkcji jest poprawny
+- czy ranking fitness działa
+
+### Merge warunek:
+ - evaluator działa bez GUI
+ - fitness jest poprawnie liczony
+
+---
+
+# Krok 8 — selekcja osobników
+
+### Branch: `feature/operators-selection`
+
+### Co robimy:
+1. Dodajemy operatory selekcji.
+   Nowy katalog:
+   operators/selection/
+   - best.py
+   - tournament.py
+   - roulette.py
+
+2. Implementujemy:
+ - Best selection (best.py) - zwraca najlepszych osobników
+ - Tournament selection (tournament.py) -losuje kilka osobników i wybiera najlepszego
+ - Roulette selection (roulette.py) - prawdopodobieństwo wyboru zależy od fitness
+
+### Jak testować
+W skrypcie:
+1. stwórz populację o znanych fitness
+2. uruchom selekcję
+3. wypisz wybranych osobników
+
+Sprawdź:
+ - czy `best` zwraca najlepszych
+ - czy `tournament` działa poprawnie
+ - czy `roulette` nie powoduje błędów
+
+### Merge warunek
+ - każda metoda działa
+ - wszystkie mają ten sam kontrakt wejścia/wyjścia
+
+---
+
+# Krok 9 — krzyżowanie
+
+### Branch: `feature/operators-crossover`
+
+### Co robimy
+1. Dodajemy operatory krzyżowania:
+   operators/crossover/
+   - one_point.py
+   - two_point.py
+   - uniform.py
+   - granular.py
+
+ Każdy operator działa tak:
+	 rodzic1 + rodzic2
+		       ↓
+  dziecko1 + dziecko2
+
+### Jak testować
+W skrypcie:
+1. stwórz dwóch rodziców
+2. wykonaj crossover
+3. wypisz rodziców i dzieci
+
+Sprawdź:
+- długość chromosomu
+- czy geny pochodzą od rodziców
+
+### Merge warunek
+- krzyżowanie działa bez engine
+- nie zmienia długości chromosomu
+
+---
+
+# Krok 10 — mutacja + inwersja + elitaryzm
+
+### Branch: `feature/operators-mutation`
+
+### Co robimy
+1. Dodajemy operatory modyfikujące chromosom:
+
+  mutation/
+  - one_point.py
+  - two_point.py
+  - edge.py
+
+  operators/
+  - inversion.py
+  - elitism.py
+
+ Mutacja: losowa zmiana genów.
+ Inwersja: odwrócenie fragmentu chromosomu.
+ Elitaryzm: przeniesienie najlepszych osobników do następnej generacji.
+
+### Jak testować
+W skrypcie:
+1. stwórz chromosom
+2. wykonaj mutację
+3. wykonaj inwersję
+4. wypisz przed i po
+
+Sprawdź:
+- długość chromosomu się nie zmienia
+- elitaryzm zachowuje najlepszych
+
+### Merge warunek:
+operatory działają na obiektach `core`
+
+---
+
+# Krok 11 — lifecycle generacji
+
+### Branch: `feature/core-lifecycle`
+
+### Co robimy
+1. Tworzymy logikę **jednej generacji algorytmu**.
+   Plik: core/lifecycle.py
+
+  Przepływ generacji:
+      populacja
+      ↓
+      selekcja
+      ↓
+      krzyżowanie
+      ↓
+      mutacja
+      ↓
+      inwersja
+      ↓
+      elitaryzm
+      ↓
+      nowa populacja
+
+To jest **jedna epoka GA**.
+
+### Jak testować
+W skrypcie:
+
+1. stwórz populację
+2. wykonaj lifecycle
+3. wypisz nową populację
+
+### Merge warunek
+- generacja działa
+- populacja nie ulega uszkodzeniu
+
+---
+
+# Krok 12 — engine (pętla epok)
+
+### Branch: `feature/core-engine`
+
+### Co robimy
+1. Dodajemy główny silnik algorytmu.
+   Plik: core/engine.py
+ Engine wykonuje:
+
+	inicjalizacja populacji
+	          ↓
+        for epoch:
+        lifecycle
+        evaluator
+        zapis historii
+	          ↓
+	      return wynik
+
+  Historia zawiera:
+  - best
+  - avg
+  - worst
+
+### Jak testować
+1. Uruchomić mały run:
+    population = 20
+    epochs = 30
+2. Wypisać:
+best fitness
+
+### Merge warunek
+- engine działa
+- zwraca historię
+
+---
+
+# Krok 13 — zapis wyników
+
+### Branch: `feature/io-results`
+
+### Co robimy
+1. Dodajemy zapis runów.
+  - Nowy folder: io/
+  - Pliki:
+
+	  results_writer.py
+	  json_export.py
+	  csv_export.py
+
+  Struktura zapisu: data/output/runs/ run_2026_01/
+  - config.json
+  - metrics.json
+  - history.csv
+
+### Jak testować
+Po runie:
+- sprawdzić czy folder powstał
+- sprawdzić czy pliki istnieją
+
+### Merge warunek
+- run zapisuje pliki
+
+---
+
+# Krok 14 — wykres zbieżności
+
+### Branch: `feature/visualization`
+
+### Co robimy
+1. Dodajemy wykresy.
+ - visualization/convergence_plot.py
+
+Wykres przedstawia:
+ - best
+ - avg
+ - worst
+
+Zapis wykresu: plots/convergence.png
+
+### Jak testować
+Po runie sprawdzić czy powstał plik PNG.
+
+### Merge warunek
+- wykres się generuje
+
+---
+
+# Krok 15 — integracja GUI z engine
+
+### Branch: `feature/gui-engine-integration`
+
+### Co robimy
+1. GUI zaczyna uruchamiać algorytm.
+  
+  Przepływ:
+     GUI
+      ↓
+    config
+      ↓
+    engine
+      ↓
+    wynik
+
+Controller: gui/controllers/run_controller.py
+
+### Jak testować
+W GUI:
+1. ustaw parametry
+2. kliknij **Start**
+
+Sprawdzić:
+- czy algorytm się uruchamia
+- czy wynik wraca do GUI
+
+### Merge warunek
+- można wykonać pełny run z GUI
+
+---
+
+# Krok 16 — wyniki w GUI
+
+### Branch: `feature/gui-results`
+
+### Co robimy
+GUI pokazuje:
+ - best
+ - avg
+ - worst
+ - czas
+ - wykres.
+
+Panele:
+- results_panel
+- plots_panel
+
+### Jak testować
+Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
+
+### Merge warunek
+- GUI poprawnie pokazuje wyniki
+
+---
+
+# Krok 17 — eksperymenty
+
+### Branch: `feature/experiments`
+
+### Co robimy
+1. Dodajemy skrypt do wielu runów.
+  - scripts/batch_experiment.py
+
+  Skrypt może uruchamiać np.:
+  - 3 problemy
+  - 5 konfiguracji
+  - 10 powtórzeń
+
+### Jak testować
+Uruchomić skrypt i sprawdzić czy powstało wiele runów.
+
+### Merge warunek
+- można uruchomić benchmark
+
+---
+
+# Krok 18 — stabilizacja projektu
+
+### Branch: `refactor/stabilization`
+
+### Co robimy
+
+1. Końcowe porządki:
+  - poprawa importów
+  - poprawa nazw
+  - usunięcie debugów
+  - aktualizacja README
+  - aktualizacja `.gitignore`
+
+2. Sprawdzamy działanie:
+  - GUI
+  - engine
+  - benchmark
+
+### Jak testować
+1. Uruchomić:
+  - python scripts/run_gui.py
+  - python scripts/run_experiment.py
+  - python scripts/batch_experiment.py
+
+### Merge warunek
+Projekt działa **end-to-end**:
+GUI → run → zapis → wykres → wyniki
