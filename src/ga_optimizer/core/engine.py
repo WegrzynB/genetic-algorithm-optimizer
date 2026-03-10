@@ -24,7 +24,7 @@ def run_engine(config: GAConfig) -> dict:
     
     # 2. Inicjalizacja ewaluatora
     # Zgodnie z założeniami z problem_catalog minimalizujemy funkcje
-    evaluator = Evaluator(objective_func=problem_def.formula, optimization_type='min')
+    evaluator = Evaluator(objective_func=problem_def.formula, optimization_type=config.objective_mode)
 
     # 3. Wyliczenie precyzji i długości chromosomu
     if config.precision_mode == "numeric":
