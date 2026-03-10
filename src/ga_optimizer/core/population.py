@@ -1,4 +1,5 @@
 # obsługa tworzenia, przechowywania i operacji na populacji osobników
+
 from __future__ import annotations
 
 import random

@@ -1,4 +1,5 @@
 # chromosom i podstawowe operacje na jego strukturze
+
 from __future__ import annotations
 
 import random
