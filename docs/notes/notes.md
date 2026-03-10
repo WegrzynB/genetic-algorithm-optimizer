@@ -4,27 +4,75 @@ To dziennik roboczy zespołu: notatki ze spotkań, ustalenia, szybkie decyzje, b
 
 Struktura projektu: `tree /F /A`
 
----
 
-## Schemat działania
-1. Poniższe komendy:
+---
+## Schemat działania jak chcemy stworzyć nowego brancha
+1. Wczytujemy dane z main:
   - `git checkout main`
   - `git pull origin main`
+2. Tworzymy nowego brancha (jeśli jest juz taki branch to wyskoczy błąd w terminalu):
   - `git checkout -b feature/nazwa-brancha`
+3. Sprawdzamy status:
   - `git status`
-2. Pracujemy sobie normalnie na plikach.
-3. Dodajemy wszystko co zmienione:
-  - `git add -A`
-  - `git status`
-  - `git commit -m "Add: opis zmian"`
-  - `git push -u origin feature/nazwa-brancha`
-4. Czekacie aż wam to zaakceptuje na githubie.
-5. Wpisujecie te komendy:
-  - `git checkout main`
-  - `git pull origin main`
-  - `git branch -d feature/nazwa-brancha`
+4. Pracujemy sobie normalnie na plikach.
+---
 
 ---
+## Schemat działania jak chcemy wczytać istniejącego brancha
+1. Wczytujemy dane z main:
+  - `git checkout main`
+  - `git pull origin main`
+2. Wczytujemy istniejącego brancha:
+  - `git checkout feature/nazwa-brancha`
+3. Jeśli są jakieś nowe, niewczytane commity:
+  - `git pull`
+4. Sprawdzamy status:
+  - `git status`
+5. Pracujemy sobie normalnie na plikach.
+---
+
+---
+## Schemat działania jak chcemy zrobić commit na aktualnym branchu
+1. Dodajemy wszystko co zmienione:
+  - `git add -A`
+2. Sprawdzamy status:
+  - `git status`
+3. Commit z opisem zmian co zrobiliśmy:
+  - `git commit -m "Opis zmian"`
+4. Wrzucamy do origin:
+  - `git push -u origin feature/nazwa-brancha`
+---
+
+---
+## Schemat działania jak chcemy zmienić na innego brancha
+1. Pobieramy informacje o nowych commitach:
+- `git fetch origin`
+2. Wczytujemy istniejącego brancha:
+- `git checkout feature/nazwa-brancha`
+3. Jeśli są na nim jakieś nowe, niewczytane commity:
+- `git pull`
+---
+
+---
+## Schemat działania jak chcemy usunąć lokalnego brancha (po wczytaniu go na main)
+1. Wczytujemy dane z main:
+  - `git checkout main`
+  - `git pull origin main`
+2. Usuwamy lokalnego brancha:
+  - `git branch -d feature/nazwa-brancha`
+---
+
+---
+## Schemat działania jak chcemy pobrać z main do siebie i zaaktualizować
+1. Wczytujemy istniejącego brancha:
+  - `git checkout feature/nazwa-brancha`
+2. Pobieramy informacje o nowych commitach:
+  - `git fetch origin`
+3. Robimy merge aktualnego brancha z main:
+  - `git merge origin/main`
+4. Wpisujemy do komórki np. "Aktualizuję branch" i klikamy "Commit" (prawy dolny róg).
+---
+
 
 ## Podstawowe komendy GIT (ściąga)
 

@@ -4,6 +4,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from ga_optimizer.experiments.testing import testing
+
 
 class RunPanel:
     def __init__(self, parent, on_start, on_save):
@@ -32,6 +34,11 @@ class RunPanel:
         # Przycisk zapisu jest domyślnie wyłączony (włącza się po uruchomieniu algorytmu)
         self.save_btn = ttk.Button(self.frame, text="Zapisz (plik / baza)", command=self._save, state=tk.DISABLED)
         self.save_btn.grid(row=0, column=3, sticky="e")
+
+        # Przycisk do wykonywania funkcji testowej
+        self.save_btn = ttk.Button(self.frame, text="TEST", command=self._test)
+        self.save_btn.grid(row=2, column=3, sticky="e")
+
 
         ttk.Label(self.frame, textvariable=self.status_var).grid(
             row=1, column=0, columnspan=4, sticky="w", pady=(8, 0)
@@ -63,3 +70,7 @@ class RunPanel:
         # Obsługa kliknięcia Zapisz (na razie wywołuje callback)
         if callable(self.on_save):
             self.on_save()
+
+    def _test(self) -> None:
+        # Obsługa testów
+        testing()
