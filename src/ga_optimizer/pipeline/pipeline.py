@@ -42,8 +42,6 @@ def build_pipeline_input_dict(config: GAConfig) -> dict[str, Any]:
 
 def run_pipeline(config: GAConfig) -> dict[str, Any]:
 
-    problem = get_problem_definition(config.problem_name)
-
     input_dict = build_pipeline_input_dict(config)
 
     print("\n=== PIPELINE INPUT ===")
@@ -52,14 +50,13 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
     print("======================\n")
 
     engine_result = run_engine(
-        config=config,
-        problem=problem,
+        config=config
     )
 
     return {
         "status": "ok",
         "message": "Pipeline wykonany poprawnie.",
-        "problem_name": problem.display_name,
+        "problem_name": config.problem_name,
         "input_dict": input_dict,
         "engine_result": engine_result,
     }
