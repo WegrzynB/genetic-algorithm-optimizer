@@ -1,54 +1,69 @@
-# zarządza kolejnymi etapami generacji (selekcja, krzyżowanie, mutacja, elitaryzm)
+# lifecycle.py
+# Jedna epoka algorytmu genetycznego:
+# ewaluacja bieżącej populacji + wywołanie operatorów + aktualizacja populacji.
 
-from ga_optimizer.core.decoding import decode_chromosome
+from __future__ import annotations
+
+from typing import Any
+
+from ga_optimizer.core.population import Population
+from ga_optimizer.operators.dispatch.dispatch_crossover import dispatch_crossover
+from ga_optimizer.operators.dispatch.dispatch_elitism import dispatch_elitism
+from ga_optimizer.operators.dispatch.dispatch_inversion import dispatch_inversion
+from ga_optimizer.operators.dispatch.dispatch_mutation import dispatch_mutation
+from ga_optimizer.operators.dispatch.dispatch_selection import dispatch_selection
 
 
-def run_lifecycle(config_dict: dict, parameters_dict: dict) -> dict:
+def run_lifecycle(
+    config_dict: dict[str, Any],
+    population: Population,
+    epoch_index: int,
+) -> dict[str, Any]:
+    # Najpierw oceniamy bieżącą populację.
+    population.evaluate_population()
+    summary = population.get_summary()
 
-    chromosomes = []
-    decoded_population = []
-    evaluation_result = []  # Tu przechowujemy obiekty EvaluationResult
+    # Zachowujemy poprzednią populację pod ewentualny elitaryzm.
+    previous_chromosomes = [chromosome.copy() for chromosome in population.chromosomes]
 
-    # 5. Ewaluacja każdego osobnika w populacji
-    for individual in parameters_dict["population"]:
-        chrom_str = "".join(map(str, individual.chromosome.genes))
+    # Selekcja wybiera materiał do dalszych operacji.
+    selected_chromosomes = dispatch_selection(
+        chromosomes=population.chromosomes,
+        config_dict=config_dict,
+    )
 
-        # Dekodowanie genotypu (bity) na fenotyp (wartości rzeczywiste / floaty)
-        decoded = decode_chromosome(
-            individual.chromosome,
-            parameters_dict["bounds"],
-            parameters_dict["bits"]
-        )
+    # Krzyżowanie tworzy nowe chromosomy.
+    crossed_chromosomes = dispatch_crossover(
+        chromosomes=selected_chromosomes,
+        config_dict=config_dict,
+    )
 
-        # Wyliczenie funkcji celu i fitnessu
-        eval_result = parameters_dict["evaluator"].evaluate(decoded)
-        
-        # Zapisanie fitnessu bezpośrednio do obiektu osobnika
-        individual.fitness = eval_result.fitness
+    # Mutacja modyfikuje chromosomy po krzyżowaniu.
+    mutated_chromosomes = dispatch_mutation(
+        chromosomes=crossed_chromosomes,
+        config_dict=config_dict,
+    )
 
-        chromosomes.append(chrom_str)
-        decoded_population.append(decoded)
-        evaluation_result.append(eval_result)
+    # Inwersja jest dodatkowym operatorem zmiany chromosomu
+    # i naturalnie działa po mutacji.
+    inverted_chromosomes = dispatch_inversion(
+        chromosomes=mutated_chromosomes,
+        config_dict=config_dict,
+    )
 
-    # print("\nPopulacja:")
-    # print(", ".join(chromosomes))
+    # Elitaryzm powinien być na końcu, bo może podmienić końcową populację
+    # najlepszymi osobnikami z poprzedniego pokolenia.
+    final_chromosomes = dispatch_elitism(
+        chromosomes=inverted_chromosomes,
+        previous_chromosomes=previous_chromosomes,
+        config_dict=config_dict,
+    )
 
-    # print("\nZdekodowane wartości:")
-    # Formatujemy wyjście dla czytelności (2 miejsca po przecinku dla zdekodowanych)
-    # print(", ".join(f"[{', '.join(f'{v:.2f}' for v in dec)}]" for dec in decoded_population))
-
-    # print("\nWyniki oceny (Raw Objective | Fitness):")
-    # Zgrabne wypisanie połączonego wyniku
-    # print(", ".join(f"({res.raw_objective:.2f} | {res.fitness:.4f})" for res in evaluation_result))
-    # print("======================\n")
+    # Podmieniamy chromosomy i aktualizujemy wszystko,
+    # co od nich zależy.
+    population.set_chromosomes(final_chromosomes)
 
     return {
-        "population_size": config_dict["population"],
-        "chromosome_length": parameters_dict["chrom_length"],
-        "bits_per_variable": parameters_dict["bits"],
-        "chromosomes": chromosomes,
-        "decoded_population": decoded_population,
-        # Możesz eksportować same wyniki raw, sam fitness, lub obiekty EvaluationResult
-        "evaluation_result": evaluation_result, 
-        "population": parameters_dict["population"] # Dobrze też zwrócić obiekt populacji, przyda się do selekcji
+        "epoch_index": epoch_index,
+        "summary": summary,
     }
