@@ -245,10 +245,18 @@ Sprawdź:
 ### Co robimy
 
 1. Po pierwsze skupmy się na populacji. Skoro tworzymy klasę populacji, to najlepiej byłoby w niej trzymać podstawowe info o niej oraz metody pozwalające na dekodowanie i enkodowanie chromosomów (tym samym możemy usunąć tamte pliki).
+2. Skoro tworzymy klasę evaluator, to w niej też możemy wykonywać wszystkie potrzebne operacje, bez konieczności śmiecenia kodem (oczywiście to też można wrzucić do klasy z populacją, ale możemy się wstrzymać). To oczywiście też w jednej klasie w jednym pliku.
+3. Dorobię odpowiednie funkcje, które będą odpowiednio dla metody (selekcja itp.) przekierowywać do odpowiedniego pliku i funkcji w `core/lifecycle.py`.
+4. Od Kroku 12 trzeba będzie edytować plan (nawet na kroki przed 7, żeby tam dać, że dodajemy mini integracje w engine i lifecycle i ją rozszerzamy)
 
-2. Skoro tworzymy klasę evaluator, to w niej też możemy wykonywać wszystkie potrzebne operacje, bez konieczności śmiecenia kodem (oczywiście to też można wrzucić do klasy z populacją).
+### Populacja
+  Niech klasa zawiera w sobie info o chromosomach (bity, liczba zmiennych, precyzja, chromosomy itp), dekodowanych wartościach itp. Niech posiada metodę, która ją generuje i raz to wykonujemy na początku, metodę zmieniającą chromosomy i aktualizującą odpowiednie rzeczy (też może metodę aktualizującą populację po zmianach wynikających z jakiś operacji, np selekcji).
+  Czyli na początku generujemy populację odpowiednią metodą i działamy sobie na chromosomach, zmieniając je, potem aktualizujemy te wszystkie pozostałe rzeczy.
 
-3. Dorobię odpowiednie funkcje, które będą odpowiednio dla metody (selekcja itp.) przekierowywać do odpowiedniego pliku i funkcji.
+
+### Ewaluacja
+  Niech ta klasa zawiera przy jej budowaniu info o tym jaka jest funkcja, problem itp. i niech robi swoje. Niech ma wbudowane metody wyliczające odpowiednie rzeczy i też żeby w jednej linijce już sobie wszystko wyliczać.
+  Nie chcę usuwać tego co już napisałem, ale najlepiej byłoby to też umieścić w klasie populacji.
 
 ---
 
