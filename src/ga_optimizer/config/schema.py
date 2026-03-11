@@ -85,13 +85,13 @@ GA_MAIN_FIELD_SPECS = {
         "label": "Wielkość populacji",
         "type": "int",
         "min": 2,
-        "default": 100,
+        "default": 4,
     },
     "epochs": {
         "label": "Liczba epok",
         "type": "int",
         "min": 1,
-        "default": 200,
+        "default": 1,
     },
     "epsilon": {
         "label": "Epsilon (tolerancja / warunek stopu)",
@@ -117,13 +117,13 @@ PRECISION_FIELD_SPECS = {
         "label": "Dokładność (np. 0.001)",
         "type": "float",
         "min_exclusive": 0.0,
-        "default": 0.001,
+        "default": 0.1,
     },
     "precision_bits": {
         "label": "Liczba bitów",
         "type": "int",
         "min": 1,
-        "default": 16,
+        "default": 7,
     },
 }
 

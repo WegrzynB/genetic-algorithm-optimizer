@@ -15,7 +15,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 0 — `docs/plan.md` i porządek startowy (Ukończono)
+## Krok 0 — `docs/plan.md` i porządek startowy [Bartek] (UKOŃCZONO)
 
 ### Branch: `docs/plan-initial`
 **Co robimy**
@@ -31,7 +31,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 1 — uruchamialny szkielet aplikacji (Ukończono)
+## Krok 1 — uruchamialny szkielet aplikacji [Bartek] (UKOŃCZONO)
 
 ### Branch: `feature/app-entrypoint`
 **Co robimy**
@@ -51,7 +51,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 2 — GUI: layout i panele (bez logiki GA) (Ukończono)
+## Krok 2 — GUI: layout i panele (bez logiki GA) [Bartek] (UKOŃCZONO)
 
 ### Branch: `feature/gui-layout`
 **Co robimy**
@@ -75,7 +75,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 3 — GUI: widgety i walidacja pól (lokalnie) (Ukończono)
+## Krok 3 — GUI: widgety i walidacja pól (lokalnie) [Bartek] (UKOŃCZONO)
 
 ### Branch: `feature/gui-widgets-validation`
 **Co robimy**
@@ -93,7 +93,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy) (Ukończono)
+## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy) [Bartek] (UKOŃCZONO)
 
 ### Branch: `feature/config-model`
 
@@ -125,7 +125,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline (Ukończono)
+## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline [Bartek, Krystian] (UKOŃCZONO)
 
 ### Branch: `feature/problem-pool-pipeline-ready`
 
@@ -163,7 +163,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok) (Ukończono)
+## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok) [Paweł] (UKOŃCZONO)
 
 ### Branch: `feature/core-representation`
 **Co robimy**
@@ -189,7 +189,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-# Krok 7 — ocena osobników (objective + fitness) (Ukończono)
+# Krok 7 — ocena osobników (objective + fitness) [Kamil] (UKOŃCZONO)
 
 ### Branch: `feature/core-evaluation`
 
@@ -230,6 +230,25 @@ Sprawdź:
 ### Merge warunek:
  - evaluator działa bez GUI
  - fitness jest poprawnie liczony
+
+ ---
+
+# Krok 7.5 — całkowita poprawa kodu, żeby to było czytelne i jakkolwiek użyteczne
+
+### Branch: `feature/core-basic-fixes`
+
+### Jak jest obecnie zmieniony kod i jaki jest plan
+  - `pipeline/pipeline.py` tworzy słownik odpowiednich parametrów i odpala silnik w `core/engine.py` podając mu ten właśnie słownik (zamiast całego obiektu GAConfig, bo w nim był by problem z dojściem do konkretnych parametrów np. selekcji)
+  - `core/engine.py` ma utworzyć populację startową i iterować po epokach, każda jedna epoka jest w `core/lifecycle.py`
+  - `core/lifecycle.py` odpowiada za wszystkie zmiany w danej epoce w populacji
+
+### Co robimy
+
+1. Po pierwsze skupmy się na populacji. Skoro tworzymy klasę populacji, to najlepiej byłoby w niej trzymać podstawowe info o niej oraz metody pozwalające na dekodowanie i enkodowanie chromosomów (tym samym możemy usunąć tamte pliki).
+
+2. Skoro tworzymy klasę evaluator, to w niej też możemy wykonywać wszystkie potrzebne operacje, bez konieczności śmiecenia kodem (oczywiście to też można wrzucić do klasy z populacją).
+
+3. Dorobię odpowiednie funkcje, które będą odpowiednio dla metody (selekcja itp.) przekierowywać do odpowiedniego pliku i funkcji.
 
 ---
 

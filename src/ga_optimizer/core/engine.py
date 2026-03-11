@@ -1,98 +1,63 @@
 # engine.py
 # Silnik algorytmu genetycznego z podpiętą ewaluacją osobników.
 
-from ga_optimizer.config.schema import GAConfig
 from ga_optimizer.problems.function_catalog import get_problem_definition
-
 from ga_optimizer.core.encoding import bits_required, chromosome_length
 from ga_optimizer.core.population import Population
-from ga_optimizer.core.decoding import decode_chromosome
 from ga_optimizer.core.evaluator import Evaluator
+from ga_optimizer.core.lifecycle import run_lifecycle
 
 
-def run_engine(config: GAConfig) -> dict:
-
-    n_vars = config.n_vars
-    range_start = config.range_start
-    range_end = config.range_end
-    population_size = config.population
-    seed = config.seed
+def run_engine(config_dict: dict) -> dict:
 
     # 1. Pobranie definicji problemu (funkcji celu)
-    # Zakładam, że config.problem przechowuje klucz problemu (np. "Hypersphere")
-    problem_def = get_problem_definition(config.problem_name)
+    problem_def = get_problem_definition(config_dict["problem_name"])
     
     # 2. Inicjalizacja ewaluatora
-    # Zgodnie z założeniami z problem_catalog minimalizujemy funkcje
-    evaluator = Evaluator(objective_func=problem_def.formula, optimization_type=config.objective_mode)
+    evaluator = Evaluator(objective_func=problem_def.formula, optimization_type=config_dict["objective_mode"])
 
     # 3. Wyliczenie precyzji i długości chromosomu
-    if config.precision_mode == "numeric":
-        precision = config.precision_numeric
-    else:
-        precision = (range_end - range_start) / (2 ** config.precision_bits)
+    if config_dict["precision_mode"] == "numeric":
+        precision = config_dict["precision_numeric"]
+    elif config_dict["precision_mode"] == "bits":
+        precision = (config_dict["range_end"] - config_dict["range_start"]) / (2 ** config_dict["precision_bits"] - 1)
 
-    bounds = [(range_start, range_end)] * n_vars
+    bounds = [(config_dict["range_start"], config_dict["range_end"])] * config_dict["n_vars"]
 
     bits = bits_required(bounds, precision)
     chrom_length = chromosome_length(bits)
 
-    print("\n=== ENGINE INPUT ===")
-    print(f"Problem: {problem_def.display_name}")
-    print("Długość chromosomu:", chrom_length)
-    print("Rozmiar populacji:", population_size)
+    # print("\n=== ENGINE INPUT ===")
+    # print(f"Problem: {problem_def.display_name}")
+    # print("Długość chromosomu:", chrom_length)
+    # print("Rozmiar populacji:", config_dict["population"])
 
     # 4. Inicjalizacja populacji
     population = Population.random(
-        size=population_size,
+        size=config_dict["population"],
         chromosome_length=chrom_length,
-        seed=seed
+        seed=config_dict["seed"]
     )
 
-    chromosomes = []
-    decoded_population = []
-    evaluation_result = []  # Tu przechowujemy obiekty EvaluationResult
+    parameters_dict = {
+        "population": population,
+        "evaluator": evaluator,
+        "bounds": bounds,
+        "bits": bits,
+        "chrom_length": chrom_length,
+    }
 
-    # 5. Ewaluacja każdego osobnika w populacji
-    for individual in population:
-        chrom_str = "".join(map(str, individual.chromosome.genes))
 
-        # Dekodowanie genotypu (bity) na fenotyp (wartości rzeczywiste / floaty)
-        decoded = decode_chromosome(
-            individual.chromosome,
-            bounds,
-            bits
-        )
+    for epoch in range(config_dict["epochs"]):
+        lifecycle = run_lifecycle(config_dict=config_dict, parameters_dict=parameters_dict)
 
-        # Wyliczenie funkcji celu i fitnessu
-        eval_result = evaluator.evaluate(decoded)
-        
-        # Zapisanie fitnessu bezpośrednio do obiektu osobnika
-        individual.fitness = eval_result.fitness
+        # print(population)
+        population = lifecycle["chromosomes"]
+        # print(population)
 
-        chromosomes.append(chrom_str)
-        decoded_population.append(decoded)
-        evaluation_result.append(eval_result)
-
-    print("\nPopulacja:")
-    print(", ".join(chromosomes))
-
-    print("\nZdekodowane wartości:")
-    # Formatujemy wyjście dla czytelności (2 miejsca po przecinku dla zdekodowanych)
-    print(", ".join(f"[{', '.join(f'{v:.2f}' for v in dec)}]" for dec in decoded_population))
-
-    print("\nWyniki oceny (Raw Objective | Fitness):")
-    # Zgrabne wypisanie połączonego wyniku
-    print(", ".join(f"({res.raw_objective:.2f} | {res.fitness:.4f})" for res in evaluation_result))
-    print("======================\n")
 
     return {
-        "population_size": population_size,
-        "chromosome_length": chrom_length,
-        "bits_per_variable": bits,
-        "chromosomes": chromosomes,
-        "decoded_population": decoded_population,
-        # Możesz eksportować same wyniki raw, sam fitness, lub obiekty EvaluationResult
-        "evaluation_result": evaluation_result, 
-        "population": population # Dobrze też zwrócić obiekt populacji, przyda się do selekcji
+        "population": population
     }
+
+    
