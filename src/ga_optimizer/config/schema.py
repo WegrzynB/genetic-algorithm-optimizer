@@ -149,12 +149,12 @@ OPERATOR_FIELD_SPECS = {
     "inversion_enabled": {
         "label": "Wybór operatora inwersji",
         "type": "bool",
-        "default": False,
+        "default": True,
     },
     "elitism_enabled": {
         "label": "Wybór strategii elitarnej",
         "type": "bool",
-        "default": False,
+        "default": True,
     },
 }
 

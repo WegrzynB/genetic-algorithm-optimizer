@@ -13,10 +13,15 @@ def dispatch_inversion(
 ) -> list[list[int]]:
     
     inversion_enabled = config_dict.get("inversion_enabled", False)
+    inversed_chromosomes = chromosomes.copy()
 
-    print(f"[Inversion] Placeholder dispatch, aktywne: {inversion_enabled}")
-    for index, chromosome in enumerate(chromosomes):
+    if inversion_enabled:
+        # Tu kod 
+        print("Inwersja włączona")
+
+    print(f"[Inversion] Chromosomy, aktywne: {inversion_enabled}")
+    for index, chromosome in enumerate(inversed_chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return [chromosome.copy() for chromosome in chromosomes]
+    return inversed_chromosomes

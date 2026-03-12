@@ -14,10 +14,15 @@ def dispatch_elitism(
 ) -> list[list[int]]:
     
     elitism_enabled = config_dict.get("elitism_enabled", False)
+    elited_chromosomes = chromosomes.copy()
 
-    print(f"[Elitism] Placeholder dispatch, aktywne: {elitism_enabled}")
-    for index, chromosome in enumerate(chromosomes):
+    if elitism_enabled:
+        # Tu kod
+        print("Elitaryzm włączony")
+
+    print(f"[Elitism] Chromosomy, aktywne: {elitism_enabled}")
+    for index, chromosome in enumerate(elited_chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return [chromosome.copy() for chromosome in chromosomes]
+    return elited_chromosomes

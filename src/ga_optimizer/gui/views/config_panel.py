@@ -411,14 +411,16 @@ class ConfigPanel:
         self.field_widgets[field_key] = entry
 
         spec = self.vm.get_field_spec(field_key)
-        if spec and spec.get("type") in {"int", "float"}:
-            vcmd = (
-                entry.register(
-                    lambda proposed, key=field_key: self.vm.is_allowed_partial_value(key, proposed)
-                ),
-                "%P",
-            )
-            entry.configure(validate="key", validatecommand=vcmd)
+
+        # to służy do blokowania możliwości wpisywania znaków w miejscu liczb
+        # if spec and spec.get("type") in {"int", "float"}:
+        #     vcmd = (
+        #         entry.register(
+        #             lambda proposed, key=field_key: self.vm.is_allowed_partial_value(key, proposed)
+        #         ),
+        #         "%P",
+        #     )
+        #     entry.configure(validate="key", validatecommand=vcmd)
 
     def _on_problem_changed(self) -> None:
         # Po zmianie funkcji ustawia zależne wartości domyślne.

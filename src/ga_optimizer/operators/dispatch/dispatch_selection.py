@@ -13,10 +13,13 @@ def dispatch_selection(
 ) -> list[list[int]]:
     
     method_name = config_dict["selection_method"]
+    selected_chromosomes = chromosomes.copy()
 
-    print(f"[Selection] Placeholder dispatch dla metody: {method_name}")
-    for index, chromosome in enumerate(chromosomes):
+    # Tu kod
+
+    print(f"[Selection] Chromosomy dla metody: {method_name}")
+    for index, chromosome in enumerate(selected_chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return [chromosome.copy() for chromosome in chromosomes]
+    return selected_chromosomes

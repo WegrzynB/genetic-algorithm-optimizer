@@ -13,10 +13,13 @@ def dispatch_mutation(
 ) -> list[list[int]]:
     
     method_name = config_dict["mutation_method"]
+    mutated_chromosomes = chromosomes.copy()
 
-    print(f"[Mutation] Placeholder dispatch dla metody: {method_name}")
-    for index, chromosome in enumerate(chromosomes):
+    # Tu kod
+
+    print(f"[Mutation] Chromosomy dla metody: {method_name}")
+    for index, chromosome in enumerate(mutated_chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return [chromosome.copy() for chromosome in chromosomes]
+    return mutated_chromosomes

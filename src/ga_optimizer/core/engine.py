@@ -56,7 +56,7 @@ def run_engine(config_dict: dict[str, Any]) -> dict[str, Any]:
         )
 
         # Wypisujemy chromosomy po zakończeniu epoki.
-        print(f"\n=== EPOKA {epoch_index + 1} - CHROMOSOMY ===")
+        print(f"\n=== EPOKA {epoch_index + 1} - CHROMOSOMY NA KOŃCU EPOKI ===")
         for index, chromosome in enumerate(population.chromosomes):
             print(f"{index}: {chromosome}")
         print("================================================================================\n\n\n")

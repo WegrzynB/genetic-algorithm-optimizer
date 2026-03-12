@@ -13,10 +13,13 @@ def dispatch_crossover(
 ) -> list[list[int]]:
     
     method_name = config_dict["crossover_method"]
+    crossovered_chromosomes = chromosomes.copy()
 
-    print(f"[Crossover] Placeholder dispatch dla metody: {method_name}")
-    for index, chromosome in enumerate(chromosomes):
+    # Tu kod
+
+    print(f"[Crossover] Chromosomy dla metody: {method_name}")
+    for index, chromosome in enumerate(crossovered_chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return [chromosome.copy() for chromosome in chromosomes]
+    return crossovered_chromosomes
