@@ -1,4 +1,4 @@
-# krzyżowanie dwupunktowe
+#Krzyżowanie trzypunktowe
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import random
 from typing import Any
 
 
-def two_point_crossover(
+def three_point_crossover(
     chromosomes: list[list[int]],
     config_dict: dict[str, Any],
 ) -> list[list[int]]:
 
-    p = config_dict["crossover_two_point_p"]
+    p = config_dict["crossover_three_point_p"]
 
-    new_population = chromosomes.copy()
+    new_population = [c[:] for c in chromosomes]
 
     for i in range(0, len(chromosomes) - 1, 2):
 
@@ -25,19 +25,22 @@ def two_point_crossover(
 
         length = len(parent1)
 
-        point1 = random.randint(1, length - 2)
-        point2 = random.randint(point1 + 1, length - 1)
+        points = sorted(random.sample(range(1, length), 3))
+
+        p1, p2, p3 = points
 
         child1 = (
-            parent1[:point1]
-            + parent2[point1:point2]
-            + parent1[point2:]
+            parent1[:p1]
+            + parent2[p1:p2]
+            + parent1[p2:p3]
+            + parent2[p3:]
         )
 
         child2 = (
-            parent2[:point1]
-            + parent1[point1:point2]
-            + parent2[point2:]
+            parent2[:p1]
+            + parent1[p1:p2]
+            + parent2[p2:p3]
+            + parent1[p3:]
         )
 
         new_population[i] = child1
