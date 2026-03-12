@@ -304,7 +304,7 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 
 ---
 
-# Krok 10 — mutacja [Paweł]
+# Krok 10 — mutacja [Paweł] (UKOŃCZONO)
 
 ### Branch: `feature/operators-mutation`
 

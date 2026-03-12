@@ -3,13 +3,11 @@
 
 MUTATION_METHOD_LABELS = {
     "one_point": "Jednopunktowa",
-    #"one_point_copy": "Jednopunktowa kopia",
     "two_point": "Dwupunktowa",
     "edge": "Krawędziowa",
     "bit_flip": "Bitowa",
     "swap": "Zamiany",
     "scramble": "Tasowania",
-    #"inversion": "Inwersji",
     "reset": "Resetowania"
 }
 
@@ -45,18 +43,6 @@ MUTATION_METHOD_PARAM_SPECS = {
             "max": 1.0,
         },
     ],
-
-
-    #"one_point_copy": [
-        #{
-            #"key": "mutation_one_point_copy_p",
-            #"label": "P (mutacja)",
-            #"type": "float",
-            #"default": 0.05,
-            #"min": 0.0,
-            #"max": 1.0,
-        #},
-    #],
 
 
     "two_point": [
@@ -105,18 +91,6 @@ MUTATION_METHOD_PARAM_SPECS = {
             "max": 1.0,
         },
     ],
-
-
-    #"inversion": [
-        #{
-            #"key": "mutation_inversion_p",
-            #"label": "P (mutacja)",
-            #"type": "float",
-            #"default": 0.05,
-            #"min": 0.0,
-            #"max": 1.0,
-        #},
-    #],
 
 
     "reset": [

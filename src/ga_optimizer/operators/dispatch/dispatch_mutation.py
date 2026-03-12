@@ -12,7 +12,6 @@ from ga_optimizer.operators.mutation.edge import mutation_edge
 from ga_optimizer.operators.mutation.bit_flip import mutation_bit_flip
 from ga_optimizer.operators.mutation.swap import mutation_swap
 from ga_optimizer.operators.mutation.scramble import mutation_scramble
-from ga_optimizer.operators.mutation.inversion import mutation_inversion
 from ga_optimizer.operators.mutation.reset import mutation_reset
 
 
@@ -46,9 +45,6 @@ def dispatch_mutation(
 
         case "scramble":
             mutated_chromosomes = mutation_scramble(chromosomes, config_dict)
-
-        #case "inversion":
-            #mutated_chromosomes = mutation_inversion(chromosomes, config_dict)
 
         case "reset":
             mutated_chromosomes = mutation_reset(chromosomes, config_dict)
