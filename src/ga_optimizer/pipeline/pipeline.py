@@ -1,11 +1,5 @@
 # pipeline.py
 # Warstwa orkiestracji pojedynczego uruchomienia aplikacji.
-# Na razie:
-# - pobiera problem na podstawie configu,
-# - składa jeden duży słownik wejściowy,
-# - wypisuje go w konsoli,
-# - wywołuje placeholder engine,
-# - zwraca ustandaryzowany wynik do GUI.
 
 from typing import Any
 
@@ -14,7 +8,7 @@ from ga_optimizer.core.engine import run_engine
 
 
 def run_pipeline(config: GAConfig) -> dict[str, Any]:
-
+    # Składa config do prostego słownika wejściowego dla engine.
     input_dict = {
         "problem_name": config.problem_name,
         "n_vars": config.n_vars,
@@ -42,9 +36,7 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
         print(f"{key}: {value}")
     print("======================\n")
 
-
     engine_result = run_engine(config_dict=input_dict)
-    
 
     return {
         "status": "ok",
