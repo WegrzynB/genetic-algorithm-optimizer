@@ -280,9 +280,9 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 - Selekcja działa poprawnie
 - Kontrakt wejścia/wyjścia spójny
 
----
+--
 
-# Krok 9 — krzyżowanie [Krystian]
+# Krok 9 — krzyżowanie [Krystian] (UKOŃCZONO)
 
 ### Branch: `feature/operators-crossover`
 
