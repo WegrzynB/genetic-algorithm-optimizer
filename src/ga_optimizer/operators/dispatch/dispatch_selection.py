@@ -6,8 +6,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.ga_optimizer.operators.selection.roulette import ruledga
-
 
 def dispatch_selection(
     chromosomes: list[list[int]],
