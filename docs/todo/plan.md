@@ -282,7 +282,7 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 
 ---
 
-# Krok 9 — krzyżowanie [Krystian] (UKOŃCZONO)
+# Krok 9 — krzyżowanie [Krystian]
 
 ### Branch: `feature/operators-crossover`
 
