@@ -16,6 +16,18 @@ def dispatch_mutation(
     mutated_chromosomes = chromosomes.copy()
 
     # Tu kod
+    # Przykład chromosomu:
+    # [[0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1], 
+    # [0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1], [0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1]]
+    match method_name:
+        case "one_point":
+            pass
+
+        case "two_point":
+            pass
+        
+        case _:
+            print("Nieznana metoda")
 
     print(f"[Mutation] Chromosomy dla metody: {method_name}")
     for index, chromosome in enumerate(mutated_chromosomes):

@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from src.ga_optimizer.operators.selection.roulette import ruledga
+
 
 def dispatch_selection(
     chromosomes: list[list[int]],
@@ -16,6 +18,18 @@ def dispatch_selection(
     selected_chromosomes = chromosomes.copy()
 
     # Tu kod
+    # Przykład chromosomu:
+    # [[0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1], 
+    # [0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1], [0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1]]
+    match method_name:
+        case "roulette":
+            pass
+
+        case "tournament":
+            pass
+
+        case _:
+            print("Nieznana metoda")
 
     print(f"[Selection] Chromosomy dla metody: {method_name}")
     for index, chromosome in enumerate(selected_chromosomes):

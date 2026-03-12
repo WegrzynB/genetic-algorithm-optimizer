@@ -260,41 +260,35 @@ Sprawdź:
 
 ---
 
-# Krok 8 — selekcja osobników
+# Krok 8 — selekcja osobników [Kamil]
 
 ### Branch: `feature/operators-selection`
 
 ### Co robimy
 
 1. Dodaj katalog `operators/selection/`.
-        oraz plik:
-    `operators/selection/roulette.py`
-2. Implementujemy **selekcję ruletkową** (roulette.py).
-    - każdy osobnik posiada wartość `fitness`
-    - prawdopodobieństwo wyboru osobnika jest proporcjonalne do jego fitness
-    - osobniki o wyższym fitness mają większą szansę zostać wybrane
+2. Implementujemy **różne rodzaje selekcji**.
 
 Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następnym etapie algorytmu.
 
 **Jak testować**
 - Stwórz populację o znanych fitnessach
 - Wykonaj selekcję
-- Sprawdź, czy osobniki z wyższym fitness pojawiają się częściej
+- Sprawdź, czy działa
 
 **Merge warunek**
 - Selekcja działa poprawnie
 - Kontrakt wejścia/wyjścia spójny
-- Działa bez engine
 
 ---
 
-# Krok 9 — krzyżowanie
+# Krok 9 — krzyżowanie [Krystian]
 
 ### Branch: `feature/operators-crossover`
 
 ### Co robimy
 1. Dodaj katalog `operators/crossover/`.
-2. Implementujemy **krzyżowanie jednopunktowe** (`one_point.py`):
+2. Implementujemy **różne rodzaje krzyżowań**:
    - losowany punkt podziału chromosomu
    - wymiana fragmentów między rodzicami
    - zachowana długość chromosomu
@@ -305,19 +299,19 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 3. Sprawdź, czy długość chromosomu się nie zmienia i geny dzieci pochodzą od rodziców
 
 **Merge warunek**
- - Krzyżowanie działa bez engine
+ - Krzyżowanie działa
   Długość chromosomu dzieci = rodziców
 
 ---
 
-# Krok 10 — mutacja
+# Krok 10 — mutacja [Paweł]
 
 ### Branch: `feature/operators-mutation`
 
 ### Co robimy
 1. Dodaj katalog `operators/mutation/`.
-2. Implementujemy **mutację jednopunktową** (`one_point.py`):
-   - losowo zmieniany jeden gen w chromosomie
+2. Implementujemy **różne rodzaje mutacji**:
+   - losowo zmieniany geny w chromosomie
    - wprowadza różnorodność genetyczną
 
 ### Jak testować
@@ -331,7 +325,6 @@ Sprawdź:
 
 ### Merge warunek
 - mutacja działa poprawnie
-- operuje na obiektach `core`
 - długość chromosomu nie ulega zmianie
 
 ---
@@ -353,75 +346,15 @@ Sprawdź:
 - Operatory działają poprawnie
 - Zachowana spójność populacji
 
-# Krok 12 — lifecycle generacji
+---
 
-### Branch: `feature/core-lifecycle`
+# Krok 12 — poprawki w gui, spowodowane wymaganiami powyższych implementacji [Bartek]
+  Zajmę się tym
 
-### Co robimy
-1. Tworzymy logikę **jednej generacji algorytmu**.
-   Plik: core/lifecycle.py
-
-  Przepływ generacji: populacja → selekcja → krzyżowanie → mutacja → inwersja → elitaryzm → nowa populacja
-  To jest **jedna epoka GA**.
-
-### Jak testować
-1. stwórz populację
-2. wykonaj lifecycle
-3. wypisz nową populację
-
-### Merge warunek
-- generacja działa
-- populacja nie ulega uszkodzeniu
 
 ---
 
-# Krok 13 — engine (pętla epok)
-
-### Branch: `feature/core-engine`
-
-### Co robimy
-1. Dodajemy główny silnik algorytmu.
-   Plik: `core/engine.py`
- Engine wykonuje:
-  inicjalizacja populacji → for epoch: lifecycle → evaluator → zapis historii → return wynik
-
-  Historia zawiera:
-  - best
-  - avg
-  - worst
-
-### Jak testować
-1. Uruchomić mały run:
-    population = 20
-    epochs = 30
-2. Wypisać:
-    best fitness
-
-### Merge warunek
-- engine działa
-- zwraca historię
-
----
-
-# Krok 14 - Rozszerzenie selekcji, krzyżowania, mutacji
-
-### Branch: `feature/operators-extended`
-
-**Co robimy**
-Dodatkowe metody selekcji:
- - `best.py`, `tournament.py`
-
- Dodatkowe metody krzyżowania:
- -  `two_point.py`, `uniform.py`, `granular.py`
- Dodatkowe metody mutacji:
- - `two_point.py`, `edge.py`
-
-
-**Merge warunek**
-  Nowe operatory działają poprawnie i kompatybilnie z engine
-
-
-# Krok 15 — zapis wyników
+# Krok 13 — zapis wyników
 
 ### Branch: `feature/io-results`
 
@@ -448,7 +381,7 @@ Po runie:
 
 ---
 
-# Krok 16 — wykres zbieżności
+# Krok 14 — wykres zbieżności
 
 ### Branch: `feature/visualization`
 
@@ -471,7 +404,7 @@ Po runie sprawdzić czy powstał plik PNG.
 
 ---
 
-# Krok 17 — integracja GUI z engine
+# Krok 15 — integracja GUI z engine
 
 ### Branch: `feature/gui-engine-integration`
 
@@ -496,7 +429,7 @@ Sprawdzić:
 
 ---
 
-# Krok 18 — wyniki w GUI
+# Krok 16 — wyniki w GUI
 
 ### Branch: `feature/gui-results`
 
@@ -520,7 +453,7 @@ Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
 
 ---
 
-# Krok 19 — Eksperymenty / batch runy
+# Krok 17 — Eksperymenty / batch runy
 
 ### Branch: `feature/experiments`
 
@@ -541,7 +474,7 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
 
 ---
 
-# Krok 20 — stabilizacja projektu
+# Krok 18 — stabilizacja projektu
 
 ### Branch: `refactor/stabilization`
 
