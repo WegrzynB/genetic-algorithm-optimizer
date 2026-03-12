@@ -1,16 +1,16 @@
-# Implementuje mutację dwupunktową
+# Implementuje mutację zamiany
 
 from __future__ import annotations
 import random
 from typing import Any
 
 
-def mutation_two_point(
+def mutation_swap(
     chromosomes: list[list[int]],
     config_dict: dict[str, Any],
 ) -> list[list[int]]:
 
-    p = config_dict["mutation_two_point_p"]
+    p = config_dict["mutation_swap_p"]
 
     mutated = []
 
@@ -22,8 +22,10 @@ def mutation_two_point(
 
             i, j = random.sample(range(len(new_chromosome)), 2)
 
-            new_chromosome[i] = 1 - new_chromosome[i]
-            new_chromosome[j] = 1 - new_chromosome[j]
+            new_chromosome[i], new_chromosome[j] = (
+                new_chromosome[j],
+                new_chromosome[i],
+            )
 
         mutated.append(new_chromosome)
 
