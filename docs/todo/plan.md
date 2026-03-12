@@ -233,7 +233,7 @@ Sprawdź:
 
  ---
 
-# Krok 7.5 — całkowita poprawa kodu, żeby to było czytelne i jakkolwiek użyteczne
+# Krok 7.5 — całkowita poprawa kodu, żeby to było czytelne i jakkolwiek użyteczne [Bartek] (UKOŃCZONO)
 
 ### Branch: `feature/core-basic-fixes`
 
