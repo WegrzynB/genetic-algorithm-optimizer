@@ -2,7 +2,7 @@ To szybka, bieżąca lista zadań do wykonania i statusów (np. TODO / IN PROGRE
 
 
 Kroki dodawania nowych metod operatorów:
-1. Wpisanie odpowiedniej metody, wraz z jej parametrami do `src/fa_optimizer/config/metchod_xxx.py`,
+1. Wpisanie odpowiedniej metody, wraz z jej parametrami do `src/fa_optimizer/config/metchod_xxx.py` (UWAGA: na samej górze jest stała `XXX_METHOD_LABELS`, należy do niej wpisać klucz metody, wraz z jej tłumaczeniem, które wyświetli się w interfejsie),
 2. Wpisanie odpowiedniej metody w `src/fa_optimizer/operators/xxx/metoda.py`,
 3. Dopisanie tej metody do pliku dispatch `src/fa_optimizer/operators/dispatch/dispatch_xxx.py` w match dla danego case
 4. Testowanie
