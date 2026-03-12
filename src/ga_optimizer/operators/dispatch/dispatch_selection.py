@@ -1,37 +1,38 @@
-# dispatch_selection.py
-# Dispatcher metod selekcji.
-# Na razie zwraca chromosomy bez zmian.
+# ga_optimizer/operators/selection/dispatch_selection.py
 
 from __future__ import annotations
-
 from typing import Any
+
+from ga_optimizer.core.population import Population
+
+from ga_optimizer.operators.selection.best import select_best
+from ga_optimizer.operators.selection.roulette import select_roulette
+from ga_optimizer.operators.selection.tournament import select_tournament
 
 
 def dispatch_selection(
-    chromosomes: list[list[int]],
+    population: Population,
     config_dict: dict[str, Any],
 ) -> list[list[int]]:
     
-    method_name = config_dict["selection_method"]
-    selected_chromosomes = chromosomes.copy()
-
-    # Tu kod
-    # Przykład chromosomu:
-    # [[0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1], 
-    # [0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1], [0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1]]
+    method_name = config_dict.get("selection_method", "roulette")
+    num_parents = len(population)
+    
     match method_name:
+        case "best":
+            selected_chromosomes = select_best(population, num_parents, config_dict)
+            
         case "roulette":
-            pass
+            selected_chromosomes = select_roulette(population, num_parents, config_dict, is_copy=False)
+            
+        case "roulette copy":
+            selected_chromosomes = select_roulette(population, num_parents, config_dict, is_copy=True)
 
         case "tournament":
-            pass
+            selected_chromosomes = select_tournament(population, num_parents, config_dict)
 
         case _:
-            print("Nieznana metoda")
-
-    print(f"[Selection] Chromosomy dla metody: {method_name}")
-    for index, chromosome in enumerate(selected_chromosomes):
-        print(f"{index}: {chromosome}")
-    print("\n")
+            print(f"[Ostrzeżenie] Nieznana metoda selekcji: {method_name}. Przepisuję populację 1:1.")
+            selected_chromosomes = [chrom.copy() for chrom in population.chromosomes]
 
     return selected_chromosomes
