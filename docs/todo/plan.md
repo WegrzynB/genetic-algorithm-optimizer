@@ -329,7 +329,7 @@ Sprawdź:
 
 ---
 
-# Krok 11 - operatory inwersji i elitaryzm:
+# Krok 11 - operatory inwersji i elitaryzm: [Krystian] (UKOŃCZONO)
 ### Branch: `feature/operators-inversion-elitism`
 
 **Co robimy**
