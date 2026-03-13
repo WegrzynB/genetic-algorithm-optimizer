@@ -52,4 +52,10 @@ def dispatch_selection(
             print(f"[Ostrzeżenie] Nieznana metoda selekcji: {method_name}. Przepisuję populację 1:1.")
             selected_chromosomes = [chrom.copy() for chrom in chromosomes]
 
+    print(f"\n[Selection] Chromosomy dla metody: {method_name}")
+    for index, chromosome in enumerate(selected_chromosomes):
+        print(f"{index}: {chromosome}")
+    print("\n")
+    return selected_chromosomes
+
     return selected_chromosomes
