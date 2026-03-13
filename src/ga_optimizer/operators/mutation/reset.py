@@ -1,16 +1,16 @@
-# Implementuje mutację jednopunktową
+# Implementuje mutację resetowania
 
 from __future__ import annotations
 import random
 from typing import Any
 
 
-def mutation_one_point(
+def mutation_reset(
     chromosomes: list[list[int]],
     config_dict: dict[str, Any],
 ) -> list[list[int]]:
 
-    p = config_dict["mutation_one_point_p"]
+    p = config_dict["mutation_reset_p"]
 
     mutated = []
 
@@ -19,8 +19,9 @@ def mutation_one_point(
         new_chromosome = chromosome.copy()
 
         if random.random() < p:
-            index = random.randrange(len(new_chromosome))
-            new_chromosome[index] = 1 - new_chromosome[index]
+
+            idx = random.randrange(len(new_chromosome))
+            new_chromosome[idx] = random.choice([0, 1])
 
         mutated.append(new_chromosome)
 
