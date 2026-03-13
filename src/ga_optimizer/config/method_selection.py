@@ -3,12 +3,14 @@
 
 SELECTION_METHOD_LABELS = {
     "best": "Najlepsza",
+    "worst": "Najgorszych",
+    "unbiased": "Beztendencyjna",
     "roulette": "Ruletka",
     "roulette copy": "Ruletka kopia",
+    "sus": "Stochastyczny dobór uniwersalny",
     "tournament": "Turniejowa",
+    "double_tournament": "Podwójna turniejowa",
 }
-
-
 
 SELECTION_METHOD_PARAM_SPECS = {
     "best": [
@@ -21,6 +23,19 @@ SELECTION_METHOD_PARAM_SPECS = {
         },
     ],
 
+    "worst": [
+        {
+            "key": "selection_worst_k",
+            "label": "K (ile najgorszych)",
+            "type": "int",
+            "default": 2,
+            "min": 1,
+        },
+    ],
+
+    "unbiased": [
+        # Ta metoda jest czysto losowa, nie potrzebuje żadnych parametrów
+    ],
 
     "roulette": [
         {
@@ -32,7 +47,6 @@ SELECTION_METHOD_PARAM_SPECS = {
         },
     ],
 
-
     "roulette copy": [
         {
             "key": "selection_roulette_copy_eps",
@@ -43,6 +57,15 @@ SELECTION_METHOD_PARAM_SPECS = {
         },
     ],
 
+    "sus": [
+        {
+            "key": "selection_sus_eps",
+            "label": "Eps (stabilizacja)",
+            "type": "float",
+            "default": 1e-9,
+            "min_exclusive": 0.0,
+        },
+    ],
 
     "tournament": [
         {
@@ -52,6 +75,7 @@ SELECTION_METHOD_PARAM_SPECS = {
             "default": 3,
             "min": 2,
         },
+        
         {
             "key": "selection_tournament_k2",
             "label": "K2",
@@ -96,6 +120,20 @@ SELECTION_METHOD_PARAM_SPECS = {
         },
     ],
 
-
-    
+    "double_tournament": [
+        {
+            "key": "selection_double_tournament_k1",
+            "label": "K1 (rozmiar małego turnieju)",
+            "type": "int",
+            "default": 3,
+            "min": 1,
+        },
+        {
+            "key": "selection_double_tournament_k2",
+            "label": "K2 (liczba turniejów w finale)",
+            "type": "int",
+            "default": 3,
+            "min": 1,
+        },
+    ],
 }
