@@ -3,7 +3,7 @@
 # Na razie zwraca chromosomy bez zmian.
 
 from __future__ import annotations
-
+from ga_optimizer.operators.inversion import inversion
 from typing import Any
 
 
@@ -11,17 +11,18 @@ def dispatch_inversion(
     chromosomes: list[list[int]],
     config_dict: dict[str, Any],
 ) -> list[list[int]]:
-    
-    inversion_enabled = config_dict.get("inversion_enabled", False)
-    inversed_chromosomes = chromosomes.copy()
+
+    inversion_enabled = config_dict["inversion_enabled"]
 
     if inversion_enabled:
-        # Tu kod 
-        print("Inwersja włączona")
+        chromosomes = inversion(chromosomes, config_dict)
 
+    print("\n")
     print(f"[Inversion] Chromosomy, aktywne: {inversion_enabled}")
-    for index, chromosome in enumerate(inversed_chromosomes):
+    for index, chromosome in enumerate(chromosomes):
         print(f"{index}: {chromosome}")
     print("\n")
 
-    return inversed_chromosomes
+    return chromosomes
+
+
