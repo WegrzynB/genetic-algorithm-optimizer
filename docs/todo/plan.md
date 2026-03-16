@@ -268,7 +268,7 @@ Sprawdź:
 
 1. Dodaj katalog `operators/selection/`.
 2. Implementujemy **różne rodzaje selekcji**.
-
+(Tutaj dodałem metody z wykładu: najgorszych, neutralna tj. beztendencyjna, podwójna turniejowa, stochastyczny dobór uniwersalny. Można jeszcze dodać: stochastyczny dobór resztowy, selekcja Boltzmana.)
 Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następnym etapie algorytmu.
 
 **Jak testować**
