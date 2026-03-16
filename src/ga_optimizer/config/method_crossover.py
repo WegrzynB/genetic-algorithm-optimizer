@@ -11,7 +11,7 @@ CROSSOVER_METHOD_LABELS = {
     "granular": "Ziarniste",
     "segmented": "Segmentowe ",
     "arithmetic": "Arytmetyczne",
-    "reduced_surro": "Zastępujące",
+    "reduced_surro": "Zredukowane",
     "disruptive": "Niszczące",
     "majority": "Większościowe",
 }

@@ -1,4 +1,4 @@
-# Krzyżowanie zastępujące
+# Krzyżowanie zredukowane
 
 from __future__ import annotations
 
