@@ -3,6 +3,7 @@
 # i przekazujemy dalej do warstwy pipeline.
 
 from tkinter import Menu, messagebox, ttk
+import matplotlib.pyplot as plt
 
 from ga_optimizer.config.validators import build_config_from_payload
 from ga_optimizer.gui.state.view_model import ViewModel
@@ -56,6 +57,7 @@ class MainWindow:
         self._build_layout()
         self._build_header()
         self._build_panels()
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _configure_root(self) -> None:
         # Ustawia podstawowe parametry okna.
@@ -231,6 +233,7 @@ class MainWindow:
 
             self.run_panel.set_progress(0)
             self.results_panel.enable_save(False)
+            self.results_panel.select_results_tab()
             self.run_panel.set_status("Uruchomienie przerwane: błędna konfiguracja.")
             self.results_panel.set_termination_reason("Brak wyników przez błędną konfigurację.")
             return
@@ -243,6 +246,7 @@ class MainWindow:
 
         # Przekazuje sterowanie do warstwy pipeline.
         self.results_panel.enable_save(False)
+        self.results_panel.select_results_tab()
 
         pipeline_result = run_pipeline(
             config,
@@ -277,9 +281,14 @@ class MainWindow:
         self.results_panel.configure_history_tabs(run_count=len(runs))
         self.results_panel.set_run_history(runs)
         self.results_panel.set_full_history(runs)
+        self.results_panel.set_plots(
+            engine_result=engine_result,
+            input_dict=pipeline_result.get("input_dict", {}),
+        )
         self.results_panel.set_results_text(
             self._build_results_description(problem, engine_result, runs)
         )
+        self.results_panel.select_results_tab()
 
     def _reset_run_state(self) -> None:
         # Czyści stan GUI przed kolejnym uruchomieniem algorytmu.
@@ -497,3 +506,19 @@ class MainWindow:
     def _on_save(self) -> None:
         # Placeholder pod zapis wyników.
         self.run_panel.set_status("Ukończono. Wyniki zapisano (placeholder).")
+
+    def _on_close(self) -> None:
+        try:
+            plt.close("all")
+        except Exception:
+            pass
+
+        try:
+            self.root.quit()
+        except Exception:
+            pass
+
+        try:
+            self.root.destroy()
+        except Exception:
+            pass

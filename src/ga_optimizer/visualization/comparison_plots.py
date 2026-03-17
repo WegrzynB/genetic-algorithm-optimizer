@@ -1,1 +1,0 @@
-# Tworzy wykresy porównawcze między konfiguracjami lub operatorami

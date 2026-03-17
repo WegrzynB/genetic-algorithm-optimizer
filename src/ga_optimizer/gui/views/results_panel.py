@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import tkinter as tk
 from tkinter import ttk
+from ga_optimizer.gui.views.plots_panel import PlotsPanel
 
 
 def _fmt_value(value, digits: int = 7) -> str:
@@ -51,6 +52,9 @@ class ResultsPanel:
         self.results_text = None
         self.run_history_table = None
         self.full_history_table = None
+
+        # Panel na wykresy
+        self.plots_panel = None
 
     def build(self) -> None:
         # Buduje panel wyników: górne podsumowanie + notebook.
@@ -184,13 +188,19 @@ class ResultsPanel:
         self.full_history_table.configure(yscrollcommand=sb.set)
 
     def _build_plots_tab(self) -> None:
-        # Zakładka wykresów - placeholder do dalszego osadzenia wykresów.
         self.plots_tab.columnconfigure(0, weight=1)
         self.plots_tab.rowconfigure(0, weight=1)
-        ttk.Label(
-            self.plots_tab,
-            text="Tutaj będą wykresy i wizualizacje wyników.",
-        ).grid(row=0, column=0, sticky="nsew")
+
+        self.plots_panel = PlotsPanel(self.plots_tab)
+        self.plots_panel.build()
+
+    def set_plots(self, engine_result: dict, input_dict: dict) -> None:
+        if self.plots_panel is not None:
+            self.plots_panel.set_plots(engine_result=engine_result, input_dict=input_dict)
+
+    def select_results_tab(self) -> None:
+        if self.nb is not None and self.results_tab is not None:
+            self.nb.select(self.results_tab)
 
     def configure_history_tabs(self, run_count: int) -> None:
         # Przy jednym uruchomieniu pokazujemy tylko pełną historię.
@@ -204,12 +214,10 @@ class ResultsPanel:
             if full_tab_id in current_tabs:
                 self.nb.tab(self.full_history_tab, text="Pełna historia")
         else:
-            if run_tab_id in current_tabs:
-                self.nb.add(self.run_history_tab, text="Historia uruchomień")
-                self.nb.hide(self.run_history_tab)
+            if run_tab_id not in current_tabs:
                 self.nb.add(self.run_history_tab, text="Historia uruchomień")
             else:
-                self.nb.add(self.run_history_tab, text="Historia uruchomień")
+                self.nb.tab(self.run_history_tab, state="normal")
 
     def set_summary(
         self,
@@ -292,6 +300,9 @@ class ResultsPanel:
 
     def reset(self) -> None:
         # Czyści panel wyników przed nowym uruchomieniem.
+        if self.plots_panel is not None:
+            self.plots_panel.reset()
+            
         self.set_summary("-", "-", "-", "-", "-", "-")
         self.set_global_minimum_info("Minimum globalne: -")
         self.set_results_text("Tutaj pojawi się opis wyników po uruchomieniu algorytmu.")
@@ -306,3 +317,6 @@ class ResultsPanel:
                 self.full_history_table.delete(item)
 
         self.configure_history_tabs(run_count=1)
+
+        if self.plots_panel is not None:
+            self.plots_panel.reset()
