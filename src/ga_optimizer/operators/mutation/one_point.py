@@ -11,6 +11,7 @@ def mutation_one_point(
 ) -> list[list[int]]:
 
     p = config_dict["mutation_one_point_p"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -18,8 +19,8 @@ def mutation_one_point(
 
         new_chromosome = chromosome.copy()
 
-        if random.random() < p:
-            index = random.randrange(len(new_chromosome))
+        if rng.random() < p:
+            index = rng.randrange(len(new_chromosome))
             new_chromosome[index] = 1 - new_chromosome[index]
 
         mutated.append(new_chromosome)

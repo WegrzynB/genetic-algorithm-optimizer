@@ -260,7 +260,7 @@ Sprawdź:
 
 ---
 
-# Krok 8 — selekcja osobników [Kamil]
+# Krok 8 — selekcja osobników [Kamil] (UKOŃCZONO)
 
 ### Branch: `feature/operators-selection`
 
@@ -348,28 +348,55 @@ Sprawdź:
 
 ---
 
-# Krok 12 — poprawki w gui, spowodowane wymaganiami powyższych implementacji [Bartek]
-  Zajmę się tym
+# Krok 12 — poprawki w gui, spowodowane wymaganiami powyższych implementacji [Bartek] (UKOŃCZONO)
 
+### Branch: `feature/gui-tailoring`
+
+### Co robimy
+1. Aktualizujemy GUI, podmieniamy Epsilon na Liczbę uruchomień algorytmu i tworzymy tego implementacje
+2. Kasujemy niepotrzebne pliki
+3. Modyfikujemy core tak, żeby wszystkie operacje były wykonywane z poziomu klasy Population
+4. Przenosimy pipeline do core
+5. Dodajemy możliwość tworzenia presetów oraz menu z którego poziomu możemy je wybierać
+6. Dodajemy parametr verbose, który odpowiada za to czy wyświetlają się printy; dodajemy nową funkcję debug_print (ga_optimizer.utils.helpers) do wyświetlania
+7. Dodajemy wyświetlanie wyników w odpowiednich zakładkach
+8. Wprowadzamy pełną funkcjonalność paska postępu działania algorytmu
+9. Zwracamy pełną historię 
 
 ---
 
-# Krok 13 — zapis wyników
+# Krok 13 — wyniki w GUI [Bartek] (UKOŃCZONO)
+
+### Branch: `feature/gui-tailoring`
+
+### Co robimy
+GUI pokazuje:
+ - best
+ - avg
+ - worst
+ - czas.
+
+Panele:
+- results_panel
+
+### Jak testować
+Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
+
+### Merge warunek
+- GUI poprawnie pokazuje wyniki
+
+---
+
+# Krok 14 — zapis wyników
 
 ### Branch: `feature/io-results`
 
 ### Co robimy
 1. Dodajemy zapis runów.
   - Nowy folder: io/
-  - Pliki:
-	  `results_writer.py`
-	  `json_export.py`
-	  `csv_export.py`
 
   Struktura zapisu: data/output/runs/ run_2026_01/
-  - config.json
-  - metrics.json
-  - history.csv
+  - najlepiej jakbyśmy decydowali w jakim formacie chcemy zapisać plik i do takowego zgrałoby nam naszą historię uruchomień i pełną
 
 ### Jak testować
 Po runie:
@@ -381,79 +408,22 @@ Po runie:
 
 ---
 
-# Krok 14 — wykres zbieżności
+# Krok 15 — wykresy
 
 ### Branch: `feature/visualization`
 
 ### Co robimy
-1. Dodajemy wykresy.
+1. Dodajemy wykresy, różne.
  - `visualization/convergence_plot.py`
 
-Wykres przedstawia:
- - best
- - avg
- - worst
-
-Zapis wykresu: plots/convergence.png
-
-### Jak testować
-Po runie sprawdzić czy powstał plik PNG.
+Wykres ma przedstawiać coś co ma sens; trzeba jeszcze zobaczyć jak to rozwiążemy dla wielu zmiennyhc (> 2)
 
 ### Merge warunek
 - wykres się generuje
 
 ---
 
-# Krok 15 — integracja GUI z engine
-
-### Branch: `feature/gui-engine-integration`
-
-### Co robimy
-1. GUI zaczyna uruchamiać algorytm.
-  
-  Przepływ: `GUI → config → engine → wynik`
-
-Controller: gui/controllers/run_controller.py
-
-### Jak testować
-W GUI:
-1. ustaw parametry
-2. kliknij **Start**
-
-Sprawdzić:
-- czy algorytm się uruchamia
-- czy wynik wraca do GUI
-
-### Merge warunek
-- można wykonać pełny run z GUI
-
----
-
-# Krok 16 — wyniki w GUI
-
-### Branch: `feature/gui-results`
-
-### Co robimy
-GUI pokazuje:
- - best
- - avg
- - worst
- - czas
- - wykres.
-
-Panele:
-- results_panel
-- plots_panel
-
-### Jak testować
-Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
-
-### Merge warunek
-- GUI poprawnie pokazuje wyniki
-
----
-
-# Krok 17 — Eksperymenty / batch runy
+# Krok 16 — Eksperymenty / batch runy [Bartek]
 
 ### Branch: `feature/experiments`
 
@@ -474,7 +444,7 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
 
 ---
 
-# Krok 18 — stabilizacja projektu
+# Krok 17 — stabilizacja projektu
 
 ### Branch: `refactor/stabilization`
 

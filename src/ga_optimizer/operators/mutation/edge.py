@@ -12,6 +12,7 @@ def mutation_edge(
 
     p = config_dict["mutation_edge_p"]
     mode = config_dict["mutation_edge_mode"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -19,13 +20,13 @@ def mutation_edge(
 
         new_chromosome = chromosome.copy()
 
-        if random.random() < p and len(new_chromosome) >= 2:
+        if rng.random() < p and len(new_chromosome) >= 2:
 
             first = 0
             last = len(new_chromosome) - 1
 
             if mode == "Ends":
-                idx = random.choice([first, last])
+                idx = rng.choice([first, last])
                 new_chromosome[idx] = 1 - new_chromosome[idx]
 
             elif mode == "First_last":

@@ -11,6 +11,7 @@ def shuffle_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_shuffle_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -19,18 +20,18 @@ def shuffle_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
 
         perm = list(range(length))
-        random.shuffle(perm)
+        rng.shuffle(perm)
 
         shuffled1 = [parent1[j] for j in perm]
         shuffled2 = [parent2[j] for j in perm]
 
-        point = random.randint(1, length - 1)
+        point = rng.randint(1, length - 1)
 
         child1 = shuffled1[:point] + shuffled2[point:]
         child2 = shuffled2[:point] + shuffled1[point:]

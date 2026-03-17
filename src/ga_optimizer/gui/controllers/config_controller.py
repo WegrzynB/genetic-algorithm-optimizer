@@ -1,1 +1,0 @@
-# Obsługuje wczytywanie, walidację i przekazywanie parametrów z GUI do konfiguracji

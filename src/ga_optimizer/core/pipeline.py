@@ -1,13 +1,20 @@
 # pipeline.py
 # Warstwa orkiestracji pojedynczego uruchomienia aplikacji.
 
-from typing import Any
+from __future__ import annotations
+
+import random
+from typing import Any, Callable
 
 from ga_optimizer.config.schema import GAConfig
 from ga_optimizer.core.engine import run_engine
+from ga_optimizer.utils.helpers import debug_print
 
 
-def run_pipeline(config: GAConfig) -> dict[str, Any]:
+def run_pipeline(
+    config: GAConfig,
+    progress_callback: Callable[[int, int], None] | None = None,
+) -> dict[str, Any]:
     # Składa config do prostego słownika wejściowego dla engine.
     input_dict = {
         "problem_name": config.problem_name,
@@ -17,7 +24,7 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
         "range_end": config.range_end,
         "population": config.population,
         "epochs": config.epochs,
-        "epsilon": config.epsilon,
+        "run_count": config.run_count,
         "seed": config.seed,
         "precision_mode": config.precision_mode,
         "precision_numeric": config.precision_numeric,
@@ -31,16 +38,26 @@ def run_pipeline(config: GAConfig) -> dict[str, Any]:
 
     input_dict.update(config.method_params)
 
-    print("\n=== PIPELINE INPUT ===")
-    for key, value in input_dict.items():
-        print(f"{key}: {value}")
-    print("======================\n")
+    if input_dict["seed"] in (None, ""):
+        input_dict["seed"] = random.randint(0, 2_147_483_647)
 
-    engine_result = run_engine(config_dict=input_dict)
+    # True żeby wypisywać debug_print
+    input_dict["verbose"] = True
+
+    debug_print(input_dict["verbose"], "\n=== PIPELINE INPUT ===")
+    for key, value in input_dict.items():
+        debug_print(input_dict["verbose"], f"{key}: {value}")
+    debug_print(input_dict["verbose"], "======================\n")
+
+
+    engine_result = run_engine(
+        config_dict=input_dict,
+        progress_callback=progress_callback,
+    )
 
     return {
         "status": "ok",
-        "message": "Pipeline wykonany poprawnie.",
+        "message": "Algorytm ukończył działanie.",
         "problem_name": input_dict["problem_name"],
         "input_dict": input_dict,
         "engine_result": engine_result,

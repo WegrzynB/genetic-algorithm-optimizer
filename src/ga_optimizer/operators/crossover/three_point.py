@@ -12,6 +12,7 @@ def three_point_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_three_point_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -20,12 +21,12 @@ def three_point_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
 
-        points = sorted(random.sample(range(1, length), 3))
+        points = sorted(rng.sample(range(1, length), 3))
 
         p1, p2, p3 = points
 

@@ -11,6 +11,7 @@ def mutation_reset(
 ) -> list[list[int]]:
 
     p = config_dict["mutation_reset_p"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -18,10 +19,10 @@ def mutation_reset(
 
         new_chromosome = chromosome.copy()
 
-        if random.random() < p:
+        if rng.random() < p:
 
-            idx = random.randrange(len(new_chromosome))
-            new_chromosome[idx] = random.choice([0, 1])
+            idx = rng.randrange(len(new_chromosome))
+            new_chromosome[idx] = rng.choice([0, 1])
 
         mutated.append(new_chromosome)
 

@@ -13,6 +13,7 @@ def granular_crossover(
 
     p = config_dict["crossover_granular_p"]
     granularity = config_dict["crossover_granular_granularity"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -22,7 +23,7 @@ def granular_crossover(
         parent2 = chromosomes[i + 1]
 
         # czy w ogóle robimy crossover
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
@@ -33,7 +34,7 @@ def granular_crossover(
         # przechodzimy blokami genów
         for g in range(0, length, granularity):
 
-            a = random.random()
+            a = rng.random()
 
             end = min(g + granularity, length)
 

@@ -1,1 +1,0 @@
-# Definiuje aliasy typów (np. dla chromosomu, fitness, konfiguracji, wektorów NumPy)

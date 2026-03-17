@@ -1,1 +1,0 @@
-# definiuje warunki zakończenia działania algorytmu

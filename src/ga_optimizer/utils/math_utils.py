@@ -1,1 +1,0 @@
-# Zawiera ogólne funkcje matematyczne wspólne dla modułów projektu

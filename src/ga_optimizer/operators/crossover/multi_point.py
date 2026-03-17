@@ -13,6 +13,7 @@ def multi_point_crossover(
 
     p = config_dict["crossover_multi_point_p"]
     k = config_dict["crossover_multi_point_k"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -21,14 +22,14 @@ def multi_point_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
 
         k = min(k, length - 1)
 
-        points = sorted(random.sample(range(1, length), k))
+        points = sorted(rng.sample(range(1, length), k))
         points = [0] + points + [length]
 
         child1 = []

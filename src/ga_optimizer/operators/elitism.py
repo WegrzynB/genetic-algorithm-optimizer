@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 from typing import Any
+from ga_optimizer.utils.helpers import debug_print
 
 
 def elitism(
@@ -15,6 +16,7 @@ def elitism(
 
     elitism_enabled = config_dict.get("elitism_enabled", False)
     objective_mode = config_dict.get("objective_mode", "min")
+    verbose = bool(config_dict.get("verbose", False))
 
     if not elitism_enabled:
         return chromosomes
@@ -22,9 +24,9 @@ def elitism(
     if not chromosomes or not previous_chromosomes:
         return chromosomes
 
-    print("ELITISM")
-    print("Previous fitness:", previous_fitness)
-    print("New fitness:", fitness_values)
+    debug_print(verbose, "ELITISM")
+    debug_print(verbose, "Previous fitness:", previous_fitness)
+    debug_print(verbose, "New fitness:", fitness_values)
 
     # wybór najlepszego z poprzedniej populacji
     if objective_mode == "max":
@@ -36,9 +38,9 @@ def elitism(
 
     best_chromosome = previous_chromosomes[best_index].copy()
 
-    print("Best from previous:", best_chromosome)
-    print("Replacing chromosome index:", worst_index)
-    print()
+    debug_print(verbose, "Best from previous:", best_chromosome)
+    debug_print(verbose, "Replacing chromosome index:", worst_index)
+    debug_print(verbose)
 
     new_population = [c.copy() for c in chromosomes]
     new_population[worst_index] = best_chromosome

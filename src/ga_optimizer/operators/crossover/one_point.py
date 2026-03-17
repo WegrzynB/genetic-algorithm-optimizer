@@ -12,6 +12,7 @@ def one_point_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_one_point_p"]
+    rng = config_dict["rng"]
 
     new_population = chromosomes.copy()
 
@@ -24,12 +25,12 @@ def one_point_crossover(
         if len(parent1) < 2:
             continue
 
-        if random.random() <= p:
+        if rng.random() <= p:
 
             length = len(parent1)
 
             # losujemy punkt przecięcia
-            point = random.randint(1, length - 1)
+            point = rng.randint(1, length - 1)
 
             child1 = parent1[:point] + parent2[point:]
             child2 = parent2[:point] + parent1[point:]

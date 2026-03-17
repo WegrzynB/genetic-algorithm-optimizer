@@ -12,6 +12,7 @@ def reduced_surro_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_reduced_surro_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -20,7 +21,7 @@ def reduced_surro_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
@@ -32,7 +33,7 @@ def reduced_surro_crossover(
         if not candidate_points:
             continue
 
-        point = random.choice(candidate_points)
+        point = rng.choice(candidate_points)
 
         child1 = parent1[:point] + parent2[point:]
         child2 = parent2[:point] + parent1[point:]
