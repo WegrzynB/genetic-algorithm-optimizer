@@ -387,7 +387,7 @@ Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
 
 ---
 
-# Krok 14 — zapis wyników
+# Krok 14 — zapis wyników [Kamil] (UKOŃCZONO)
 
 ### Branch: `feature/io-results`
 
@@ -408,7 +408,7 @@ Po runie:
 
 ---
 
-# Krok 15 — wykresy
+# Krok 15 — wykresy [Bartek, Kamil] (UKOŃCZONO)
 
 ### Branch: `feature/visualization`
 

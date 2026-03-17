@@ -1,1 +1,0 @@
-# Tworzy wizualizacje powierzchni funkcji celu (2D/3D) dla wybranych problemów
