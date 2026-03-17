@@ -4,7 +4,11 @@
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+
+# Dodany import zapisu!
+from ga_optimizer.io.results_writer import save_run_results
+
 from ga_optimizer.gui.views.plots_panel import PlotsPanel
 
 
@@ -27,10 +31,12 @@ def _fmt_time(value) -> str:
 
 
 class ResultsPanel:
-    def __init__(self, parent, on_save):
-        # Przechowuje kontener nadrzędny oraz callback zapisu wyników.
+    def __init__(self, parent, on_save=None):
+        # Przechowuje kontener nadrzędny. 'on_save' możemy zignorować, bo zrobimy zapis lokalnie.
         self.parent = parent
-        self.on_save = on_save
+        
+        # TU PRZECHOWUJEMY WYNIK DO ZAPISU!
+        self._last_engine_result = None
 
         # Referencje do głównych elementów UI.
         self.frame = None
@@ -83,7 +89,7 @@ class ResultsPanel:
         self.save_btn = ttk.Button(
             self.summary_frame,
             text="Zapisz (plik / baza)",
-            command=self._save,
+            command=self._save,  # <-- Podpięcie naszej nowej metody
             state=tk.DISABLED,
         )
         self.save_btn.grid(row=0, column=1, rowspan=2, sticky="ne", padx=(12, 0))
@@ -108,8 +114,8 @@ class ResultsPanel:
 
         self.configure_history_tabs(run_count=1)
 
+    # ... TUTAJ SĄ METODY _build_results_tab(), _build_run_history_tab() itd. Zostają BEZ ZMIAN ...
     def _build_results_tab(self) -> None:
-        # Zakładka z tekstowym opisem najważniejszych informacji.
         self.results_tab.columnconfigure(0, weight=1)
         self.results_tab.rowconfigure(0, weight=1)
 
@@ -124,7 +130,6 @@ class ResultsPanel:
         self.results_text.configure(state="disabled")
 
     def _build_run_history_tab(self) -> None:
-        # Zakładka historii uruchomień - tylko końcowe statystyki każdego runa.
         self.run_history_tab.columnconfigure(0, weight=1)
         self.run_history_tab.rowconfigure(0, weight=1)
 
@@ -157,7 +162,6 @@ class ResultsPanel:
         self.run_history_table.configure(yscrollcommand=sb.set)
 
     def _build_full_history_tab(self) -> None:
-        # Zakładka pełnej historii: run + epoka + kwartyle.
         self.full_history_tab.columnconfigure(0, weight=1)
         self.full_history_tab.rowconfigure(0, weight=1)
 
@@ -203,7 +207,6 @@ class ResultsPanel:
             self.nb.select(self.results_tab)
 
     def configure_history_tabs(self, run_count: int) -> None:
-        # Przy jednym uruchomieniu pokazujemy tylko pełną historię.
         current_tabs = self.nb.tabs()
         run_tab_id = str(self.run_history_tab)
         full_tab_id = str(self.full_history_tab)
@@ -267,7 +270,13 @@ class ResultsPanel:
                 ),
             )
 
-    def set_full_history(self, runs: list[dict]) -> None:
+    def set_full_history(self, engine_result: dict[str, Any]) -> None:
+        # NOWE: Zapamiętujemy cały engine_result na potrzeby zapisu
+        self._last_engine_result = engine_result
+        
+        # Stara logika (wypełnianie tabeli)
+        runs = engine_result.get("runs", [])
+        
         for item in self.full_history_table.get_children():
             self.full_history_table.delete(item)
 
@@ -295,14 +304,35 @@ class ResultsPanel:
         self.save_btn.configure(state=tk.NORMAL if enabled else tk.DISABLED)
 
     def _save(self) -> None:
-        if callable(self.on_save):
-            self.on_save()
+        # NOWA LOGIKA ZAPISU - z zabezpieczeniem typu!
+        if self._last_engine_result is None:
+            messagebox.showerror("Błąd", "Brak wyników do zapisania.")
+            return
+            
+        try:
+            # --- ZABEZPIECZENIE ---
+            # Jeśli przekazano listę runs zamiast głównego słownika, ratujemy sytuację:
+            data_to_export = self._last_engine_result
+            if isinstance(data_to_export, list):
+                data_to_export = {"runs": data_to_export}
+            # ----------------------
+
+            # Zapisuje obie rzeczy naraz
+            saved_dir = save_run_results(data_to_export, format_type="all")
+            
+            messagebox.showinfo(
+                "Zapisano", 
+                f"Pomyślnie wyeksportowano wyniki do formatu CSV i JSON.\nFolder:\n{saved_dir}"
+            )
+        except Exception as e:
+            messagebox.showerror("Błąd zapisu", f"Wystąpił błąd podczas zapisu:\n{e}")
 
     def reset(self) -> None:
         # Czyści panel wyników przed nowym uruchomieniem.
         if self.plots_panel is not None:
             self.plots_panel.reset()
             
+        self._last_engine_result = None
         self.set_summary("-", "-", "-", "-", "-", "-")
         self.set_global_minimum_info("Minimum globalne: -")
         self.set_results_text("Tutaj pojawi się opis wyników po uruchomieniu algorytmu.")
