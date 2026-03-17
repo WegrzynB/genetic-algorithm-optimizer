@@ -12,6 +12,7 @@ from ga_optimizer.gui.views.results_panel import ResultsPanel
 from ga_optimizer.gui.views.run_panel import RunPanel
 from ga_optimizer.core.pipeline import run_pipeline
 from ga_optimizer.config.presets import PRESETS
+from ga_optimizer.io.results_writer import save_run_results
 
 
 class MainWindow:
@@ -235,7 +236,6 @@ class MainWindow:
             self.results_panel.enable_save(False)
             self.results_panel.select_results_tab()
             self.run_panel.set_status("Uruchomienie przerwane: błędna konfiguracja.")
-            self.results_panel.set_termination_reason("Brak wyników przez błędną konfigurację.")
             return
 
         # Zapamiętuje ostatni poprawny config.
@@ -311,7 +311,7 @@ class MainWindow:
             self.run_panel.set_progress(percent)
 
         self.run_panel.set_status(
-            f"Trwa uruchamianie algorytmu... krok {completed_steps}/{total_steps}"
+            f"Trwa uruchamianie algorytmu genetycznego... krok {completed_steps}/{total_steps}"
         )
         self.root.update_idletasks()
 
@@ -504,8 +504,25 @@ class MainWindow:
         return "\n".join(lines)
 
     def _on_save(self) -> None:
-        # Placeholder pod zapis wyników.
-        self.run_panel.set_status("Ukończono. Wyniki zapisano (placeholder).")
+        if not self.last_pipeline_result:
+            messagebox.showerror("Błąd", "Brak wyników do zapisania.")
+            return
+
+        try:
+            engine_result = self.last_pipeline_result.get("engine_result", {})
+            if not engine_result:
+                messagebox.showerror("Błąd", "Brak danych engine_result do zapisania.")
+                return
+
+            saved_dir = save_run_results(engine_result, format_type="all")
+
+            self.run_panel.set_status(f"Ukończono. Wyniki zapisano do: {saved_dir}")
+            messagebox.showinfo(
+                "Zapisano",
+                f"Pomyślnie wyeksportowano wyniki do formatu CSV i JSON.\nFolder:\n{saved_dir}",
+            )
+        except Exception as e:
+            messagebox.showerror("Błąd zapisu", f"Wystąpił błąd podczas zapisu:\n{e}")
 
     def _on_close(self) -> None:
         try:

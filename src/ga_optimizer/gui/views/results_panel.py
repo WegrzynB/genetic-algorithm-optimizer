@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import ttk, messagebox
-
-# Dodany import zapisu!
-from ga_optimizer.io.results_writer import save_run_results
+from tkinter import ttk
+from typing import Any
 
 from ga_optimizer.gui.views.plots_panel import PlotsPanel
 
@@ -32,11 +30,8 @@ def _fmt_time(value) -> str:
 
 class ResultsPanel:
     def __init__(self, parent, on_save=None):
-        # Przechowuje kontener nadrzędny. 'on_save' możemy zignorować, bo zrobimy zapis lokalnie.
         self.parent = parent
-        
-        # TU PRZECHOWUJEMY WYNIK DO ZAPISU!
-        self._last_engine_result = None
+        self.on_save = on_save
 
         # Referencje do głównych elementów UI.
         self.frame = None
@@ -59,11 +54,10 @@ class ResultsPanel:
         self.run_history_table = None
         self.full_history_table = None
 
-        # Panel na wykresy
+        # Panel na wykresy.
         self.plots_panel = None
 
     def build(self) -> None:
-        # Buduje panel wyników: górne podsumowanie + notebook.
         self.frame = ttk.LabelFrame(self.parent, text="Wyniki", padding=10)
         self.frame.columnconfigure(0, weight=1)
         self.frame.rowconfigure(1, weight=1)
@@ -89,10 +83,10 @@ class ResultsPanel:
         self.save_btn = ttk.Button(
             self.summary_frame,
             text="Zapisz (plik / baza)",
-            command=self._save,  # <-- Podpięcie naszej nowej metody
+            command=self._save,
             state=tk.DISABLED,
         )
-        self.save_btn.grid(row=0, column=1, rowspan=2, sticky="ne", padx=(12, 0))
+        self.save_btn.grid(row=0, column=1, rowspan=3, sticky="ne", padx=(12, 0))
 
         self.nb = ttk.Notebook(self.frame)
         self.nb.grid(row=1, column=0, sticky="nsew")
@@ -114,7 +108,6 @@ class ResultsPanel:
 
         self.configure_history_tabs(run_count=1)
 
-    # ... TUTAJ SĄ METODY _build_results_tab(), _build_run_history_tab() itd. Zostają BEZ ZMIAN ...
     def _build_results_tab(self) -> None:
         self.results_tab.columnconfigure(0, weight=1)
         self.results_tab.rowconfigure(0, weight=1)
@@ -134,7 +127,12 @@ class ResultsPanel:
         self.run_history_tab.rowconfigure(0, weight=1)
 
         columns = ("run", "seed", "min", "q1", "median", "q3", "max", "avg", "elapsed")
-        self.run_history_table = ttk.Treeview(self.run_history_tab, columns=columns, show="headings", height=12)
+        self.run_history_table = ttk.Treeview(
+            self.run_history_tab,
+            columns=columns,
+            show="headings",
+            height=12,
+        )
 
         self.run_history_table.heading("run", text="Uruchomienie")
         self.run_history_table.heading("seed", text="Seed")
@@ -166,7 +164,12 @@ class ResultsPanel:
         self.full_history_tab.rowconfigure(0, weight=1)
 
         columns = ("run", "epoch", "min", "q1", "median", "q3", "max", "avg")
-        self.full_history_table = ttk.Treeview(self.full_history_tab, columns=columns, show="headings", height=12)
+        self.full_history_table = ttk.Treeview(
+            self.full_history_tab,
+            columns=columns,
+            show="headings",
+            height=12,
+        )
 
         self.full_history_table.heading("run", text="Uruchomienie")
         self.full_history_table.heading("epoch", text="Epoka")
@@ -222,15 +225,7 @@ class ResultsPanel:
             else:
                 self.nb.tab(self.run_history_tab, state="normal")
 
-    def set_summary(
-        self,
-        min_value,
-        q1,
-        median,
-        q3,
-        max_value,
-        elapsed,
-    ) -> None:
+    def set_summary(self, min_value, q1, median, q3, max_value, elapsed) -> None:
         self.summary_label.configure(
             text=(
                 f"FITNESS -- Min: {_fmt_value(min_value)}  |  25%: {_fmt_value(q1)}  |  "
@@ -270,13 +265,12 @@ class ResultsPanel:
                 ),
             )
 
-    def set_full_history(self, engine_result: dict[str, Any]) -> None:
-        # NOWE: Zapamiętujemy cały engine_result na potrzeby zapisu
-        self._last_engine_result = engine_result
-        
-        # Stara logika (wypełnianie tabeli)
-        runs = engine_result.get("runs", [])
-        
+    def set_full_history(self, data: list[dict] | dict[str, Any]) -> None:
+        if isinstance(data, dict):
+            runs = data.get("runs", [])
+        else:
+            runs = data
+
         for item in self.full_history_table.get_children():
             self.full_history_table.delete(item)
 
@@ -304,35 +298,13 @@ class ResultsPanel:
         self.save_btn.configure(state=tk.NORMAL if enabled else tk.DISABLED)
 
     def _save(self) -> None:
-        # NOWA LOGIKA ZAPISU - z zabezpieczeniem typu!
-        if self._last_engine_result is None:
-            messagebox.showerror("Błąd", "Brak wyników do zapisania.")
-            return
-            
-        try:
-            # --- ZABEZPIECZENIE ---
-            # Jeśli przekazano listę runs zamiast głównego słownika, ratujemy sytuację:
-            data_to_export = self._last_engine_result
-            if isinstance(data_to_export, list):
-                data_to_export = {"runs": data_to_export}
-            # ----------------------
-
-            # Zapisuje obie rzeczy naraz
-            saved_dir = save_run_results(data_to_export, format_type="all")
-            
-            messagebox.showinfo(
-                "Zapisano", 
-                f"Pomyślnie wyeksportowano wyniki do formatu CSV i JSON.\nFolder:\n{saved_dir}"
-            )
-        except Exception as e:
-            messagebox.showerror("Błąd zapisu", f"Wystąpił błąd podczas zapisu:\n{e}")
+        if callable(self.on_save):
+            self.on_save()
 
     def reset(self) -> None:
-        # Czyści panel wyników przed nowym uruchomieniem.
         if self.plots_panel is not None:
             self.plots_panel.reset()
-            
-        self._last_engine_result = None
+
         self.set_summary("-", "-", "-", "-", "-", "-")
         self.set_global_minimum_info("Minimum globalne: -")
         self.set_results_text("Tutaj pojawi się opis wyników po uruchomieniu algorytmu.")
@@ -347,6 +319,3 @@ class ResultsPanel:
                 self.full_history_table.delete(item)
 
         self.configure_history_tabs(run_count=1)
-
-        if self.plots_panel is not None:
-            self.plots_panel.reset()
