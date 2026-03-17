@@ -11,6 +11,7 @@ def mutation_scramble(
 ) -> list[list[int]]:
 
     p = config_dict["mutation_scramble_p"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -18,12 +19,12 @@ def mutation_scramble(
 
         new_chromosome = chromosome.copy()
 
-        if random.random() < p and len(new_chromosome) >= 3:
+        if rng.random() < p and len(new_chromosome) >= 3:
 
-            i, j = sorted(random.sample(range(len(new_chromosome)), 2))
+            i, j = sorted(rng.sample(range(len(new_chromosome)), 2))
 
             segment = new_chromosome[i:j]
-            random.shuffle(segment)
+            rng.shuffle(segment)
 
             new_chromosome[i:j] = segment
 

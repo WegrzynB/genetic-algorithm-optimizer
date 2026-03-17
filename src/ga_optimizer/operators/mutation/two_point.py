@@ -11,6 +11,7 @@ def mutation_two_point(
 ) -> list[list[int]]:
 
     p = config_dict["mutation_two_point_p"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -18,9 +19,9 @@ def mutation_two_point(
 
         new_chromosome = chromosome.copy()
 
-        if random.random() < p and len(new_chromosome) >= 2:
+        if rng.random() < p and len(new_chromosome) >= 2:
 
-            i, j = random.sample(range(len(new_chromosome)), 2)
+            i, j = rng.sample(range(len(new_chromosome)), 2)
 
             new_chromosome[i] = 1 - new_chromosome[i]
             new_chromosome[j] = 1 - new_chromosome[j]

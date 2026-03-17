@@ -1,1 +1,0 @@
-# Zarządza ścieżkami do katalogów projektu i plików wynikowych

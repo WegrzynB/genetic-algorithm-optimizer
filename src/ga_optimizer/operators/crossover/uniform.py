@@ -12,6 +12,7 @@ def uniform_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_uniform_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -25,7 +26,7 @@ def uniform_crossover(
 
         for g in range(len(parent1)):
 
-            alpha = random.random()
+            alpha = rng.random()
 
             if alpha < p:
                 child1[g] = parent2[g]

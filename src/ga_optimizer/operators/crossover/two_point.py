@@ -12,6 +12,7 @@ def two_point_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_two_point_p"]
+    rng = config_dict["rng"]
 
     new_population = chromosomes.copy()
 
@@ -20,13 +21,13 @@ def two_point_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
 
-        point1 = random.randint(1, length - 2)
-        point2 = random.randint(point1 + 1, length - 1)
+        point1 = rng.randint(1, length - 2)
+        point2 = rng.randint(point1 + 1, length - 1)
 
         child1 = (
             parent1[:point1]

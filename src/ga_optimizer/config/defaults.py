@@ -22,7 +22,7 @@ DEFAULT_GA_VALUES = {
     "population": GA_MAIN_FIELD_SPECS["population"]["default"],
     "objective_mode": GA_MAIN_FIELD_SPECS["objective_mode"]["default"],
     "epochs": GA_MAIN_FIELD_SPECS["epochs"]["default"],
-    "epsilon": GA_MAIN_FIELD_SPECS["epsilon"]["default"],
+    "run_count": GA_MAIN_FIELD_SPECS["run_count"]["default"],
     "seed": GA_MAIN_FIELD_SPECS["seed"]["default"],
 }
 
@@ -74,7 +74,7 @@ def build_default_config(problem_name: str | None = None) -> GAConfig:
         range_end=problem.suggested_range[1],
         population=DEFAULT_GA_VALUES["population"],
         epochs=DEFAULT_GA_VALUES["epochs"],
-        epsilon=DEFAULT_GA_VALUES["epsilon"],
+        run_count=DEFAULT_GA_VALUES["run_count"],
         seed=DEFAULT_GA_VALUES["seed"],
         precision_mode=DEFAULT_PRECISION_VALUES["precision_mode"],
         precision_numeric=DEFAULT_PRECISION_VALUES["precision_numeric"],

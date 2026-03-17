@@ -1,1 +1,0 @@
-# Koordynuje komunikację między głównymi widokami i logiką aplikacji

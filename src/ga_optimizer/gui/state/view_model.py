@@ -18,6 +18,7 @@ from ga_optimizer.problems.function_catalog import (
     get_problem_definition,
     get_problem_names,
 )
+from ga_optimizer.config.presets import PRESETS
 
 
 class ViewModel:
@@ -41,7 +42,7 @@ class ViewModel:
         # Zmienne głównych parametrów algorytmu.
         self.population = tk.StringVar(root, value=str(self._base_config.population))
         self.epochs = tk.StringVar(root, value=str(self._base_config.epochs))
-        self.epsilon = tk.StringVar(root, value=str(self._base_config.epsilon))
+        self.run_count = tk.StringVar(root, value=str(self._base_config.run_count))
         self.seed = tk.StringVar(root, value=str(self._base_config.seed))
 
         # Zmienne związane z dokładnością kodowania.
@@ -104,7 +105,7 @@ class ViewModel:
             "range_end": self.range_end,
             "population": self.population,
             "epochs": self.epochs,
-            "epsilon": self.epsilon,
+            "run_count": self.run_count,
             "seed": self.seed,
             "precision_mode": self.precision_mode,
             "precision_numeric": self.precision_numeric,
@@ -137,6 +138,54 @@ class ViewModel:
         self.range_start.set(str(problem.suggested_range[0]))
         self.range_end.set(str(problem.suggested_range[1]))
         self.n_vars.set(str(problem.default_n_vars))
+
+    def apply_preset(self, preset_name: str) -> None:
+        # Ustawia wszystkie pola GUI zgodnie z wybranym presetem.
+        preset = PRESETS.get(preset_name)
+        if preset is None:
+            return
+
+        # Najpierw pola podstawowe.
+        simple_fields = (
+            "problem_name",
+            "objective_mode",
+            "n_vars",
+            "range_start",
+            "range_end",
+            "population",
+            "epochs",
+            "epsilon",
+            "seed",
+            "precision_mode",
+            "precision_numeric",
+            "precision_bits",
+            "selection_method",
+            "crossover_method",
+            "mutation_method",
+            "inversion_enabled",
+            "elitism_enabled",
+        )
+
+        for key in simple_fields:
+            if key not in preset:
+                continue
+
+            var = self.field_vars.get(key)
+            if var is None:
+                continue
+
+            value = preset[key]
+
+            # Bool ustawiamy bez rzutowania na string.
+            if isinstance(var, tk.BooleanVar):
+                var.set(bool(value))
+            else:
+                var.set(str(value))
+
+        # Potem parametry metod.
+        for key, value in preset.get("method_params", {}).items():
+            if key in self.method_params:
+                self.method_params[key].set(str(value))
 
     def get_field_spec(self, key: str) -> dict | None:
         # Zwraca specyfikację danego pola, jeśli istnieje.
@@ -172,7 +221,7 @@ class ViewModel:
             "range_end": self.range_end.get(),
             "population": self.population.get(),
             "epochs": self.epochs.get(),
-            "epsilon": self.epsilon.get(),
+            "run_count": self.run_count.get(),
             "seed": self.seed.get(),
             "precision_mode": self.precision_mode.get(),
             "precision_numeric": self.precision_numeric.get(),

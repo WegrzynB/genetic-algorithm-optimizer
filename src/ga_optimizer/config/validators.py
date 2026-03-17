@@ -46,6 +46,8 @@ def _parse_value(
         return bool(raw_value)
 
     if raw_value is None or (isinstance(raw_value, str) and raw_value.strip() == ""):
+        if spec.get("allow_empty", False):
+            return None
         result.add_error(key, f'Pole "{label}" nie może być puste.')
         return None
 
@@ -130,7 +132,7 @@ def build_config_from_payload(payload: dict[str, Any]) -> tuple[GAConfig | None,
 
     parsed_population = _parse_value("population", payload.get("population"), GA_MAIN_FIELD_SPECS["population"], result)
     parsed_epochs = _parse_value("epochs", payload.get("epochs"), GA_MAIN_FIELD_SPECS["epochs"], result)
-    parsed_epsilon = _parse_value("epsilon", payload.get("epsilon"), GA_MAIN_FIELD_SPECS["epsilon"], result)
+    parsed_run_count = _parse_value("run_count", payload.get("run_count"), GA_MAIN_FIELD_SPECS["run_count"], result)
     parsed_seed = _parse_value("seed", payload.get("seed"), GA_MAIN_FIELD_SPECS["seed"], result)
 
     parsed_precision_mode = _parse_value("precision_mode", payload.get("precision_mode"), PRECISION_FIELD_SPECS["precision_mode"], result)
@@ -150,7 +152,7 @@ def build_config_from_payload(payload: dict[str, Any]) -> tuple[GAConfig | None,
         ("range_end", parsed_range_end, GENERAL_FIELD_SPECS["range_end"]),
         ("population", parsed_population, GA_MAIN_FIELD_SPECS["population"]),
         ("epochs", parsed_epochs, GA_MAIN_FIELD_SPECS["epochs"]),
-        ("epsilon", parsed_epsilon, GA_MAIN_FIELD_SPECS["epsilon"]),
+        ("run_count", parsed_run_count, GA_MAIN_FIELD_SPECS["run_count"]),
         ("seed", parsed_seed, GA_MAIN_FIELD_SPECS["seed"]),
         ("precision_numeric", parsed_precision_numeric, PRECISION_FIELD_SPECS["precision_numeric"]),
         ("precision_bits", parsed_precision_bits, PRECISION_FIELD_SPECS["precision_bits"]),
@@ -189,7 +191,7 @@ def build_config_from_payload(payload: dict[str, Any]) -> tuple[GAConfig | None,
         range_end=parsed_range_end,
         population=parsed_population,
         epochs=parsed_epochs,
-        epsilon=parsed_epsilon,
+        run_count=parsed_run_count,
         seed=parsed_seed,
         precision_mode=parsed_precision_mode,
         precision_numeric=parsed_precision_numeric,

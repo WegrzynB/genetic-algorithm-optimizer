@@ -6,7 +6,6 @@ SELECTION_METHOD_LABELS = {
     "worst": "Najgorszych",
     "unbiased": "Beztendencyjna",
     "roulette": "Ruletka",
-    "roulette copy": "Ruletka kopia",
     "sus": "Stochastyczny dobór uniwersalny",
     "tournament": "Turniejowa",
     "double_tournament": "Podwójna turniejowa",
@@ -47,16 +46,6 @@ SELECTION_METHOD_PARAM_SPECS = {
         },
     ],
 
-    "roulette copy": [
-        {
-            "key": "selection_roulette_copy_eps",
-            "label": "Eps (stabilizacja)",
-            "type": "float",
-            "default": 0.2,
-            "min_exclusive": 0.0,
-        },
-    ],
-
     "sus": [
         {
             "key": "selection_sus_eps",
@@ -73,49 +62,6 @@ SELECTION_METHOD_PARAM_SPECS = {
             "label": "K (rozmiar turnieju)",
             "type": "int",
             "default": 3,
-            "min": 2,
-        },
-        
-        {
-            "key": "selection_tournament_k2",
-            "label": "K2",
-            "type": "int",
-            "default": 3,
-            "min": 2,
-        },
-        {
-            "key": "selection_tournament_k3",
-            "label": "K3",
-            "type": "int",
-            "default": 23,
-            "min": 2,
-        },
-        {
-            "key": "selection_tournament_k4",
-            "label": "K4",
-            "type": "int",
-            "default": 63,
-            "min": 2,
-        },
-        {
-            "key": "selection_tournament_k5",
-            "label": "K5",
-            "type": "int",
-            "default": 33,
-            "min": 2,
-        },
-        {
-            "key": "selection_tournament_k6",
-            "label": "K6",
-            "type": "int",
-            "default": 3,
-            "min": 2,
-        },
-        {
-            "key": "selection_tournament_k7",
-            "label": "K7",
-            "type": "int",
-            "default": 7,
             "min": 2,
         },
     ],

@@ -11,6 +11,7 @@ def mutation_bit_flip(
 ) -> list[list[int]]:
 
     p = config_dict["mutation_bit_flip_p"]
+    rng = config_dict["rng"]
 
     mutated = []
 
@@ -19,7 +20,7 @@ def mutation_bit_flip(
         new_chromosome = chromosome.copy()
 
         for i in range(len(new_chromosome)):
-            if random.random() < p:
+            if rng.random() < p:
                 new_chromosome[i] = 1 - new_chromosome[i]
 
         mutated.append(new_chromosome)

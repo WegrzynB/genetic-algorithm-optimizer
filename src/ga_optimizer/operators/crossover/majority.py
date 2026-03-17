@@ -12,6 +12,7 @@ def majority_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_majority_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -20,7 +21,7 @@ def majority_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         length = len(parent1)
@@ -37,7 +38,7 @@ def majority_crossover(
 
             else:
 
-                gene = random.choice([parent1[g], parent2[g]])
+                gene = rng.choice([parent1[g], parent2[g]])
 
                 child1.append(gene)
                 child2.append(1 - gene)

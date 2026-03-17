@@ -85,24 +85,25 @@ GA_MAIN_FIELD_SPECS = {
         "label": "Wielkość populacji",
         "type": "int",
         "min": 2,
-        "default": 4,
+        "default": 10,
     },
     "epochs": {
         "label": "Liczba epok",
         "type": "int",
         "min": 1,
-        "default": 1,
+        "default": 10,
     },
-    "epsilon": {
-        "label": "Epsilon (tolerancja / warunek stopu)",
-        "type": "float",
-        "min_exclusive": 0.0,
-        "default": 0.0001,
+    "run_count": {
+        "label": "Liczba uruchomień algorytmu",
+        "type": "int",
+        "min": 1,
+        "default": 5,
     },
     "seed": {
         "label": "Seed",
         "type": "int",
         "default": 42,
+        "allow_empty": True,
     },
 }
 
@@ -176,8 +177,8 @@ class GAConfig:
 
     population: int
     epochs: int
-    epsilon: float
-    seed: int
+    run_count: int
+    seed: int | None
 
     precision_mode: str
     precision_numeric: float

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import random
 from typing import Any
 
 
@@ -12,6 +11,7 @@ def disruptive_crossover(
 ) -> list[list[int]]:
 
     p = config_dict["crossover_disruptive_p"]
+    rng = config_dict["rng"]
 
     new_population = [c[:] for c in chromosomes]
 
@@ -20,7 +20,7 @@ def disruptive_crossover(
         parent1 = chromosomes[i]
         parent2 = chromosomes[i + 1]
 
-        if random.random() > p:
+        if rng.random() > p:
             continue
 
         child1 = parent1[:]
@@ -38,10 +38,9 @@ def disruptive_crossover(
 
         swaps = diff // 2
 
-        chosen_positions = random.sample(diff_positions, swaps)
+        chosen_positions = rng.sample(diff_positions, swaps)
 
         for pos in chosen_positions:
-
             child1[pos], child2[pos] = child2[pos], child1[pos]
 
         new_population[i] = child1
