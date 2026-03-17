@@ -136,15 +136,29 @@ class Population:
             for chromosome in chromosomes
         ]
 
-        raw_objectives: list[float] = []
-        fitness_values: list[float] = []
+        raw_objectives = [
+            self.problem_definition.formula(values)
+            for values in decoded_population
+        ]
 
-        for values in decoded_population:
-            raw_value = self.problem_definition.formula(values)
-            fitness = self.calculate_fitness(raw_value)
+        eps = 1e-12
 
-            raw_objectives.append(raw_value)
-            fitness_values.append(fitness)
+        if self.objective_mode == "min":
+            worst_raw = max(raw_objectives)
+            fitness_values = [
+                (worst_raw - raw_value) + eps
+                for raw_value in raw_objectives
+            ]
+
+        elif self.objective_mode == "max":
+            best_raw = min(raw_objectives)
+            fitness_values = [
+                (raw_value - best_raw) + eps
+                for raw_value in raw_objectives
+            ]
+
+        else:
+            raise ValueError(f"Nieobsługiwany typ optymalizacji: {self.objective_mode}")
 
         return decoded_population, raw_objectives, fitness_values
 
@@ -165,11 +179,36 @@ class Population:
 
     def update_after_chromosome_change(self) -> None:
         # Po zmianie chromosomów aktualizujemy wszystko, co od nich zależy.
-        decoded_population, raw_objectives, fitness_values = self._compute_state_for_chromosomes(self.chromosomes)
+        self.decoded_population = [
+            self.decode_chromosome(chromosome)
+            for chromosome in self.chromosomes
+        ]
 
-        self.decoded_population = decoded_population
-        self.raw_objectives = raw_objectives
-        self.fitness_values = fitness_values
+        self.raw_objectives = [
+            self.problem_definition.formula(values)
+            for values in self.decoded_population
+        ]
+
+        eps = 1e-12
+
+        if self.objective_mode == "min":
+            # Im mniejsza wartość funkcji, tym większy fitness.
+            worst_raw = max(self.raw_objectives)
+            self.fitness_values = [
+                (worst_raw - raw_value) + eps
+                for raw_value in self.raw_objectives
+            ]
+
+        elif self.objective_mode == "max":
+            # Im większa wartość funkcji, tym większy fitness.
+            best_raw = min(self.raw_objectives)
+            self.fitness_values = [
+                (raw_value - best_raw) + eps
+                for raw_value in self.raw_objectives
+            ]
+
+        else:
+            raise ValueError(f"Nieobsługiwany typ optymalizacji: {self.objective_mode}")
 
     def decode_chromosome(self, chromosome: list[int]) -> list[float]:
         # Dekoduje pojedynczy chromosom na listę wartości rzeczywistych.
@@ -215,16 +254,6 @@ class Population:
             chromosome.extend(int(bit) for bit in bits_str)
 
         return chromosome
-
-    def calculate_fitness(self, raw_objective: float) -> float:
-        # Liczy fitness na podstawie raw objective i trybu min/max.
-        if self.objective_mode == "min":
-            return 1.0 / (1.0 + abs(raw_objective))
-
-        if self.objective_mode == "max":
-            return max(0.0, raw_objective)
-
-        raise ValueError(f"Nieobsługiwany typ optymalizacji: {self.objective_mode}")
 
     def evaluate_population(self) -> None:
         # Przelicza ewaluację dla całej populacji.

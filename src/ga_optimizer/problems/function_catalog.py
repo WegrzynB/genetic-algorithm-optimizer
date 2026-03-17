@@ -52,7 +52,7 @@ FUNCTION_CATALOG = {
         formula=schwefel,
         suggested_range=(-500.0, 500.0),
         global_minimum_value=2.545567497236334e-05,
-        global_minimum_points=[[420.9687, 420.9687], [-302.5249351839932, 420.9687467475071]],
+        global_minimum_points=[[420.9687, 420.9687]],
         default_n_vars=2,
         fixed_n_vars=False,
     ),
@@ -105,7 +105,7 @@ FUNCTION_CATALOG = {
         key="DeJong3",
         display_name="De Jong 3",
         formula=dejong3,
-        suggested_range=(3.8, 3.8),
+        suggested_range=(-3.8, 3.8),
         global_minimum_value=-8.0,  # Najniższe z wymienionych w opisie
         global_minimum_points=[[-3.5, -3.5]],
         default_n_vars=2,
