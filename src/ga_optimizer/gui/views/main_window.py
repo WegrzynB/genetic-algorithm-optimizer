@@ -348,8 +348,8 @@ class MainWindow:
         return "Minimum globalne: nie dotyczy (tryb maksymalizacji)."
 
     def _build_results_description(self, problem, engine_result: dict, runs: list[dict]) -> str:
-        # Buduje tekstowy opis najważniejszych wyników do zakładki „Wyniki”.
         lines: list[str] = []
+        objective_mode = self.vm.objective_mode.get()
 
         def _fmt_value(value) -> str:
             if value in (None, ""):
@@ -367,16 +367,7 @@ class MainWindow:
             except Exception:
                 return str(point)
 
-        def _safe_function_value(point):
-            if point in (None, "-"):
-                return None
-            try:
-                return float(problem.formula(point))
-            except Exception:
-                return None
-
         def _build_best_individuals_pool() -> list[dict]:
-            # Bierze tylko najlepszego osobnika z każdego uruchomienia.
             pool: list[dict] = []
 
             for run in runs:
@@ -384,23 +375,30 @@ class MainWindow:
                 best_point = summary.get("best_decoded")
                 best_chromosome = summary.get("best_chromosome")
                 best_fitness = summary.get("max_fitness")
+                best_raw_objective = summary.get("best_raw_objective")
 
-                if best_point is None or best_chromosome is None or best_fitness is None:
+                if (
+                    best_point is None
+                    or best_chromosome is None
+                    or best_fitness is None
+                    or best_raw_objective is None
+                ):
                     continue
 
                 pool.append(
                     {
-                        "run_index": run.get("run_index"),
+                        "run_index": (run.get("run_index", 0) + 1),
                         "seed": run.get("seed"),
                         "point": list(best_point),
                         "chromosome": list(best_chromosome),
                         "fitness": float(best_fitness),
+                        "raw_objective": float(best_raw_objective),
                     }
                 )
 
             return pool
 
-        def _find_closest_individual_by_fitness(pool: list[dict], target: float | None):
+        def _find_closest_individual_by_raw(pool: list[dict], target: float | None):
             if not pool or target in (None, ""):
                 return None
 
@@ -408,20 +406,23 @@ class MainWindow:
             closest_distance = None
 
             for item in pool:
-                distance = abs(item["fitness"] - float(target))
+                distance = abs(item["raw_objective"] - float(target))
                 if closest_distance is None or distance < closest_distance:
                     closest_distance = distance
                     closest_item = item
 
             return closest_item
 
+        def _sort_key(item: dict) -> float:
+            return float(item["raw_objective"])
+
         lines.append(f"Funkcja: {problem.display_name}")
-        lines.append(f"Tryb optymalizacji: {self.vm.objective_mode.get()}")
+        lines.append(f"Tryb optymalizacji: {objective_mode}")
         lines.append(f"Liczba uruchomień: {engine_result.get('run_count', len(runs))}")
         lines.append(f"Łączny czas: {engine_result.get('elapsed', 0.0):.2f} s")
         lines.append("")
 
-        if self.vm.objective_mode.get() == "min":
+        if objective_mode == "min":
             lines.append(f"Znane minimum globalne: {problem.global_minimum_value:.7f}")
             if getattr(problem, "global_minimum_points", None):
                 lines.append("Punkty minimum globalnego:")
@@ -429,7 +430,7 @@ class MainWindow:
                     lines.append(f"  - {point}")
             lines.append("")
 
-        lines.append("Statystyki końcowe po wszystkich uruchomieniach")
+        lines.append("Statystyki końcowe po wszystkich uruchomieniach (wartość funkcji celu)")
         lines.append(f"  Min: {_fmt_value(engine_result.get('min'))}")
         lines.append(f"  25%: {_fmt_value(engine_result.get('q1'))}")
         lines.append(f"  Mediana: {_fmt_value(engine_result.get('median'))}")
@@ -441,64 +442,56 @@ class MainWindow:
         best_individuals_pool = _build_best_individuals_pool()
 
         if best_individuals_pool:
-            sorted_pool = sorted(best_individuals_pool, key=lambda item: item["fitness"])
-            best_item = sorted_pool[-1]
-            worst_item = sorted_pool[0]
+            sorted_pool = sorted(best_individuals_pool, key=_sort_key)
+
+            if objective_mode == "min":
+                best_item = sorted_pool[0]
+                worst_item = sorted_pool[-1]
+            else:
+                best_item = sorted_pool[-1]
+                worst_item = sorted_pool[0]
 
             median_target = engine_result.get("median")
             avg_target = engine_result.get("avg")
 
-            median_item = _find_closest_individual_by_fitness(best_individuals_pool, median_target)
-            avg_item = _find_closest_individual_by_fitness(best_individuals_pool, avg_target)
+            median_item = _find_closest_individual_by_raw(best_individuals_pool, median_target)
+            avg_item = _find_closest_individual_by_raw(best_individuals_pool, avg_target)
 
             if median_item is not None:
-                median_function_value = _safe_function_value(median_item["point"])
                 lines.append("Mediana z najlepszych osobników uruchomień")
-                lines.append(f"  Mediana fitness: {_fmt_value(median_target)}")
-                lines.append(f"  Reprezentatywny fitness: {_fmt_value(median_item['fitness'])}")
+                lines.append(f"  Mediana wartości funkcji celu: {_fmt_value(median_target)}")
+                lines.append(f"  Reprezentatywna wartość funkcji celu: {_fmt_value(median_item['raw_objective'])}")
+                lines.append(f"  Fitness tego osobnika: {_fmt_value(median_item['fitness'])}")
                 lines.append(f"  Uruchomienie: {median_item['run_index']}")
                 lines.append(f"  Chromosom: {median_item['chromosome']}")
                 lines.append(f"  Punkt: {_fmt_point(median_item['point'])}")
-                lines.append(f"  Wartość funkcji w tym punkcie: {_fmt_value(median_function_value)}")
                 lines.append("")
 
             if avg_item is not None:
-                avg_function_value = _safe_function_value(avg_item["point"])
                 lines.append("Średnia z najlepszych osobników uruchomień")
-                lines.append(f"  Średnia fitness: {_fmt_value(avg_target)}")
-                lines.append(f"  Reprezentatywny fitness: {_fmt_value(avg_item['fitness'])}")
+                lines.append(f"  Średnia wartości funkcji celu: {_fmt_value(avg_target)}")
+                lines.append(f"  Reprezentatywna wartość funkcji celu: {_fmt_value(avg_item['raw_objective'])}")
+                lines.append(f"  Fitness tego osobnika: {_fmt_value(avg_item['fitness'])}")
                 lines.append(f"  Uruchomienie: {avg_item['run_index']}")
                 lines.append(f"  Chromosom: {avg_item['chromosome']}")
                 lines.append(f"  Punkt: {_fmt_point(avg_item['point'])}")
-                lines.append(f"  Wartość funkcji w tym punkcie: {_fmt_value(avg_function_value)}")
                 lines.append("")
 
-            best_function_value = _safe_function_value(best_item["point"])
             lines.append("Najlepszy osobnik z najlepszych osobników uruchomień")
+            lines.append(f"  Wartość funkcji celu: {_fmt_value(best_item['raw_objective'])}")
             lines.append(f"  Fitness: {_fmt_value(best_item['fitness'])}")
             lines.append(f"  Uruchomienie: {best_item['run_index']}")
             lines.append(f"  Chromosom: {best_item['chromosome']}")
             lines.append(f"  Punkt: {_fmt_point(best_item['point'])}")
-            lines.append(f"  Wartość funkcji w tym punkcie: {_fmt_value(best_function_value)}")
             lines.append("")
 
-            worst_function_value = _safe_function_value(worst_item["point"])
             lines.append("Najgorszy osobnik z najlepszych osobników uruchomień")
+            lines.append(f"  Wartość funkcji celu: {_fmt_value(worst_item['raw_objective'])}")
             lines.append(f"  Fitness: {_fmt_value(worst_item['fitness'])}")
             lines.append(f"  Uruchomienie: {worst_item['run_index']}")
             lines.append(f"  Chromosom: {worst_item['chromosome']}")
             lines.append(f"  Punkt: {_fmt_point(worst_item['point'])}")
-            lines.append(f"  Wartość funkcji w tym punkcie: {_fmt_value(worst_function_value)}")
-            lines.append("")
 
-        lines.append("Opis")
-        lines.append("  Statystyki u góry są liczone z wyników końcowych każdego uruchomienia,")
-        lines.append("  czyli z populacji po ostatniej epoce danego runa.")
-        lines.append("  Sekcje mediany i średniej poniżej używają tych samych wartości fitness co góra,")
-        lines.append("  a jako punkt pokazują najlepszego osobnika z uruchomienia, którego fitness")
-        lines.append("  jest najbliżej odpowiednio mediany lub średniej.")
-        lines.append("  'Historia uruchomień' pokazuje tylko końcowe podsumowanie każdego runa.")
-        lines.append("  'Pełna historia' pokazuje wszystkie epoki dla wszystkich uruchomień.")
 
         lines = [f" {line}" if line else "" for line in lines]
         return "\n".join(lines)

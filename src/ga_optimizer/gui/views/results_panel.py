@@ -73,7 +73,7 @@ class ResultsPanel:
 
         self.summary_label = ttk.Label(
             info,
-            text="FITNESS -- Min: -  |  25%: -  |  Mediana: -  |  75%: -  |  Max: -  |  Czas: -",
+            text="WARTOŚĆ FUNKCJI CELU -- Min: -  |  25%: -  |  Mediana: -  |  75%: -  |  Max: -  |  Czas: -",
         )
         self.summary_label.grid(row=0, column=0, sticky="w")
 
@@ -126,7 +126,15 @@ class ResultsPanel:
         self.run_history_tab.columnconfigure(0, weight=1)
         self.run_history_tab.rowconfigure(0, weight=1)
 
-        columns = ("run", "seed", "min", "q1", "median", "q3", "max", "avg", "elapsed")
+        columns = (
+            "run",
+            "seed",
+            "best_raw",
+            "worst_raw",
+            "avg_raw",
+            "best_fitness",
+            "elapsed",
+        )
         self.run_history_table = ttk.Treeview(
             self.run_history_tab,
             columns=columns,
@@ -136,22 +144,18 @@ class ResultsPanel:
 
         self.run_history_table.heading("run", text="Uruchomienie")
         self.run_history_table.heading("seed", text="Seed")
-        self.run_history_table.heading("min", text="Min")
-        self.run_history_table.heading("q1", text="25%")
-        self.run_history_table.heading("median", text="Mediana")
-        self.run_history_table.heading("q3", text="75%")
-        self.run_history_table.heading("max", text="Max")
-        self.run_history_table.heading("avg", text="Średnia")
+        self.run_history_table.heading("best_raw", text="Najlepsza wartość f(x)")
+        self.run_history_table.heading("worst_raw", text="Najgorsza wartość f(x)")
+        self.run_history_table.heading("avg_raw", text="Średnia f(x)")
+        self.run_history_table.heading("best_fitness", text="Najlepszy fitness")
         self.run_history_table.heading("elapsed", text="Czas [s]")
 
         self.run_history_table.column("run", width=110, anchor="center")
         self.run_history_table.column("seed", width=110, anchor="center")
-        self.run_history_table.column("min", width=110, anchor="e")
-        self.run_history_table.column("q1", width=110, anchor="e")
-        self.run_history_table.column("median", width=110, anchor="e")
-        self.run_history_table.column("q3", width=110, anchor="e")
-        self.run_history_table.column("max", width=110, anchor="e")
-        self.run_history_table.column("avg", width=110, anchor="e")
+        self.run_history_table.column("best_raw", width=150, anchor="e")
+        self.run_history_table.column("worst_raw", width=150, anchor="e")
+        self.run_history_table.column("avg_raw", width=130, anchor="e")
+        self.run_history_table.column("best_fitness", width=130, anchor="e")
         self.run_history_table.column("elapsed", width=100, anchor="e")
 
         self.run_history_table.grid(row=0, column=0, sticky="nsew")
@@ -163,7 +167,16 @@ class ResultsPanel:
         self.full_history_tab.columnconfigure(0, weight=1)
         self.full_history_tab.rowconfigure(0, weight=1)
 
-        columns = ("run", "epoch", "min", "q1", "median", "q3", "max", "avg")
+        columns = (
+            "run",
+            "epoch",
+            "min_raw",
+            "q1_raw",
+            "median_raw",
+            "q3_raw",
+            "max_raw",
+            "avg_raw",
+        )
         self.full_history_table = ttk.Treeview(
             self.full_history_tab,
             columns=columns,
@@ -173,21 +186,21 @@ class ResultsPanel:
 
         self.full_history_table.heading("run", text="Uruchomienie")
         self.full_history_table.heading("epoch", text="Epoka")
-        self.full_history_table.heading("min", text="Min")
-        self.full_history_table.heading("q1", text="25%")
-        self.full_history_table.heading("median", text="Mediana")
-        self.full_history_table.heading("q3", text="75%")
-        self.full_history_table.heading("max", text="Max")
-        self.full_history_table.heading("avg", text="Średnia")
+        self.full_history_table.heading("min_raw", text="Min f(x)")
+        self.full_history_table.heading("q1_raw", text="25% f(x)")
+        self.full_history_table.heading("median_raw", text="Mediana f(x)")
+        self.full_history_table.heading("q3_raw", text="75% f(x)")
+        self.full_history_table.heading("max_raw", text="Max f(x)")
+        self.full_history_table.heading("avg_raw", text="Średnia f(x)")
 
         self.full_history_table.column("run", width=110, anchor="center")
         self.full_history_table.column("epoch", width=90, anchor="center")
-        self.full_history_table.column("min", width=110, anchor="e")
-        self.full_history_table.column("q1", width=110, anchor="e")
-        self.full_history_table.column("median", width=110, anchor="e")
-        self.full_history_table.column("q3", width=110, anchor="e")
-        self.full_history_table.column("max", width=110, anchor="e")
-        self.full_history_table.column("avg", width=110, anchor="e")
+        self.full_history_table.column("min_raw", width=120, anchor="e")
+        self.full_history_table.column("q1_raw", width=120, anchor="e")
+        self.full_history_table.column("median_raw", width=120, anchor="e")
+        self.full_history_table.column("q3_raw", width=120, anchor="e")
+        self.full_history_table.column("max_raw", width=120, anchor="e")
+        self.full_history_table.column("avg_raw", width=120, anchor="e")
 
         self.full_history_table.grid(row=0, column=0, sticky="nsew")
         sb = ttk.Scrollbar(self.full_history_tab, orient="vertical", command=self.full_history_table.yview)
@@ -228,7 +241,7 @@ class ResultsPanel:
     def set_summary(self, min_value, q1, median, q3, max_value, elapsed) -> None:
         self.summary_label.configure(
             text=(
-                f"FITNESS -- Min: {_fmt_value(min_value)}  |  25%: {_fmt_value(q1)}  |  "
+                f"WARTOŚĆ FUNKCJI CELU -- Min: {_fmt_value(min_value)}  |  25%: {_fmt_value(q1)}  |  "
                 f"Mediana: {_fmt_value(median)}  |  75%: {_fmt_value(q3)}  |  "
                 f"Max: {_fmt_value(max_value)}  |  Czas: {_fmt_time(elapsed)}"
             )
@@ -255,12 +268,10 @@ class ResultsPanel:
                 values=(
                     index,
                     run.get("seed", "-"),
-                    _fmt_value(summary.get("min_fitness")),
-                    _fmt_value(summary.get("q1_fitness")),
-                    _fmt_value(summary.get("median_fitness")),
-                    _fmt_value(summary.get("q3_fitness")),
+                    _fmt_value(summary.get("best_raw_objective")),
+                    _fmt_value(summary.get("worst_raw_objective")),
+                    _fmt_value(summary.get("avg_raw_objective")),
                     _fmt_value(summary.get("max_fitness")),
-                    _fmt_value(summary.get("avg_fitness")),
                     _fmt_value(run.get("elapsed"), digits=2),
                 ),
             )
@@ -283,12 +294,12 @@ class ResultsPanel:
                     values=(
                         run_index,
                         epoch_row.get("epoch_index", "-"),
-                        _fmt_value(summary.get("min_fitness")),
-                        _fmt_value(summary.get("q1_fitness")),
-                        _fmt_value(summary.get("median_fitness")),
-                        _fmt_value(summary.get("q3_fitness")),
-                        _fmt_value(summary.get("max_fitness")),
-                        _fmt_value(summary.get("avg_fitness")),
+                        _fmt_value(summary.get("min_raw_objective")),
+                        _fmt_value(summary.get("q1_raw_objective")),
+                        _fmt_value(summary.get("median_raw_objective")),
+                        _fmt_value(summary.get("q3_raw_objective")),
+                        _fmt_value(summary.get("max_raw_objective")),
+                        _fmt_value(summary.get("avg_raw_objective")),
                     ),
                 )
 

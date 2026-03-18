@@ -74,7 +74,7 @@ FUNCTION_CATALOG = {
         formula=michalewicz,
         suggested_range=(0.0, math.pi),
         global_minimum_value=-1.8013034100904854,
-        global_minimum_points=[[2.202906, 1.570796], [2.202900552, 2.71157148384]],
+        global_minimum_points=[[2.202906, 1.570796]],
         default_n_vars=2,
         fixed_n_vars=False,
     ),
