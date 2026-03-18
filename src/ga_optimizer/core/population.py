@@ -267,7 +267,9 @@ class Population:
         return max(range(len(self.fitness_values)), key=lambda idx: self.fitness_values[idx])
 
     def get_summary(self) -> dict[str, Any]:
-        # Zwraca podstawowe podsumowanie populacji oparte o fitness.
+        # Zwraca podsumowanie populacji:
+        # - fitness: do działania GA
+        # - raw objective: do raportowania i porównań między runami
         best_index = self.get_best_index()
 
         if best_index is None:
@@ -276,9 +278,21 @@ class Population:
                 "chromosome_length": self.chromosome_length,
                 "precision": self.precision,
                 "bits_per_variable": self.bits_per_variable.copy(),
+
                 "best_index": None,
                 "best_chromosome": None,
                 "best_decoded": None,
+
+                "best_raw_objective": None,
+                "worst_raw_objective": None,
+
+                "avg_raw_objective": None,
+                "min_raw_objective": None,
+                "q1_raw_objective": None,
+                "median_raw_objective": None,
+                "q3_raw_objective": None,
+                "max_raw_objective": None,
+
                 "avg_fitness": None,
                 "min_fitness": None,
                 "q1_fitness": None,
@@ -290,14 +304,39 @@ class Population:
         fitness_values = [float(value) for value in self.fitness_values]
         sorted_fitness = sorted(fitness_values)
 
+        raw_values = [float(value) for value in self.raw_objectives]
+        sorted_raw = sorted(raw_values)
+
+        if self.objective_mode == "min":
+            best_raw_objective = min(raw_values)
+            worst_raw_objective = max(raw_values)
+        elif self.objective_mode == "max":
+            best_raw_objective = max(raw_values)
+            worst_raw_objective = min(raw_values)
+        else:
+            raise ValueError(f"Nieobsługiwany typ optymalizacji: {self.objective_mode}")
+
         return {
             "size": self.population_size,
             "chromosome_length": self.chromosome_length,
             "precision": self.precision,
             "bits_per_variable": self.bits_per_variable.copy(),
+
             "best_index": best_index,
             "best_chromosome": self.chromosomes[best_index].copy(),
             "best_decoded": self.decoded_population[best_index].copy(),
+
+            # RAW OBJECTIVE
+            "best_raw_objective": best_raw_objective,
+            "worst_raw_objective": worst_raw_objective,
+            "avg_raw_objective": sum(raw_values) / len(raw_values),
+            "min_raw_objective": sorted_raw[0],
+            "q1_raw_objective": _percentile_from_sorted(sorted_raw, 0.25),
+            "median_raw_objective": _percentile_from_sorted(sorted_raw, 0.50),
+            "q3_raw_objective": _percentile_from_sorted(sorted_raw, 0.75),
+            "max_raw_objective": sorted_raw[-1],
+
+            # FITNESS
             "avg_fitness": sum(fitness_values) / len(fitness_values),
             "min_fitness": sorted_fitness[0],
             "q1_fitness": _percentile_from_sorted(sorted_fitness, 0.25),
@@ -313,6 +352,7 @@ class Population:
                 "epoch_index": epoch_index,
                 "chromosomes": self._copy_chromosomes(),
                 "decoded_population": self._copy_decoded_population(),
+                "raw_objectives": [float(value) for value in self.raw_objectives],
                 "fitness_values": [float(value) for value in self.fitness_values],
                 "summary": deepcopy(self.get_summary()),
             }

@@ -36,16 +36,20 @@ def _percentile_from_sorted(values: list[float], percentile: float) -> float | N
     return float(lower_value + (upper_value - lower_value) * fraction)
 
 
-def _build_runs_aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
-    # Buduje zbiorcze statystyki po wszystkich uruchomieniach.
-    run_max_fitness_values = [
-        float(run["summary"]["max_fitness"])
+def _build_runs_aggregate(
+    runs: list[dict[str, Any]],
+    objective_mode: str,
+) -> dict[str, Any]:
+    # Buduje zbiorcze statystyki po wszystkich uruchomieniach
+    # na podstawie RAW objective najlepszego osobnika z każdego runa.
+    run_best_raw_values = [
+        float(run["summary"]["best_raw_objective"])
         for run in runs
-        if run.get("summary", {}).get("max_fitness") is not None
+        if run.get("summary", {}).get("best_raw_objective") is not None
     ]
-    run_max_fitness_values.sort()
+    run_best_raw_values.sort()
 
-    if not run_max_fitness_values:
+    if not run_best_raw_values:
         return {
             "min": None,
             "q1": None,
@@ -57,12 +61,21 @@ def _build_runs_aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
             "worst": None,
         }
 
-    min_value = run_max_fitness_values[0]
-    q1_value = _percentile_from_sorted(run_max_fitness_values, 0.25)
-    median_value = _percentile_from_sorted(run_max_fitness_values, 0.50)
-    q3_value = _percentile_from_sorted(run_max_fitness_values, 0.75)
-    max_value = run_max_fitness_values[-1]
-    avg_value = sum(run_max_fitness_values) / len(run_max_fitness_values)
+    min_value = run_best_raw_values[0]
+    q1_value = _percentile_from_sorted(run_best_raw_values, 0.25)
+    median_value = _percentile_from_sorted(run_best_raw_values, 0.50)
+    q3_value = _percentile_from_sorted(run_best_raw_values, 0.75)
+    max_value = run_best_raw_values[-1]
+    avg_value = sum(run_best_raw_values) / len(run_best_raw_values)
+
+    if objective_mode == "min":
+        best_value = min_value
+        worst_value = max_value
+    elif objective_mode == "max":
+        best_value = max_value
+        worst_value = min_value
+    else:
+        raise ValueError(f"Nieobsługiwany typ optymalizacji: {objective_mode}")
 
     return {
         "min": min_value,
@@ -71,9 +84,8 @@ def _build_runs_aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
         "q3": q3_value,
         "max": max_value,
         "avg": avg_value,
-        # Zachowanie zgodności z wcześniejszym API.
-        "best": max_value,
-        "worst": min_value,
+        "best": best_value,
+        "worst": worst_value,
     }
 
 
@@ -129,6 +141,8 @@ def run_engine(
         debug_print(verbose, f"Długość chromosomu: {population.chromosome_length}")
         debug_print(verbose, f"Bity na zmienną: {population.bits_per_variable}")
         debug_print(verbose, f"Precyzja: {_fmt_float(population.precision)}")
+        debug_print(verbose, f"Najlepsza wartość funkcji celu: {_fmt_float(summary['best_raw_objective'])}")
+        debug_print(verbose, f"Najgorsza wartość funkcji celu: {_fmt_float(summary['worst_raw_objective'])}")
         debug_print(verbose, f"Min fitness: {_fmt_float(summary['min_fitness'])}")
         debug_print(verbose, f"25% fitness: {_fmt_float(summary['q1_fitness'])}")
         debug_print(verbose, f"Mediana fitness: {_fmt_float(summary['median_fitness'])}")
@@ -139,17 +153,20 @@ def run_engine(
         debug_print(verbose, "======================\n")
 
     total_elapsed = time.perf_counter() - total_started_at
-    aggregate = _build_runs_aggregate(runs)
+    aggregate = _build_runs_aggregate(
+        runs,
+        objective_mode=str(config_dict["objective_mode"]),
+    )
 
     debug_print(verbose, "\n====================== ENGINE MULTIRUN SUMMARY ======================")
     debug_print(verbose, f"Liczba uruchomień: {run_count}")
     debug_print(verbose, f"Seed startowy: {base_seed}")
-    debug_print(verbose, f"Min fitness: {_fmt_float(aggregate['min'])}")
-    debug_print(verbose, f"25%: {_fmt_float(aggregate['q1'])}")
-    debug_print(verbose, f"Mediana: {_fmt_float(aggregate['median'])}")
-    debug_print(verbose, f"75%: {_fmt_float(aggregate['q3'])}")
-    debug_print(verbose, f"Max fitness: {_fmt_float(aggregate['max'])}")
-    debug_print(verbose, f"Średnia z max fitness: {_fmt_float(aggregate['avg'])}")
+    debug_print(verbose, f"Min best-raw: {_fmt_float(aggregate['min'])}")
+    debug_print(verbose, f"25% best-raw: {_fmt_float(aggregate['q1'])}")
+    debug_print(verbose, f"Mediana best-raw: {_fmt_float(aggregate['median'])}")
+    debug_print(verbose, f"75% best-raw: {_fmt_float(aggregate['q3'])}")
+    debug_print(verbose, f"Max best-raw: {_fmt_float(aggregate['max'])}")
+    debug_print(verbose, f"Średnia z best-raw: {_fmt_float(aggregate['avg'])}")
     debug_print(verbose, f"Łączny czas: {_fmt_float(total_elapsed)} s")
     debug_print(verbose, "====================================================================")
 
