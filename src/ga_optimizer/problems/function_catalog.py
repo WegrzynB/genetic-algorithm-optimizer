@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 import math
 
-from ga_optimizer.problems.function_impl import hypersphere, hyperellipsoid, schwefel, ackley, michalewicz, rastrigin, rosenbrock, dejong3, martin_gaddy, griewank
+from ga_optimizer.problems.function_impl import hypersphere, hyperellipsoid, schwefel, ackley, michalewicz, rastrigin, rosenbrock, dejong3, martin_gaddy, griewank, dejong5, easom, goldstein_price, picheny_goldstein_price, styblinski_tang, mccormick, rana, eggholder, schaffer2, himmelblau, pits_and_holes
 
 
 @dataclass(frozen=True)
@@ -106,7 +106,7 @@ FUNCTION_CATALOG = {
         display_name="De Jong 3",
         formula=dejong3,
         suggested_range=(-3.8, 3.8),
-        global_minimum_value=-8.0,  # Najniższe z wymienionych w opisie
+        global_minimum_value=-8.0,
         global_minimum_points=[[-3.5, -3.5]],
         default_n_vars=2,
         fixed_n_vars=False,
@@ -132,6 +132,113 @@ FUNCTION_CATALOG = {
         global_minimum_points=[[0.0, 0.0]],
         default_n_vars=2,
         fixed_n_vars=False,
+    ),
+
+    "DeJong5": ProblemDefinition(
+        key="DeJong5",
+        display_name="De Jong 5",
+        formula=dejong5,
+        suggested_range=(-65.536, 65.536),
+        global_minimum_value=0.9980038377944496,
+        global_minimum_points=[[-31.9783, -31.9783]],
+        fixed_n_vars=True,
+    ),
+
+    "Easom": ProblemDefinition(
+        key="Easom",
+        display_name="Easom",
+        formula=easom,
+        suggested_range=(-100, 100),
+        global_minimum_value=-1.0,
+        global_minimum_points=[[math.pi, math.pi]],
+        fixed_n_vars=True,
+    ),
+
+    "GoldsteinPrice": ProblemDefinition(
+        key="GoldsteinPrice",
+        display_name="Goldstein and Price",
+        formula=goldstein_price,
+        suggested_range=(-2, 2),
+        global_minimum_value=3.0,
+        global_minimum_points=[[0.0, -1.0]],
+        fixed_n_vars=True,
+    ),
+
+    "PichenyGoldsteinPrice": ProblemDefinition(
+        key="PichenyGoldsteinPrice",
+        display_name="Picheny Goldstein Price",
+        formula=picheny_goldstein_price,
+        suggested_range=(-2, 2),
+        global_minimum_value=-3.129125550610585,
+        global_minimum_points=[[0.5, 0.25]],
+        fixed_n_vars=True,
+    ),
+
+    "StyblinskiTang": ProblemDefinition(
+        key="StyblinskiTang",
+        display_name="Styblinski-Tang",
+        formula=styblinski_tang,
+        suggested_range=(-5, 5),
+        global_minimum_value=-78.3323314075428,
+        global_minimum_points=[[-2.903534, -2.903534]],
+    ),
+
+    "McCormick": ProblemDefinition(
+        key="McCormick",
+        display_name="McCormick",
+        formula=mccormick,
+        suggested_range=(-3, 4),
+        global_minimum_value=-1.913222954882274,
+        global_minimum_points=[[-0.54719, -1.54719]],
+        fixed_n_vars=True,
+    ),
+
+    "Rana": ProblemDefinition(
+        key="Rana",
+        display_name="Rana",
+        formula=rana,
+        suggested_range=(-512, 512),
+        global_minimum_value=-511.73288188661934,
+        global_minimum_points=[[-488.632577, 512]],
+    ),
+
+    "Eggholder": ProblemDefinition(
+        key="Eggholder",
+        display_name="Egg Holder",
+        formula=eggholder,
+        suggested_range=(-512, 512),
+        global_minimum_value=-959.7133283100513,
+        global_minimum_points=[[512.0214, 404.2510]],
+    ),
+
+    "Schaffer2": ProblemDefinition(
+        key="Schaffer2",
+        display_name="Schaffer 2",
+        formula=schaffer2,
+        suggested_range=(-100, 100),
+        global_minimum_value=0.0,
+        global_minimum_points=[[0.0, 0.0]],
+        fixed_n_vars=True,
+    ),
+
+    "Himmelblau": ProblemDefinition(
+        key="Himmelblau",
+        display_name="Himmelblau",
+        formula=himmelblau,
+        suggested_range=(-5, 5),
+        global_minimum_value=0.0,
+        global_minimum_points=[[3.0, 2.0]],
+        fixed_n_vars=True,
+    ),
+
+    "PitsAndHoles": ProblemDefinition(
+        key="PitsAndHoles",
+        display_name="Pits and Holes",
+        formula=pits_and_holes,
+        suggested_range=(-20, 20),
+        global_minimum_value=-0.23874320826749335,
+        global_minimum_points=[[-10, -10]],
+        fixed_n_vars=True,
     ),
 }
 
