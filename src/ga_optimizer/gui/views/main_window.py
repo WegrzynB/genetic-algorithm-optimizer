@@ -13,6 +13,7 @@ from ga_optimizer.gui.views.run_panel import RunPanel
 from ga_optimizer.core.pipeline import run_pipeline
 from ga_optimizer.config.presets import PRESETS
 from ga_optimizer.io.results_writer import save_run_results
+from ga_optimizer.experiments.experiments import run_experiments
 
 
 class MainWindow:
@@ -20,7 +21,7 @@ class MainWindow:
     RIGHT_TOP_RATIO = 0.12
     RESIZE_DEBOUNCE_MS = 80
 
-    EXPERIMENTS = False
+    EXPERIMENTS = True
 
     def __init__(self, root):
         # Referencja do głównego okna Tkinter.
@@ -109,8 +110,8 @@ class MainWindow:
             self.run_panel.set_status(f"Załadowano preset: {preset_name}")
 
     def _apply_experiment(self, experiment_name: str) -> None:
-        # Aplikuje preset do ViewModel i odświeża panel konfiguracji.
-        print(experiment_name)
+        # Uruchamia zdefiniowany eksperyment na aktualnym stanie GUI.
+        run_experiments(self, experiment_name)
 
     def _build_layout(self) -> None:
         # Tworzy główny układ okna: nagłówek + ciało.
