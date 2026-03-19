@@ -1,1 +1,0 @@
-# Buduje zestawy scenariuszy eksperymentalnych z kombinacji parametrów

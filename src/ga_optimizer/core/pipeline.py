@@ -14,6 +14,7 @@ from ga_optimizer.utils.helpers import debug_print
 def run_pipeline(
     config: GAConfig,
     progress_callback: Callable[[int, int], None] | None = None,
+    verbose: bool = True,
 ) -> dict[str, Any]:
     # Składa config do prostego słownika wejściowego dla engine.
     input_dict = {
@@ -42,7 +43,7 @@ def run_pipeline(
         input_dict["seed"] = random.randint(0, 2_147_483_647)
 
     # True żeby wypisywać debug_print
-    input_dict["verbose"] = True
+    input_dict["verbose"] = bool(verbose)
 
     debug_print(input_dict["verbose"], "\n=== PIPELINE INPUT ===")
     for key, value in input_dict.items():
