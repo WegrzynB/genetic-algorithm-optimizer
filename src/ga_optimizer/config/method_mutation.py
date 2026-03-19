@@ -12,14 +12,13 @@ MUTATION_METHOD_LABELS = {
 }
 
 
-
 MUTATION_METHOD_PARAM_SPECS = {
     "edge": [
         {
             "key": "mutation_edge_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.1,
+            "default": 0.03,
             "min": 0.0,
             "max": 1.0,
         },
@@ -32,78 +31,69 @@ MUTATION_METHOD_PARAM_SPECS = {
         },
     ],
 
-
     "one_point": [
         {
             "key": "mutation_one_point_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.05,
+            "default": 0.02,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
 
     "two_point": [
         {
             "key": "mutation_two_point_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.06,
+            "default": 0.02,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
 
     "bit_flip": [
         {
             "key": "mutation_bit_flip_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.08,
+            "default": 0.03,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
 
     "swap": [
         {
             "key": "mutation_swap_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.05,
+            "default": 0.02,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
 
     "scramble": [
         {
             "key": "mutation_scramble_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.04,
+            "default": 0.02,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
 
     "reset": [
         {
             "key": "mutation_reset_p",
             "label": "P (mutacja)",
             "type": "float",
-            "default": 0.04,
+            "default": 0.015,
             "min": 0.0,
             "max": 1.0,
         },
     ],
-
-
-    
 }

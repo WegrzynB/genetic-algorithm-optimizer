@@ -118,13 +118,13 @@ PRECISION_FIELD_SPECS = {
         "label": "Dokładność (np. 0.001)",
         "type": "float",
         "min_exclusive": 0.0,
-        "default": 0.1,
+        "default": 0.01,
     },
     "precision_bits": {
         "label": "Liczba bitów",
         "type": "int",
         "min": 1,
-        "default": 7,
+        "default": 10,
     },
 }
 

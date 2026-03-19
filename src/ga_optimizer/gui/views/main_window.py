@@ -20,7 +20,6 @@ class MainWindow:
     RIGHT_TOP_RATIO = 0.12
     RESIZE_DEBOUNCE_MS = 80
 
-    EXPERIMENTS = False
 
     def __init__(self, root):
         # Referencja do głównego okna Tkinter.
@@ -82,15 +81,6 @@ class MainWindow:
         self.root.config(menu=menubar)
 
 
-        if self.EXPERIMENTS:
-            experiments_menu = Menu(menubar, tearoff=0)
-            for experiments_name in ["Test"]:
-                experiments_menu.add_command(
-                    label=experiments_name,
-                    command=lambda name=experiments_name: self._apply_experiment(name),
-                )
-            menubar.add_cascade(label="Experiments", menu=experiments_menu)
-            self.root.config(menu=menubar)
 
     def _apply_preset(self, preset_name: str) -> None:
         # Aplikuje preset do ViewModel i odświeża panel konfiguracji.
@@ -107,10 +97,6 @@ class MainWindow:
 
         if self.run_panel is not None:
             self.run_panel.set_status(f"Załadowano preset: {preset_name}")
-
-    def _apply_experiment(self, experiment_name: str) -> None:
-        # Aplikuje preset do ViewModel i odświeża panel konfiguracji.
-        print(experiment_name)
 
     def _build_layout(self) -> None:
         # Tworzy główny układ okna: nagłówek + ciało.
