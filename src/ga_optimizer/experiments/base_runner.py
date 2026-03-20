@@ -1,3 +1,4 @@
+# base_runner.py
 from __future__ import annotations
 
 import math
@@ -80,47 +81,167 @@ def _nearest_global_point_distance(
     return min(distances) if distances else None
 
 
-def _extract_best_run_record(
-    engine_result: dict[str, Any],
-    problem_name: str,
-) -> dict[str, Any] | None:
-    runs = engine_result.get("runs", [])
-    if not runs:
+def _percentile_from_sorted(values: list[float], percentile: float) -> float | None:
+    if not values:
         return None
 
-    problem = get_problem_definition(problem_name)
-    pool: list[dict[str, Any]] = []
+    if len(values) == 1:
+        return float(values[0])
 
-    for run in runs:
-        summary = run.get("summary", {})
-        best_point = summary.get("best_decoded")
-        best_chromosome = summary.get("best_chromosome")
-        best_raw = summary.get("best_raw_objective")
+    position = (len(values) - 1) * percentile
+    lower_index = int(position)
+    upper_index = min(lower_index + 1, len(values) - 1)
+    fraction = position - lower_index
 
-        if best_raw is None and best_point is not None:
-            try:
-                best_raw = float(problem.formula(best_point))
-            except Exception:
-                best_raw = None
+    lower_value = values[lower_index]
+    upper_value = values[upper_index]
 
-        if best_point is None or best_chromosome is None or best_raw is None:
+    return float(lower_value + (upper_value - lower_value) * fraction)
+
+
+def _median_index_for_sorted_length(length: int) -> int | None:
+    if length <= 0:
+        return None
+    return (length - 1) // 2
+
+
+def _safe_float_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def _extract_run_population_points(
+    run: dict[str, Any],
+    problem_definition,
+) -> list[dict[str, Any]]:
+    decoded_population = run.get("decoded_population") or []
+    raw_objectives = run.get("raw_objectives") or []
+
+    if not decoded_population:
+        history = run.get("history") or []
+        if history:
+            last_state = history[-1]
+            decoded_population = last_state.get("decoded_population") or []
+            raw_objectives = last_state.get("raw_objectives") or []
+
+    if not decoded_population:
+        return []
+
+    prepared_points: list[dict[str, Any]] = []
+
+    for idx, point in enumerate(decoded_population):
+        if point is None:
             continue
 
-        pool.append(
+        point_list = [float(x) for x in point]
+
+        raw_value = None
+        if idx < len(raw_objectives):
+            raw_value = _safe_float_or_none(raw_objectives[idx])
+
+        if raw_value is None:
+            try:
+                raw_value = float(problem_definition.formula(point_list))
+            except Exception:
+                continue
+
+        prepared_points.append(
             {
-                "run_index": int(run.get("run_index", 0)) + 1,
-                "seed": run.get("seed"),
-                "best_point": list(best_point),
-                "best_chromosome": list(best_chromosome),
-                "best_raw_objective": float(best_raw),
-                "elapsed": float(run.get("elapsed", 0.0)),
+                "point": point_list,
+                "raw_objective": raw_value,
+                "population_index": idx,
             }
         )
 
-    if not pool:
+    return prepared_points
+
+
+def _choose_median_point_from_population(
+    points: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if not points:
         return None
 
-    return min(pool, key=lambda item: item["best_raw_objective"])
+    ordered = sorted(points, key=lambda item: item["raw_objective"])
+    median_idx = _median_index_for_sorted_length(len(ordered))
+    if median_idx is None:
+        return None
+    return ordered[median_idx]
+
+
+def _collect_final_population_points(engine_result: dict[str, Any], problem_name: str) -> list[dict[str, Any]]:
+    problem = get_problem_definition(problem_name)
+    runs = engine_result.get("runs", []) or []
+
+    collected: list[dict[str, Any]] = []
+
+    for run_index, run in enumerate(runs, start=1):
+        run_points = _extract_run_population_points(run, problem)
+        for item in run_points:
+            collected.append(
+                {
+                    "run_index": run_index,
+                    "point": item["point"],
+                    "raw_objective": item["raw_objective"],
+                    "population_index": item["population_index"],
+                }
+            )
+
+    return collected
+
+
+def _choose_global_median_from_all_final_populations(
+    engine_result: dict[str, Any],
+    problem_name: str,
+) -> dict[str, Any] | None:
+    all_points = _collect_final_population_points(engine_result, problem_name)
+    if not all_points:
+        return None
+
+    ordered = sorted(all_points, key=lambda item: item["raw_objective"])
+    median_idx = _median_index_for_sorted_length(len(ordered))
+    if median_idx is None:
+        return None
+    return ordered[median_idx]
+
+
+def _build_engine_summary_from_all_final_populations(
+    engine_result: dict[str, Any],
+    problem_name: str,
+) -> dict[str, Any]:
+    all_points = _collect_final_population_points(engine_result, problem_name)
+    values = sorted([float(item["raw_objective"]) for item in all_points])
+
+    if not values:
+        return {
+            "min": None,
+            "q1": None,
+            "median": None,
+            "q3": None,
+            "max": None,
+            "avg": None,
+            "best": None,
+            "worst": None,
+            "elapsed": engine_result.get("elapsed"),
+            "final_population_point_count": 0,
+        }
+
+    return {
+        "min": values[0],
+        "q1": _percentile_from_sorted(values, 0.25),
+        "median": _percentile_from_sorted(values, 0.50),
+        "q3": _percentile_from_sorted(values, 0.75),
+        "max": values[-1],
+        "avg": sum(values) / len(values),
+        "best": values[0],
+        "worst": values[-1],
+        "elapsed": engine_result.get("elapsed"),
+        "final_population_point_count": len(values),
+    }
 
 
 def run_single_config(
@@ -144,24 +265,33 @@ def run_single_config(
     engine_result = pipeline_result["engine_result"]
 
     problem = get_problem_definition(config.problem_name)
-    best_run = _extract_best_run_record(
+
+    # FINALNY WYNIK RUNU:
+    # bierzemy wszystkie punkty ze wszystkich końcowych populacji
+    # i wybieramy medianę po raw objective
+    chosen_point_record = _choose_global_median_from_all_final_populations(
         engine_result=engine_result,
         problem_name=config.problem_name,
     )
 
-    best_value = None
+    aggregated_engine_summary = _build_engine_summary_from_all_final_populations(
+        engine_result=engine_result,
+        problem_name=config.problem_name,
+    )
+
+    final_value = None
     signed_value_error = None
     abs_value_error = None
-    best_point = None
+    final_point = None
     nearest_point_distance = None
 
-    if best_run is not None:
-        best_value = float(best_run["best_raw_objective"])
-        signed_value_error = best_value - float(problem.global_minimum_value)
+    if chosen_point_record is not None:
+        final_value = float(chosen_point_record["raw_objective"])
+        final_point = list(chosen_point_record["point"])
+        signed_value_error = final_value - float(problem.global_minimum_value)
         abs_value_error = abs(signed_value_error)
-        best_point = list(best_run["best_point"])
         nearest_point_distance = _nearest_global_point_distance(
-            best_point,
+            final_point,
             problem.global_minimum_points,
         )
 
@@ -191,20 +321,10 @@ def run_single_config(
             "elitism_enabled": config.elitism_enabled,
             "method_params": dict(config.method_params),
         },
-        "engine_summary": {
-            "min": engine_result.get("min"),
-            "q1": engine_result.get("q1"),
-            "median": engine_result.get("median"),
-            "q3": engine_result.get("q3"),
-            "max": engine_result.get("max"),
-            "avg": engine_result.get("avg"),
-            "best": engine_result.get("best"),
-            "worst": engine_result.get("worst"),
-            "elapsed": engine_result.get("elapsed"),
-        },
-        "best_run": best_run,
-        "best_value": best_value,
-        "best_point": best_point,
+        "engine_summary": aggregated_engine_summary,
+        "best_run": chosen_point_record,
+        "best_value": final_value,
+        "best_point": final_point,
         "signed_value_error": signed_value_error,
         "abs_value_error": abs_value_error,
         "nearest_global_min_point_distance": nearest_point_distance,
