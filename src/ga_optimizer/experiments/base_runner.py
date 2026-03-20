@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import math
+import time
 from typing import Any, Callable
 
 from ga_optimizer.core.pipeline import run_pipeline
 from ga_optimizer.problems.function_catalog import get_problem_definition
 
 
-PROGRESS_PRINT_EVERY = 500
+PROGRESS_PRINT_EVERY = 1000
 
 
 def _format_percent(current: int, total: int) -> str:
@@ -23,10 +24,7 @@ def print_experiment_progress(
     step_label: str = "",
 ) -> None:
     suffix = f" | {step_label}" if step_label else ""
-    print(
-        f"[{test_name}] postęp eksperymentu: "
-        f"{current}/{total} ({_format_percent(current, total)}){suffix}"
-    )
+    print(f"[{test_name}] postęp eksperymentu: {current}/{total} ({_format_percent(current, total)}){suffix}")
 
 
 def make_progress_callback(
@@ -51,22 +49,17 @@ def make_progress_callback(
             or current == total
             or (print_every > 0 and current % print_every == 0)
         )
-
         if not should_print:
             return
 
         if experiment_progress is not None:
             exp_current, exp_total = experiment_progress
-            experiment_part = (
-                f"eksperyment {exp_current}/{exp_total} "
-                f"({_format_percent(exp_current, exp_total)})"
-            )
+            experiment_part = f"eksperyment {exp_current}/{exp_total} ({_format_percent(exp_current, exp_total)})"
         else:
             experiment_part = "eksperyment -/-"
 
         local_part = f"run_engine {current}/{total} ({_format_percent(current, total)})"
         suffix = f" | {step_label}" if step_label else ""
-
         print(f"{prefix} {experiment_part} | {local_part}{suffix}")
 
     return _callback
@@ -136,15 +129,8 @@ def run_single_config(
     experiment_progress: tuple[int, int] | None = None,
     step_label: str = "",
 ) -> dict[str, Any]:
-    """
-    Uruchamia pojedynczy config GA przez pipeline i zwraca rekord
-    gotowy do agregacji w eksperymentach.
+    start = time.perf_counter()
 
-    Dodatkowo liczy:
-    - signed_value_error
-    - abs_value_error
-    - nearest_global_min_point_distance
-    """
     pipeline_result = run_pipeline(
         config,
         progress_callback=make_progress_callback(
@@ -178,6 +164,8 @@ def run_single_config(
             best_point,
             problem.global_minimum_points,
         )
+
+    duration_sec = time.perf_counter() - start
 
     return {
         "problem_name": config.problem_name,
@@ -220,4 +208,23 @@ def run_single_config(
         "signed_value_error": signed_value_error,
         "abs_value_error": abs_value_error,
         "nearest_global_min_point_distance": nearest_point_distance,
+        "duration_sec": duration_sec,
     }
+
+
+def format_global_params_for_print(config) -> str:
+    parts = [
+        f"problem={config.problem_name}",
+        f"population={config.population}",
+        f"epochs={config.epochs}",
+        f"run_count={config.run_count}",
+        f"precision_bits={config.precision_bits}",
+        f"selection={config.selection_method}",
+        f"crossover={config.crossover_method}",
+        f"mutation={config.mutation_method}",
+        f"inversion={config.inversion_enabled}",
+        f"elitism={config.elitism_enabled}",
+        f"seed={config.seed}",
+        f"method_params={dict(config.method_params)}",
+    ]
+    return " | ".join(parts)
