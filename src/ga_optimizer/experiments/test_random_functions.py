@@ -1,13 +1,23 @@
+# test_random_functions.py
 from __future__ import annotations
 
 import random
+import time
+import traceback
 
-from ga_optimizer.experiments.base_runner import print_experiment_progress, run_single_config
-from ga_optimizer.experiments.metrics import build_operator_ranking_rows, summarize_rows_basic
+from ga_optimizer.experiments.base_runner import (
+    format_global_params_for_print,
+    print_experiment_progress,
+    run_single_config,
+)
+from ga_optimizer.experiments.metrics import (
+    build_operator_ranking_rows,
+    summarize_rows_basic,
+)
 from ga_optimizer.experiments.plotting import (
-    save_bar_errors_by_function,
-    save_bar_operator_wins,
-    save_histogram_best_values,
+    save_group_quality_ranking,
+    save_problem_counts_bar,
+    save_problem_metric_bar,
 )
 from ga_optimizer.experiments.reporting import (
     build_random_functions_report,
@@ -16,8 +26,7 @@ from ga_optimizer.experiments.reporting import (
     save_summary_csv,
     save_summary_json,
 )
-from ga_optimizer.experiments.search_spaces import sample_random_config
-from ga_optimizer.problems.function_catalog import get_problem_names
+from ga_optimizer.experiments.search_spaces import pick_problem_name, sample_random_config
 
 
 def _to_csv_rows(rows: list[dict]) -> list[dict]:
@@ -35,150 +44,226 @@ def _to_csv_rows(rows: list[dict]) -> list[dict]:
                 "signed_value_error": item["signed_value_error"],
                 "abs_value_error": item["abs_value_error"],
                 "nearest_global_min_point_distance": item["nearest_global_min_point_distance"],
-                "population": cfg["population"],
-                "epochs": cfg["epochs"],
-                "run_count": cfg["run_count"],
-                "precision_bits": cfg["precision_bits"],
                 "selection_method": cfg["selection_method"],
                 "crossover_method": cfg["crossover_method"],
                 "mutation_method": cfg["mutation_method"],
                 "inversion_enabled": cfg["inversion_enabled"],
                 "elitism_enabled": cfg["elitism_enabled"],
+                "population": cfg["population"],
+                "epochs": cfg["epochs"],
+                "run_count": cfg["run_count"],
+                "precision_bits": cfg["precision_bits"],
                 "seed": cfg["seed"],
+                "duration_sec": item.get("duration_sec"),
             }
         )
     return csv_rows
+
+
+def _build_quality_rows(
+    rows: list[dict],
+    config_key: str,
+    label_map: dict | None = None,
+) -> list[dict]:
+    valid = [r for r in rows if r.get("abs_value_error") is not None]
+    grouped: dict[str, list[float]] = {}
+
+    for row in valid:
+        raw_label = row["config"][config_key]
+        label = label_map.get(raw_label, str(raw_label)) if label_map else str(raw_label)
+        grouped.setdefault(label, []).append(float(row["abs_value_error"]))
+
+    result = []
+    for label, vals in grouped.items():
+        result.append(
+            {
+                "label": label,
+                "mean": sum(vals) / len(vals),
+                "median": sorted(vals)[len(vals) // 2] if len(vals) % 2 == 1 else (sorted(vals)[len(vals) // 2 - 1] + sorted(vals)[len(vals) // 2]) / 2.0,
+                "count": len(vals),
+            }
+        )
+
+    result.sort(key=lambda item: (item["mean"], item["median"], item["label"]))
+    return result
 
 
 def run_random_functions_test(
     preset_name: str,
     preset: dict,
 ) -> dict:
-    """
-    Testuje losowe funkcje z losowymi konfiguracjami.
-    Wszystko jest losowane:
-    - funkcja
-    - operatorzy
-    - parametry
-    - seed (jeśli pusty)
-    """
-    ranges = preset["ranges"]
     executions = int(preset["executions"])
-    seed = preset.get("seed", "")
+    problem_pool = preset["problem_pool"]
+    seed = preset.get("seed", None)
     value_tol = float(preset["success_value_abs_tol"])
     point_tol = float(preset["success_point_distance_tol"])
-    pool = get_problem_names()
+    ranges = preset["ranges"]
 
     rng = random.Random()
-    if seed not in ("", None):
+    if seed is not None:
         rng.seed(seed)
 
     output_dir = make_experiment_output_dir("random_functions", preset_name)
 
+    print("\n\n[random_functions] START TESTU\n")
     print(f"[random_functions] liczba pełnych wykonań: {executions}")
-    print(f"[random_functions] katalog: {output_dir}")
+    print(f"[random_functions] katalog: {output_dir}\n")
 
+    test_start = time.perf_counter()
     rows = []
+    errors = []
+
     for exec_index in range(executions):
         current_step = exec_index + 1
-        problem_name = rng.choice(pool)
+        problem_name = pick_problem_name(problem_pool, rng)
         step_label = f"funkcja={problem_name}"
 
-        print_experiment_progress(
-            "random_functions",
-            current_step,
-            executions,
-            step_label=step_label,
-        )
+        print_experiment_progress("random_functions", current_step, executions, step_label=step_label)
 
-        config = sample_random_config(
-            problem_name=problem_name,
-            ranges=ranges,
-            rng=rng,
-            seed=seed,
-        )
+        config = sample_random_config(problem_name=problem_name, ranges=ranges, rng=rng, seed=seed)
+        print(f"[random_functions] parametry globalne | {format_global_params_for_print(config)}")
 
-        print(
-            f"[random_functions] konfiguracja | "
-            f"sel={config.selection_method} | "
-            f"cross={config.crossover_method} | "
-            f"mut={config.mutation_method} | "
-            f"pop={config.population} | epochs={config.epochs} | run_count={config.run_count}"
-        )
+        exp_start = time.perf_counter()
+        try:
+            row = run_single_config(
+                config,
+                progress_prefix="[random_functions]",
+                experiment_progress=(current_step, executions),
+                step_label=step_label,
+            )
+            row["experiment_duration_sec"] = time.perf_counter() - exp_start
+            rows.append(row)
+            print(f"[random_functions] czas eksperymentu: {row['experiment_duration_sec']:.3f} s")
+        except Exception as exc:
+            err = {
+                "step": current_step,
+                "label": step_label,
+                "type": type(exc).__name__,
+                "message": str(exc),
+                "traceback": traceback.format_exc(),
+            }
+            errors.append(err)
+            print(f"[random_functions] BŁĄD: {err['type']} | {err['message']}")
 
-        row = run_single_config(
-            config,
-            progress_prefix="[random_functions]",
-            experiment_progress=(current_step, executions),
-            step_label=step_label,
-        )
-        rows.append(row)
+        print()
+
+    test_duration_sec = time.perf_counter() - test_start
+    print(f"[random_functions] czas całego testu: {test_duration_sec:.3f} s")
+    print("\n[random_functions] KONIEC TESTU\n\n")
 
     csv_rows = _to_csv_rows(rows)
     summary_basic = summarize_rows_basic(rows, value_tol=value_tol, point_tol=point_tol)
     ranking_rows = build_operator_ranking_rows([row for row in rows if row.get("best_value") is not None])
 
-    values = [row["best_value"] for row in rows if row.get("best_value") is not None]
-    per_problem_best_rows = []
-    best_per_problem = {}
-    for row in [r for r in rows if r.get("best_value") is not None]:
-        name = row["problem_name"]
-        if name not in best_per_problem or row["best_value"] < best_per_problem[name]["best_value"]:
-            best_per_problem[name] = row
-    for row in best_per_problem.values():
-        per_problem_best_rows.append(
-            {
-                "problem_name": row["problem_name"],
-                "error_to_global_min": row["abs_value_error"],
-            }
-        )
+    selection_quality_rows = _build_quality_rows(rows, "selection_method")
+    crossover_quality_rows = _build_quality_rows(rows, "crossover_method")
+    mutation_quality_rows = _build_quality_rows(rows, "mutation_method")
+    inversion_quality_rows = _build_quality_rows(
+        rows,
+        "inversion_enabled",
+        label_map={True: "inversion=True", False: "inversion=False"},
+    )
+    elitism_quality_rows = _build_quality_rows(
+        rows,
+        "elitism_enabled",
+        label_map={True: "elitism=True", False: "elitism=False"},
+    )
 
-    hist_path = save_histogram_best_values(output_dir, values, filename="hist_random_functions.png")
-    bar_problem_path = save_bar_errors_by_function(output_dir, per_problem_best_rows, filename="bar_errors_random_functions.png")
-    bar_operator_path = save_bar_operator_wins(output_dir, ranking_rows, filename="bar_operator_wins_random_functions.png")
+    sampled_problem_counts = save_problem_counts_bar(
+        output_dir=output_dir,
+        rows=rows,
+        filename="bar_problem_counts_random_functions.png",
+        title="Liczba wylosowań funkcji",
+    )
+    median_error_by_problem = save_problem_metric_bar(
+        output_dir=output_dir,
+        rows=rows,
+        value_key="abs_value_error",
+        agg="median",
+        title="Mediana abs error per funkcja",
+        xlabel="Mediana abs error",
+        filename="bar_median_error_by_problem_random_functions.png",
+    )
 
-    best_overall_row = summary_basic["best_row"]
-    worst_overall_row = summary_basic["worst_row"]
-
-    def _bestworst_to_dict(row):
-        if row is None:
-            return None
-        cfg = row["config"]
-        return {
-            "problem_name": row["problem_name"],
-            "best_value": row["best_value"],
-            "abs_value_error": row["abs_value_error"],
-            "nearest_global_min_point_distance": row["nearest_global_min_point_distance"],
-            "selection_method": cfg["selection_method"],
-            "crossover_method": cfg["crossover_method"],
-            "mutation_method": cfg["mutation_method"],
-        }
+    selection_ranking = save_group_quality_ranking(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="selection_method",
+        title="Ranking jakości metod selekcji (losowe funkcje)",
+        filename="rank_selection_quality_random_functions.png",
+    )
+    crossover_ranking = save_group_quality_ranking(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="crossover_method",
+        title="Ranking jakości metod crossover (losowe funkcje)",
+        filename="rank_crossover_quality_random_functions.png",
+    )
+    mutation_ranking = save_group_quality_ranking(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="mutation_method",
+        title="Ranking jakości metod mutacji (losowe funkcje)",
+        filename="rank_mutation_quality_random_functions.png",
+    )
+    inversion_ranking = save_group_quality_ranking(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="inversion_enabled",
+        title="Czy inwersja pomaga? (losowe funkcje)",
+        filename="rank_inversion_quality_random_functions.png",
+        label_map={True: "inversion=True", False: "inversion=False"},
+    )
+    elitism_ranking = save_group_quality_ranking(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="elitism_enabled",
+        title="Czy elitaryzm pomaga? (losowe funkcje)",
+        filename="rank_elitism_quality_random_functions.png",
+        label_map={True: "elitism=True", False: "elitism=False"},
+    )
 
     summary = {
         "test_name": "random_functions",
         "preset_name": preset_name,
         "executions": executions,
-        "problem_pool_label": "all",
+        "problem_pool": problem_pool,
         "success_value_abs_tol": value_tol,
         "success_point_distance_tol": point_tol,
-        "mean_best_value": summary_basic["mean_best_value"],
+        "best_value": summary_basic["best_value"],
+        "q1_best_value": summary_basic["q1_best_value"],
         "median_best_value": summary_basic["median_best_value"],
-        "std_best_value": summary_basic["std_best_value"],
+        "mean_best_value": summary_basic["mean_best_value"],
+        "q3_best_value": summary_basic["q3_best_value"],
+        "worst_best_value": summary_basic["worst_best_value"],
         "mean_abs_error": summary_basic["mean_abs_error"],
         "median_abs_error": summary_basic["median_abs_error"],
         "mean_point_distance": summary_basic["mean_point_distance"],
         "median_point_distance": summary_basic["median_point_distance"],
         "mean_elapsed": summary_basic["mean_elapsed"],
+        "mean_duration_sec": summary_basic["mean_duration_sec"],
+        "median_duration_sec": summary_basic["median_duration_sec"],
+        "std_best_value": summary_basic["std_best_value"],
         "success": summary_basic["success"],
-        "best_overall": _bestworst_to_dict(best_overall_row),
-        "worst_overall": _bestworst_to_dict(worst_overall_row),
-        "top_rows": csv_rows[:10],
+        "top_rows": csv_rows[:15],
+        "top_rows_full": csv_rows,
         "operator_ranking": ranking_rows,
+        "selection_quality_rows": selection_quality_rows,
+        "crossover_quality_rows": crossover_quality_rows,
+        "mutation_quality_rows": mutation_quality_rows,
+        "inversion_quality_rows": inversion_quality_rows,
+        "elitism_quality_rows": elitism_quality_rows,
         "plot_paths": {
-            "histogram": hist_path,
-            "bar_errors_by_function": bar_problem_path,
-            "bar_operator_wins": bar_operator_path,
+            "bar_problem_counts": sampled_problem_counts,
+            "bar_median_error_by_problem": median_error_by_problem,
+            "rank_selection_quality": selection_ranking,
+            "rank_crossover_quality": crossover_ranking,
+            "rank_mutation_quality": mutation_ranking,
+            "rank_inversion_quality": inversion_ranking,
+            "rank_elitism_quality": elitism_ranking,
         },
+        "test_duration_sec": test_duration_sec,
+        "errors": errors,
         "output_dir": str(output_dir),
     }
 
