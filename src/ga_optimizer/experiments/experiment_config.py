@@ -20,7 +20,7 @@ ACTIVE_EXPERIMENT_NAME = "single_function_operator_search_default"
 # ============================================================
 RANDOM_FUNCTIONS_EXECUTIONS = 300
 ALL_FUNCTIONS_EXECUTIONS_PER_FUNCTION = 20
-SINGLE_FUNCTION_EXECUTIONS = 200
+SINGLE_FUNCTION_EXECUTIONS = 300
 
 # ============================================================
 # FUNKCJA DO TESTÓW JEDNOFUNKCYJNYCH
@@ -154,7 +154,7 @@ EXPERIMENT_PRESETS = {
         "success_value_abs_tol": SUCCESS_VALUE_ABS_TOL,
         "success_point_distance_tol": SUCCESS_POINT_DISTANCE_TOL,
         "top_fraction_for_regions": 0.25,
-        "heatmap_bins": 20,
+        "heatmap_bins": 40,
         "ranges": {**GLOBAL_RANDOM_RANGES},
     },
 }

@@ -486,6 +486,19 @@ def save_median_density_heatmap(
         linewidth=0.45,
     )
 
+    if median_point is not None and len(median_point) >= 2:
+        ax.scatter(
+            [float(median_point[0])],
+            [float(median_point[1])],
+            marker="o",
+            s=90,
+            c="#ff8c00",
+            edgecolors="black",
+            linewidths=1.2,
+            zorder=7,
+            label="mediana",
+        )
+
     if global_minimum_points:
         gx = [float(point[0]) for point in global_minimum_points if len(point) >= 2]
         gy = [float(point[1]) for point in global_minimum_points if len(point) >= 2]
@@ -493,27 +506,13 @@ def save_median_density_heatmap(
             ax.scatter(
                 gx,
                 gy,
-                marker="*",
-                s=420,
-                c="#00c853",
-                edgecolors="black",
-                linewidths=1.8,
-                zorder=6,
+                marker="x",
+                s=100,
+                c="black",
+                linewidths=2.5,
+                zorder=8,
                 label="minimum globalne",
             )
-
-    if median_point is not None and len(median_point) >= 2:
-        ax.scatter(
-            [float(median_point[0])],
-            [float(median_point[1])],
-            marker="X",
-            s=260,
-            c="#1565c0",
-            edgecolors="white",
-            linewidths=1.8,
-            zorder=7,
-            label="mediana",
-        )
 
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
