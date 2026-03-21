@@ -25,7 +25,7 @@ SINGLE_FUNCTION_EXECUTIONS = 300
 # ============================================================
 # FUNKCJA DO TESTÓW JEDNOFUNKCYJNYCH
 # ============================================================
-TARGET_PROBLEM_NAME = "Hypersphere"
+TARGET_PROBLEM_NAME = "Eggholder"
 # inne:
 # TARGET_PROBLEM_NAME = "Eggholder"
 # TARGET_PROBLEM_NAME = "Rosenbrock"
