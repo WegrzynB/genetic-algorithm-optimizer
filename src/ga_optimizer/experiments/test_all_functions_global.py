@@ -6,6 +6,7 @@ import time
 import traceback
 
 from ga_optimizer.experiments.base_runner import (
+    format_duration_human,
     format_global_params_for_print,
     print_experiment_progress,
     run_single_config,
@@ -114,7 +115,7 @@ def run_all_functions_global_operator_search(
                 )
                 row["experiment_duration_sec"] = time.perf_counter() - exp_start
                 all_rows.append(row)
-                print(f"[all_functions_global] czas eksperymentu: {row['experiment_duration_sec']:.3f} s")
+                print(f"[all_functions_global] czas eksperymentu: {format_duration_human(row['experiment_duration_sec'])}")
             except Exception as exc:
                 err = {
                     "step": global_step,
@@ -131,7 +132,7 @@ def run_all_functions_global_operator_search(
         print()
 
     test_duration_sec = time.perf_counter() - test_start
-    print(f"[all_functions_global] czas całego testu: {test_duration_sec:.3f} s")
+    print(f"[all_functions_global] czas całego testu: {format_duration_human(test_duration_sec)}")
     print("\n[all_functions_global] KONIEC TESTU\n\n")
 
     valid_rows = [row for row in all_rows if row.get("best_value") is not None]

@@ -6,6 +6,7 @@ import time
 import traceback
 
 from ga_optimizer.experiments.base_runner import (
+    format_duration_human,
     format_global_params_for_print,
     print_experiment_progress,
     run_single_config,
@@ -133,7 +134,7 @@ def run_random_functions_test(
             )
             row["experiment_duration_sec"] = time.perf_counter() - exp_start
             rows.append(row)
-            print(f"[random_functions] czas eksperymentu: {row['experiment_duration_sec']:.3f} s")
+            print(f"[random_functions] czas eksperymentu: {format_duration_human(row['experiment_duration_sec'])}")
         except Exception as exc:
             err = {
                 "step": current_step,
@@ -148,7 +149,7 @@ def run_random_functions_test(
         print()
 
     test_duration_sec = time.perf_counter() - test_start
-    print(f"[random_functions] czas całego testu: {test_duration_sec:.3f} s")
+    print(f"[random_functions] czas całego testu: {format_duration_human(test_duration_sec)}")
     print("\n[random_functions] KONIEC TESTU\n\n")
 
     csv_rows = _to_csv_rows(rows)
