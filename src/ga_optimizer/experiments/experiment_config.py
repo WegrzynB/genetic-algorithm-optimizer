@@ -8,7 +8,7 @@ from ga_optimizer.config.method_selection import SELECTION_METHOD_PARAM_SPECS
 # ============================================================
 # AKTYWNY PRESET
 # ============================================================
-ACTIVE_EXPERIMENT_NAME = "single_function_operator_search_default"
+ACTIVE_EXPERIMENT_NAME = "all_functions_global_default"
 
 # Inne:
 # ACTIVE_EXPERIMENT_NAME = "random_functions_default"
@@ -18,9 +18,9 @@ ACTIVE_EXPERIMENT_NAME = "single_function_operator_search_default"
 # ============================================================
 # ILOŚĆ WYKONAŃ TESTÓW
 # ============================================================
-RANDOM_FUNCTIONS_EXECUTIONS = 20
-ALL_FUNCTIONS_EXECUTIONS_PER_FUNCTION = 1
-SINGLE_FUNCTION_EXECUTIONS = 20
+RANDOM_FUNCTIONS_EXECUTIONS = 5
+ALL_FUNCTIONS_EXECUTIONS_PER_FUNCTION = 10
+SINGLE_FUNCTION_EXECUTIONS = 5
 
 # ============================================================
 # FUNKCJA DO TESTÓW JEDNOFUNKCYJNYCH
@@ -41,8 +41,14 @@ TARGET_PROBLEM_NAME = "Eggholder"
 # ============================================================
 # PROGI DO OCENY JAKOŚCI
 # ============================================================
-SUCCESS_VALUE_ABS_TOL = 1e-2
-SUCCESS_POINT_DISTANCE_TOL = 0.5
+# value tol zostawiam pomocniczo
+SUCCESS_VALUE_ABS_TOL = 1e-1
+
+# to jest teraz ważniejszy próg
+# 0.25 = dość wymagający
+# 0.5 = rozsądny środek
+# 1.0 = bardziej łagodny
+SUCCESS_POINT_DISTANCE_TOL = 1.0
 
 # ============================================================
 # ZAKRESY GŁÓWNE Z KROKIEM
@@ -50,16 +56,16 @@ SUCCESS_POINT_DISTANCE_TOL = 0.5
 # ============================================================
 GLOBAL_RANDOM_RANGES = {
     # "population": {"start": 200, "end": 800, "step": 100}, # DOMYŚLNE
-    "population": {"start": 300, "end": 400, "step": 10},
+    "population": {"start": 180, "end": 280, "step": 10},
 
     # "epochs": {"start": 200, "end": 500, "step": 50}, # DOMYŚLNE
-    "epochs": {"start": 200, "end": 300, "step": 10},
+    "epochs": {"start": 120, "end": 220, "step": 10},
 
     # "run_count": {"start": 10, "end": 50, "step": 5}, # DOMYŚLNE
-    "run_count": {"start": 10, "end": 10, "step": 5},
+    "run_count": {"start": 7, "end": 12, "step": 1},
 
     # "precision_bits": {"start": 8, "end": 30, "step": 2}, # DOMYŚLNE
-    "precision_bits": {"start": 16, "end": 20, "step": 2},
+    "precision_bits": {"start": 14, "end": 18, "step": 2},
 
     "inversion_enabled": {"values": [True, False]},
     "elitism_enabled": {"values": [True, False]},
@@ -73,47 +79,47 @@ GLOBAL_RANDOM_RANGES = {
 # ============================================================
 METHOD_PARAM_RANGE_OVERRIDES = {
     # SELECTION
-    "selection_best_k": {"start": 2, "end": 10, "step": 1},
-    "selection_worst_k": {"start": 2, "end": 10, "step": 1},
-    "selection_tournament_k": {"start": 2, "end": 12, "step": 1},
-    "selection_double_tournament_k1": {"start": 2, "end": 8, "step": 1},
-    "selection_double_tournament_k2": {"start": 2, "end": 8, "step": 1},
-    "selection_roulette_eps": {"values": [1e-10, 1e-9, 1e-8]},
-    "selection_sus_eps": {"values": [1e-10, 1e-9, 1e-8]},
+    "selection_best_k": {"start": 3, "end": 7, "step": 1},
+    "selection_worst_k": {"start": 3, "end": 7, "step": 1},
+    "selection_tournament_k": {"start": 3, "end": 8, "step": 1},
+    "selection_double_tournament_k1": {"start": 3, "end": 6, "step": 1},
+    "selection_double_tournament_k2": {"start": 3, "end": 6, "step": 1},
+    "selection_roulette_eps": {"values": [1e-9, 1e-8]},
+    "selection_sus_eps": {"values": [1e-9, 1e-8]},
 
     # CROSSOVER
-    "crossover_one_point_p": {"start": 0.25, "end": 0.60, "step": 0.05},
-    "crossover_two_point_p": {"start": 0.30, "end": 0.70, "step": 0.05},
-    "crossover_three_point_p": {"start": 0.30, "end": 0.70, "step": 0.05},
-    "crossover_multi_point_p": {"start": 0.35, "end": 0.75, "step": 0.05},
-    "crossover_multi_point_k": {"start": 2, "end": 6, "step": 1},
-    "crossover_uniform_p": {"start": 0.35, "end": 0.70, "step": 0.05},
-    "crossover_shuffle_p": {"start": 0.35, "end": 0.75, "step": 0.05},
-    "crossover_granular_p": {"start": 0.60, "end": 0.90, "step": 0.05},
-    "crossover_granular_granularity": {"start": 2, "end": 6, "step": 1},
-    "crossover_segment_length": {"start": 2, "end": 6, "step": 1},
-    "crossover_arithmetic_alpha": {"start": 0.30, "end": 0.70, "step": 0.05},
-    "crossover_reduced_surro_p": {"start": 0.35, "end": 0.75, "step": 0.05},
-    "crossover_disruptive_p": {"start": 0.35, "end": 0.75, "step": 0.05},
+    "crossover_one_point_p": {"start": 0.35, "end": 0.55, "step": 0.05},
+    "crossover_two_point_p": {"start": 0.40, "end": 0.60, "step": 0.05},
+    "crossover_three_point_p": {"start": 0.40, "end": 0.60, "step": 0.05},
+    "crossover_multi_point_p": {"start": 0.45, "end": 0.65, "step": 0.05},
+    "crossover_multi_point_k": {"start": 2, "end": 4, "step": 1},
+    "crossover_uniform_p": {"start": 0.45, "end": 0.65, "step": 0.05},
+    "crossover_shuffle_p": {"start": 0.45, "end": 0.65, "step": 0.05},
+    "crossover_granular_p": {"start": 0.70, "end": 0.85, "step": 0.05},
+    "crossover_granular_granularity": {"start": 2, "end": 4, "step": 1},
+    "crossover_segment_length": {"start": 2, "end": 4, "step": 1},
+    "crossover_arithmetic_alpha": {"start": 0.40, "end": 0.60, "step": 0.05},
+    "crossover_reduced_surro_p": {"start": 0.45, "end": 0.65, "step": 0.05},
+    "crossover_disruptive_p": {"start": 0.45, "end": 0.65, "step": 0.05},
 
     # MUTATION
-    "mutation_bit_flip_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_random_reset_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_gaussian_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_uniform_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_boundary_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_nonuniform_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_polynomial_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_creep_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_swap_adjacent_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_inversion_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_shuffle_index_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_two_point_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_edge_p": {"start": 0.01, "end": 0.08, "step": 0.01},
-    "mutation_edge_mode": {"values": ["Ends", "First_last", "Both"]},
-    "mutation_reset_p": {"start": 0.008, "end": 0.05, "step": 0.007},
-    "mutation_scramble_p": {"start": 0.01, "end": 0.05, "step": 0.01},
-    "mutation_swap_p": {"start": 0.01, "end": 0.08, "step": 0.01},
+    "mutation_bit_flip_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_random_reset_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_gaussian_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_uniform_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_boundary_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_nonuniform_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_polynomial_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_creep_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_swap_adjacent_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_inversion_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_shuffle_index_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_two_point_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_edge_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_edge_mode": {"values": ["Ends", "Both"]},
+    "mutation_reset_p": {"start": 0.015, "end": 0.040, "step": 0.005},
+    "mutation_scramble_p": {"start": 0.02, "end": 0.05, "step": 0.01},
+    "mutation_swap_p": {"start": 0.02, "end": 0.05, "step": 0.01},
 }
 
 # ============================================================

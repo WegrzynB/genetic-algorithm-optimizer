@@ -19,6 +19,9 @@ from ga_optimizer.experiments.plotting import (
     save_group_quality_ranking,
     save_problem_counts_bar,
     save_problem_metric_bar,
+    save_problem_metric_spread_bar,
+    save_problem_operator_group_share_bar,
+    save_problem_success_rate_bar,
 )
 from ga_optimizer.experiments.reporting import (
     build_random_functions_report,
@@ -66,26 +69,27 @@ def _build_quality_rows(
     config_key: str,
     label_map: dict | None = None,
 ) -> list[dict]:
-    valid = [r for r in rows if r.get("abs_value_error") is not None]
+    valid = [r for r in rows if r.get("nearest_global_min_point_distance") is not None]
     grouped: dict[str, list[float]] = {}
 
     for row in valid:
         raw_label = row["config"][config_key]
         label = label_map.get(raw_label, str(raw_label)) if label_map else str(raw_label)
-        grouped.setdefault(label, []).append(float(row["abs_value_error"]))
+        grouped.setdefault(label, []).append(float(row["nearest_global_min_point_distance"]))
 
     result = []
     for label, vals in grouped.items():
+        ordered = sorted(vals)
         result.append(
             {
                 "label": label,
                 "mean": sum(vals) / len(vals),
-                "median": sorted(vals)[len(vals) // 2] if len(vals) % 2 == 1 else (sorted(vals)[len(vals) // 2 - 1] + sorted(vals)[len(vals) // 2]) / 2.0,
+                "median": ordered[len(ordered) // 2] if len(ordered) % 2 == 1 else (ordered[len(ordered) // 2 - 1] + ordered[len(ordered) // 2]) / 2.0,
                 "count": len(vals),
             }
         )
 
-    result.sort(key=lambda item: (item["mean"], item["median"], item["label"]))
+    result.sort(key=lambda item: (item["median"], item["label"]))
     return result
 
 
@@ -176,14 +180,37 @@ def run_random_functions_test(
         filename="bar_problem_counts_random_functions.png",
         title="Liczba wylosowań funkcji",
     )
-    median_error_by_problem = save_problem_metric_bar(
+    median_point_distance_by_problem = save_problem_metric_bar(
         output_dir=output_dir,
         rows=rows,
-        value_key="abs_value_error",
+        value_key="nearest_global_min_point_distance",
         agg="median",
-        title="Mediana abs error per funkcja",
-        xlabel="Mediana abs error",
-        filename="bar_median_error_by_problem_random_functions.png",
+        title="Mediana odległości od minimum per funkcja",
+        xlabel="Mediana odległości",
+        filename="bar_median_point_distance_by_problem_random_functions.png",
+    )
+    neighborhood_rate_by_problem = save_problem_success_rate_bar(
+        output_dir=output_dir,
+        rows=rows,
+        value_tol=point_tol,
+        filename="bar_neighborhood_rate_by_problem_random_functions.png",
+        title="Odsetek wejść w otoczenie minimum per funkcja",
+        value_key="nearest_global_min_point_distance",
+    )
+    point_distance_spread_by_problem = save_problem_metric_spread_bar(
+        output_dir=output_dir,
+        rows=rows,
+        value_key="nearest_global_min_point_distance",
+        filename="bar_point_distance_spread_by_problem_random_functions.png",
+        title="Rozrzut odległości od minimum per funkcja",
+        xlabel="IQR odległości",
+    )
+    dominant_selection_share = save_problem_operator_group_share_bar(
+        output_dir=output_dir,
+        rows=rows,
+        config_key="selection_method",
+        filename="bar_selection_dominance_by_problem_random_functions.png",
+        title="Dominacja jednej selekcji per funkcja",
     )
 
     selection_ranking = save_group_quality_ranking(
@@ -237,8 +264,8 @@ def run_random_functions_test(
         "mean_best_value": summary_basic["mean_best_value"],
         "q3_best_value": summary_basic["q3_best_value"],
         "worst_best_value": summary_basic["worst_best_value"],
-        "mean_abs_error": summary_basic["mean_abs_error"],
-        "median_abs_error": summary_basic["median_abs_error"],
+        "mean_abs_error": summary_basic["mean_point_distance"],
+        "median_abs_error": summary_basic["median_point_distance"],
         "mean_point_distance": summary_basic["mean_point_distance"],
         "median_point_distance": summary_basic["median_point_distance"],
         "mean_elapsed": summary_basic["mean_elapsed"],
@@ -256,7 +283,10 @@ def run_random_functions_test(
         "elitism_quality_rows": elitism_quality_rows,
         "plot_paths": {
             "bar_problem_counts": sampled_problem_counts,
-            "bar_median_error_by_problem": median_error_by_problem,
+            "bar_median_point_distance_by_problem": median_point_distance_by_problem,
+            "bar_neighborhood_rate_by_problem": neighborhood_rate_by_problem,
+            "bar_point_distance_spread_by_problem": point_distance_spread_by_problem,
+            "bar_selection_dominance_by_problem": dominant_selection_share,
             "rank_selection_quality": selection_ranking,
             "rank_crossover_quality": crossover_ranking,
             "rank_mutation_quality": mutation_ranking,

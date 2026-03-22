@@ -18,8 +18,10 @@ from ga_optimizer.experiments.metrics import (
 )
 from ga_optimizer.experiments.plotting import (
     save_group_quality_ranking,
+    save_problem_dual_neighborhood_rate_bar,
     save_problem_metric_bar,
-    save_problem_success_rate_bar,
+    save_problem_metric_spread_bar,
+    save_problem_operator_diversity_bar,
 )
 from ga_optimizer.experiments.reporting import (
     build_all_functions_report,
@@ -37,26 +39,27 @@ def _build_quality_rows(
     config_key: str,
     label_map: dict | None = None,
 ) -> list[dict]:
-    valid = [r for r in rows if r.get("abs_value_error") is not None]
+    valid = [r for r in rows if r.get("nearest_global_min_point_distance") is not None]
     grouped: dict[str, list[float]] = {}
 
     for row in valid:
         raw_label = row["config"][config_key]
         label = label_map.get(raw_label, str(raw_label)) if label_map else str(raw_label)
-        grouped.setdefault(label, []).append(float(row["abs_value_error"]))
+        grouped.setdefault(label, []).append(float(row["nearest_global_min_point_distance"]))
 
     result = []
     for label, vals in grouped.items():
+        ordered = sorted(vals)
         result.append(
             {
                 "label": label,
                 "mean": sum(vals) / len(vals),
-                "median": sorted(vals)[len(vals) // 2] if len(vals) % 2 == 1 else (sorted(vals)[len(vals) // 2 - 1] + sorted(vals)[len(vals) // 2]) / 2.0,
+                "median": ordered[len(ordered) // 2] if len(ordered) % 2 == 1 else (ordered[len(ordered) // 2 - 1] + ordered[len(ordered) // 2]) / 2.0,
                 "count": len(vals),
             }
         )
 
-    result.sort(key=lambda item: (item["mean"], item["median"], item["label"]))
+    result.sort(key=lambda item: (item["median"], item["label"]))
     return result
 
 
@@ -154,16 +157,7 @@ def run_all_functions_global_operator_search(
         label_map={True: "elitism=True", False: "elitism=False"},
     )
 
-    median_error_by_function = save_problem_metric_bar(
-        output_dir=output_dir,
-        rows=valid_rows,
-        value_key="abs_value_error",
-        agg="median",
-        title="Mediana błędu per funkcja",
-        xlabel="Mediana abs error",
-        filename="bar_median_error_by_function.png",
-    )
-    median_point_distance_by_function = save_problem_metric_bar(
+    median_distance_by_function = save_problem_metric_bar(
         output_dir=output_dir,
         rows=valid_rows,
         value_key="nearest_global_min_point_distance",
@@ -172,12 +166,35 @@ def run_all_functions_global_operator_search(
         xlabel="Mediana odległości",
         filename="bar_median_point_distance_by_function.png",
     )
-    success_rate_value_by_function = save_problem_success_rate_bar(
+    best_distance_by_function = save_problem_metric_bar(
         output_dir=output_dir,
         rows=valid_rows,
-        value_tol=value_tol,
-        filename="bar_success_rate_value_by_function.png",
-        title="Success rate wg wartości per funkcja",
+        value_key="nearest_global_min_point_distance",
+        agg="best",
+        title="Najmniejsza odległość od minimum per funkcja",
+        xlabel="Najmniejsza odległość",
+        filename="bar_best_point_distance_by_function.png",
+    )
+    neighborhood_best_vs_median = save_problem_dual_neighborhood_rate_bar(
+        output_dir=output_dir,
+        rows=valid_rows,
+        point_tol=point_tol,
+        filename="bar_neighborhood_best_vs_median_by_function.png",
+        title="Czy best i mediana wpadają w otoczenie minimum?",
+    )
+    point_distance_spread = save_problem_metric_spread_bar(
+        output_dir=output_dir,
+        rows=valid_rows,
+        value_key="nearest_global_min_point_distance",
+        filename="bar_point_distance_spread_by_function.png",
+        title="Rozrzut odległości od minimum per funkcja",
+        xlabel="IQR odległości",
+    )
+    operator_diversity = save_problem_operator_diversity_bar(
+        output_dir=output_dir,
+        rows=valid_rows,
+        filename="bar_operator_diversity_by_function.png",
+        title="Różnorodność konfiguracji operatorów per funkcja",
     )
 
     selection_ranking = save_group_quality_ranking(
@@ -238,8 +255,8 @@ def run_all_functions_global_operator_search(
         "mean_best_value": all_functions_summary["mean_best_value"],
         "q3_best_value": all_functions_summary["q3_best_value"],
         "worst_best_value": all_functions_summary["worst_best_value"],
-        "mean_abs_error_across_functions": all_functions_summary["mean_abs_error"],
-        "median_abs_error_across_functions": all_functions_summary["median_abs_error"],
+        "mean_abs_error_across_functions": all_functions_summary["mean_point_distance"],
+        "median_abs_error_across_functions": all_functions_summary["median_point_distance"],
         "mean_point_distance_across_functions": all_functions_summary["mean_point_distance"],
         "median_point_distance_across_functions": all_functions_summary["median_point_distance"],
         "mean_elapsed_across_functions": all_functions_summary["mean_elapsed"],
@@ -252,9 +269,11 @@ def run_all_functions_global_operator_search(
         "inversion_quality_rows": inversion_quality_rows,
         "elitism_quality_rows": elitism_quality_rows,
         "plot_paths": {
-            "bar_median_error_by_function": median_error_by_function,
-            "bar_median_point_distance_by_function": median_point_distance_by_function,
-            "bar_success_rate_value_by_function": success_rate_value_by_function,
+            "bar_median_point_distance_by_function": median_distance_by_function,
+            "bar_best_point_distance_by_function": best_distance_by_function,
+            "bar_neighborhood_best_vs_median_by_function": neighborhood_best_vs_median,
+            "bar_point_distance_spread_by_function": point_distance_spread,
+            "bar_operator_diversity_by_function": operator_diversity,
             "rank_selection_quality": selection_ranking,
             "rank_crossover_quality": crossover_ranking,
             "rank_mutation_quality": mutation_ranking,

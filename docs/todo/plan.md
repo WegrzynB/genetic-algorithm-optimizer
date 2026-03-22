@@ -450,8 +450,10 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
 
 ### Co robimy
 1. Końcowe porządki:
+  - dopisanie nowych presetów w oparciu o testy
   - poprawa importów
   - poprawa nazw
+  - usunięcie niepotrzebnych plików
   - usunięcie debugów
   - aktualizacja README
   - aktualizacja `.gitignore`
@@ -460,6 +462,10 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
   - GUI
   - engine
   - benchmark
+
+3. Utworzenie dokumentacji
+  - w `docs` tworzymy dokumentacje całego projektu
+  - tworzymy dokładny opis jednej sprawdzanej funkcji
 
 ### Jak testować
 1. Uruchomić:
