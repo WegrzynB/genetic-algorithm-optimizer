@@ -18,14 +18,14 @@ ACTIVE_EXPERIMENT_NAME = "single_function_operator_search_default"
 # ============================================================
 # ILOŚĆ WYKONAŃ TESTÓW
 # ============================================================
-RANDOM_FUNCTIONS_EXECUTIONS = 300
-ALL_FUNCTIONS_EXECUTIONS_PER_FUNCTION = 20
-SINGLE_FUNCTION_EXECUTIONS = 300
+RANDOM_FUNCTIONS_EXECUTIONS = 20
+ALL_FUNCTIONS_EXECUTIONS_PER_FUNCTION = 1
+SINGLE_FUNCTION_EXECUTIONS = 20
 
 # ============================================================
 # FUNKCJA DO TESTÓW JEDNOFUNKCYJNYCH
 # ============================================================
-TARGET_PROBLEM_NAME = "Hypersphere"
+TARGET_PROBLEM_NAME = "Eggholder"
 # inne:
 # TARGET_PROBLEM_NAME = "Eggholder"
 # TARGET_PROBLEM_NAME = "Rosenbrock"
@@ -50,16 +50,16 @@ SUCCESS_POINT_DISTANCE_TOL = 0.5
 # ============================================================
 GLOBAL_RANDOM_RANGES = {
     # "population": {"start": 200, "end": 800, "step": 100}, # DOMYŚLNE
-    "population": {"start": 200, "end": 800, "step": 100},
+    "population": {"start": 300, "end": 400, "step": 10},
 
     # "epochs": {"start": 200, "end": 500, "step": 50}, # DOMYŚLNE
-    "epochs": {"start": 200, "end": 500, "step": 50},
+    "epochs": {"start": 200, "end": 300, "step": 10},
 
     # "run_count": {"start": 10, "end": 50, "step": 5}, # DOMYŚLNE
-    "run_count": {"start": 10, "end": 50, "step": 5},
+    "run_count": {"start": 10, "end": 10, "step": 5},
 
     # "precision_bits": {"start": 8, "end": 30, "step": 2}, # DOMYŚLNE
-    "precision_bits": {"start": 8, "end": 30, "step": 2},
+    "precision_bits": {"start": 16, "end": 20, "step": 2},
 
     "inversion_enabled": {"values": [True, False]},
     "elitism_enabled": {"values": [True, False]},

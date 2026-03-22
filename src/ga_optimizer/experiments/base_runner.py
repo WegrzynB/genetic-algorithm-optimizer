@@ -18,6 +18,23 @@ def _format_percent(current: int, total: int) -> str:
     return f"{(float(current) / float(total)) * 100.0:.1f}%"
 
 
+def format_duration_human(seconds: float | int | None) -> str:
+    if seconds is None:
+        return "-"
+
+    total_seconds = float(seconds)
+
+    if total_seconds < 60.0:
+        return f"{total_seconds:.2f} s"
+
+    total_minutes = total_seconds / 60.0
+    if total_seconds < 3600.0:
+        return f"{total_minutes:.2f} min"
+
+    total_hours = total_seconds / 3600.0
+    return f"{total_hours:.2f} h"
+
+
 def print_experiment_progress(
     test_name: str,
     current: int,

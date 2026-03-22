@@ -6,6 +6,7 @@ import time
 import traceback
 
 from ga_optimizer.experiments.base_runner import (
+    format_duration_human,
     format_global_params_for_print,
     print_experiment_progress,
     run_single_config,
@@ -145,7 +146,7 @@ def run_single_function_operator_search(
             )
             row["experiment_duration_sec"] = time.perf_counter() - exp_start
             rows.append(row)
-            print(f"[single_function_operator_search] czas eksperymentu: {row['experiment_duration_sec']:.3f} s")
+            print(f"[single_function_operator_search] czas eksperymentu: {format_duration_human(row['experiment_duration_sec'])}")
         except Exception as exc:
             err = {
                 "step": current_step,
@@ -160,7 +161,7 @@ def run_single_function_operator_search(
         print()
 
     test_duration_sec = time.perf_counter() - test_start
-    print(f"[single_function_operator_search] czas całego testu: {test_duration_sec:.3f} s")
+    print(f"[single_function_operator_search] czas całego testu: {format_duration_human(test_duration_sec)}")
     print("\n[single_function_operator_search] KONIEC TESTU\n\n")
 
     csv_rows = _to_csv_rows(rows)
