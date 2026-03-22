@@ -19,9 +19,12 @@ from ga_optimizer.experiments.metrics import (
 from ga_optimizer.experiments.plotting import (
     save_bar_operator_wins,
     save_boxplot_best_values,
+    save_boxplot_metric_values,
+    save_dense_region_heatmap,
     save_error_vs_distance_scatter,
     save_group_quality_ranking,
     save_histogram_best_values,
+    save_histogram_metric_values,
     save_median_density_heatmap,
     save_scatter_param_vs_error,
 )
@@ -47,6 +50,7 @@ def _to_csv_rows(rows: list[dict]) -> list[dict]:
             {
                 "rank": index,
                 "best_value": item["best_value"],
+                "median_value": item.get("engine_summary", {}).get("median"),
                 "abs_value_error": item["abs_value_error"],
                 "nearest_global_min_point_distance": item["nearest_global_min_point_distance"],
                 "selection_method": cfg["selection_method"],
@@ -74,26 +78,27 @@ def _build_quality_rows(
     config_key: str,
     label_map: dict | None = None,
 ) -> list[dict]:
-    valid = [r for r in rows if r.get("abs_value_error") is not None]
+    valid = [r for r in rows if r.get("nearest_global_min_point_distance") is not None]
     grouped: dict[str, list[float]] = {}
 
     for row in valid:
         raw_label = row["config"][config_key]
         label = label_map.get(raw_label, str(raw_label)) if label_map else str(raw_label)
-        grouped.setdefault(label, []).append(float(row["abs_value_error"]))
+        grouped.setdefault(label, []).append(float(row["nearest_global_min_point_distance"]))
 
     result = []
     for label, vals in grouped.items():
+        ordered = sorted(vals)
         result.append(
             {
                 "label": label,
                 "mean": sum(vals) / len(vals),
-                "median": sorted(vals)[len(vals) // 2] if len(vals) % 2 == 1 else (sorted(vals)[len(vals) // 2 - 1] + sorted(vals)[len(vals) // 2]) / 2.0,
+                "median": ordered[len(ordered) // 2] if len(ordered) % 2 == 1 else (ordered[len(ordered) // 2 - 1] + ordered[len(ordered) // 2]) / 2.0,
                 "count": len(vals),
             }
         )
 
-    result.sort(key=lambda item: (item["mean"], item["median"], item["label"]))
+    result.sort(key=lambda item: (item["median"], item["label"]))
     return result
 
 
@@ -110,6 +115,7 @@ def run_single_function_operator_search(
     ranges = preset["ranges"]
 
     heatmap_bins = int(preset.get("heatmap_bins", 18))
+    dense_region_heatmap_bins = int(preset.get("dense_region_heatmap_bins", 26))
 
     rng = random.Random()
     if seed is not None:
@@ -184,13 +190,44 @@ def run_single_function_operator_search(
     )
 
     values = [row["best_value"] for row in rows if row.get("best_value") is not None]
+    median_values = [row.get("engine_summary", {}).get("median") for row in rows if row.get("engine_summary", {}).get("median") is not None]
     points = [row["best_point"] for row in rows if row.get("best_point") is not None]
 
     hist_path = save_histogram_best_values(output_dir, values, filename="hist_single_function.png")
     box_path = save_boxplot_best_values(output_dir, values, filename="box_single_function.png")
+    hist_median_path = save_histogram_metric_values(
+        output_dir=output_dir,
+        values=median_values,
+        title="Histogram median wartości końcowej populacji",
+        xlabel="Mediana wartości funkcji celu",
+        filename="hist_median_single_function.png",
+    )
+    box_median_path = save_boxplot_metric_values(
+        output_dir=output_dir,
+        values=median_values,
+        title="Rozkład median wartości końcowej populacji",
+        ylabel="Mediana wartości funkcji celu",
+        filename="box_median_single_function.png",
+    )
     bar_operator_path = save_bar_operator_wins(output_dir, ranking_rows, filename="bar_operator_wins_single_function.png")
-    scatter_pop = save_scatter_param_vs_error(output_dir, rows, "population", "scatter_population_vs_error_single.png")
-    scatter_epochs = save_scatter_param_vs_error(output_dir, rows, "epochs", "scatter_epochs_vs_error_single.png")
+    scatter_pop = save_scatter_param_vs_error(
+        output_dir,
+        rows,
+        "population",
+        "scatter_population_vs_distance_single.png",
+        value_key="nearest_global_min_point_distance",
+        title="population vs odległość od minimum",
+        ylabel="Odległość od minimum globalnego",
+    )
+    scatter_epochs = save_scatter_param_vs_error(
+        output_dir,
+        rows,
+        "epochs",
+        "scatter_epochs_vs_distance_single.png",
+        value_key="nearest_global_min_point_distance",
+        title="epochs vs odległość od minimum",
+        ylabel="Odległość od minimum globalnego",
+    )
     scatter_err_dist = save_error_vs_distance_scatter(output_dir, rows, filename="scatter_error_vs_distance_single.png")
 
     selection_ranking = save_group_quality_ranking(
@@ -232,6 +269,7 @@ def run_single_function_operator_search(
     )
 
     median_density_heatmap = None
+    dense_region_heatmap = None
     if int(problem.default_n_vars) == 2:
         median_density_heatmap = save_median_density_heatmap(
             output_dir=output_dir,
@@ -242,6 +280,16 @@ def run_single_function_operator_search(
             filename="heatmap_median_density.png",
             bins_x=heatmap_bins,
             bins_y=heatmap_bins,
+        )
+        dense_region_heatmap = save_dense_region_heatmap(
+            output_dir=output_dir,
+            points=points,
+            median_point=_row_to_point(summary_basic["median_row"]),
+            global_minimum_points=problem.global_minimum_points,
+            title="Heatmapa najgęstszego obszaru punktów",
+            filename="heatmap_dense_region.png",
+            bins_x=dense_region_heatmap_bins,
+            bins_y=dense_region_heatmap_bins,
         )
 
     summary = {
@@ -260,8 +308,8 @@ def run_single_function_operator_search(
         "mean_best_value": summary_basic["mean_best_value"],
         "q3_best_value": summary_basic["q3_best_value"],
         "worst_best_value": summary_basic["worst_best_value"],
-        "mean_abs_error": summary_basic["mean_abs_error"],
-        "median_abs_error": summary_basic["median_abs_error"],
+        "mean_abs_error": summary_basic["mean_point_distance"],
+        "median_abs_error": summary_basic["median_point_distance"],
         "mean_point_distance": summary_basic["mean_point_distance"],
         "median_point_distance": summary_basic["median_point_distance"],
         "mean_elapsed": summary_basic["mean_elapsed"],
@@ -281,11 +329,14 @@ def run_single_function_operator_search(
         "plot_paths": {
             "histogram": hist_path,
             "boxplot": box_path,
+            "histogram_median": hist_median_path,
+            "boxplot_median": box_median_path,
             "bar_operator_wins": bar_operator_path,
-            "scatter_population_vs_error": scatter_pop,
-            "scatter_epochs_vs_error": scatter_epochs,
+            "scatter_population_vs_distance": scatter_pop,
+            "scatter_epochs_vs_distance": scatter_epochs,
             "scatter_error_vs_distance": scatter_err_dist,
             "heatmap_median_density": median_density_heatmap,
+            "heatmap_dense_region": dense_region_heatmap,
             "rank_selection_quality": selection_ranking,
             "rank_crossover_quality": crossover_ranking,
             "rank_mutation_quality": mutation_ranking,

@@ -190,7 +190,7 @@ def operator_win_counters(rows: list[dict[str, Any]]) -> dict[str, dict[str, int
 
 
 def build_operator_ranking_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    valid = [row for row in rows if row.get("best_value") is not None]
+    valid = [row for row in rows if row.get("nearest_global_min_point_distance") is not None]
     counters = operator_win_counters(valid)
     ranking_rows: list[dict[str, Any]] = []
 
@@ -207,23 +207,32 @@ def build_operator_ranking_rows(rows: list[dict[str, Any]]) -> list[dict[str, An
                     op_rows.append(row)
 
             best_vals = [float(r["best_value"]) for r in op_rows if r.get("best_value") is not None]
-            abs_errs = [float(r["abs_value_error"]) for r in op_rows if r.get("abs_value_error") is not None]
+            point_dists = [
+                float(r["nearest_global_min_point_distance"])
+                for r in op_rows
+                if r.get("nearest_global_min_point_distance") is not None
+            ]
+
+            median_best_value = safe_median(best_vals)
+            median_point_distance = safe_median(point_dists)
 
             ranking_rows.append(
                 {
                     "group": group_name,
                     "operator": operator_name,
                     "wins": count,
-                    "avg_best_value": safe_mean(best_vals),
-                    "avg_abs_error": safe_mean(abs_errs),
+                    "avg_best_value": median_best_value,
+                    "avg_abs_error": median_point_distance,
+                    "median_best_value": median_best_value,
+                    "median_point_distance": median_point_distance,
                 }
             )
 
     ranking_rows.sort(
         key=lambda row: (
             row["group"],
+            row["median_point_distance"] if row["median_point_distance"] is not None else float("inf"),
             -(row["wins"] if row["wins"] is not None else -1),
-            row["avg_abs_error"] if row["avg_abs_error"] is not None else float("inf"),
             row["operator"],
         )
     )
@@ -244,7 +253,7 @@ def build_best_per_problem_rows(rows: list[dict[str, Any]]) -> list[dict[str, An
             {
                 "problem_name": problem_name,
                 "best_value": best.get("best_value"),
-                "error_to_global_min": best.get("abs_value_error"),
+                "error_to_global_min": best.get("nearest_global_min_point_distance"),
                 "nearest_global_min_point_distance": best.get("nearest_global_min_point_distance"),
                 "selection_method": cfg.get("selection_method"),
                 "crossover_method": cfg.get("crossover_method"),
@@ -294,11 +303,11 @@ def describe_best_parameter_regions(
     rows: list[dict[str, Any]],
     top_fraction: float = 0.25,
 ) -> dict[str, Any]:
-    valid = [row for row in rows if row.get("best_value") is not None]
+    valid = [row for row in rows if row.get("nearest_global_min_point_distance") is not None]
     if not valid:
         return {}
 
-    ordered = sorted(valid, key=lambda row: float(row["best_value"]))
+    ordered = sorted(valid, key=lambda row: float(row["nearest_global_min_point_distance"]))
     top_count = max(1, int(len(ordered) * float(top_fraction)))
     top_rows = ordered[:top_count]
 
