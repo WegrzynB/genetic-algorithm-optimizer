@@ -14,7 +14,6 @@ Aplikacja w Pythonie z GUI w Tkinter realizująca optymalizację (min/max) funkc
 - `ga_optimizer/visualization/` — wykresy (zbieżność, porównania) generowane w matplotlib.
 - `ga_optimizer/experiments/` — uruchamianie serii runów i agregacje wyników (skrypty/benchmarki).
 - `ga_optimizer/utils/` — narzędzia pomocnicze (czas, losowość, ścieżki, logowanie).
-- `ga_optimizer/types/` — aliasy typów używane w projekcie.
 
 ## Zależności między modułami (zasady importów)
 

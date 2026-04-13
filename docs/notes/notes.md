@@ -11,7 +11,7 @@ Struktura projektu: `tree /F /A`
   - `git checkout main`
   - `git pull origin main`
 2. Tworzymy nowego brancha (jeśli jest juz taki branch to wyskoczy błąd w terminalu):
-  - `git checkout -b feature/nazwa-brancha`
+  - `eature/nazwa-brancha`
 3. Sprawdzamy status:
   - `git status`
 4. Pracujemy sobie normalnie na plikach.
