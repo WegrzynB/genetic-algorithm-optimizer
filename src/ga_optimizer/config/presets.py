@@ -8,7 +8,6 @@ from ga_optimizer.config.defaults import build_default_config
 
 
 def _config_to_preset_dict(config: GAConfig) -> dict:
-    # Zamienia obiekt configu na zwykły słownik presetu.
     return {
         "problem_name": config.problem_name,
         "objective_mode": config.objective_mode,
@@ -58,379 +57,271 @@ TEST_CUSTOM_PRESET.update(
 )
 
 
-# ---------------------------------------------------------------------------
-# Pomocnik: buduje preset funkcji na bazie DEFAULT_PRESET.
-# Nadpisuje tylko te klucze, które różnią się od domyślnych.
-# method_params zawsze dziedziczy pełen zestaw kluczy z DEFAULT_PRESET
-# (żeby nie brakło żadnego klucza wymaganego przez schemat).
-# ---------------------------------------------------------------------------
-def _function_preset(overrides: dict) -> dict:
-    preset = deepcopy(DEFAULT_PRESET)
-    method_params_overrides = overrides.pop("method_params", {})
-    preset.update(overrides)
-    preset["method_params"] = {
-        **deepcopy(DEFAULT_PRESET["method_params"]),
-        **method_params_overrides,
-    }
-    return preset
-
-DEJONG3_PRESET = _function_preset({
-    "problem_name": "DeJong3",
-    "objective_mode": "min",
-    "selection_method": "roulette",
-    "crossover_method": "three_point",
-    "mutation_method": "one_point",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 800,
-    "epochs": 400,
-    "run_count": 35,
-    "precision_mode": "bits",
-    "precision_bits": 10,
-})
-
-RASTRIGIN_PRESET = _function_preset({
-    "problem_name": "Rastrigin",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "arithmetic",
-    "mutation_method": "swap",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 800,
-    "epochs": 400,
-    "run_count": 40,
-    "precision_mode": "bits",
-    "precision_bits": 30,
-})
+def _make_preset(name: str, base: dict, updates: dict) -> dict:
+    cfg = deepcopy(base)
+    cfg["problem_name"] = name
+    cfg.update(updates)
+    return cfg
 
 
-HYPERELLIPSOID_PRESET = _function_preset({
-    "problem_name": "Hyperellipsoid",
-    "objective_mode": "min",
-    "selection_method": "best",
-    "crossover_method": "reduced_surro",
-    "mutation_method": "one_point",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 500,
-    "epochs": 350,
-    "run_count": 20,
-    "precision_mode": "bits",
-    "precision_bits": 22,
-})
+OPTIMAL_PRESETS = {
 
+    "DeJong3": _make_preset("DeJong3", DEFAULT_PRESET, {
+        "selection_method": "roulette",
+        "crossover_method": "three_point",
+        "mutation_method": "one_point",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 800,
+        "epochs": 400,
+        "run_count": 35,
+        "precision_bits": 10,
+    }),
 
-MARTINGADDY_PRESET = _function_preset({
-    "problem_name": "MartinGaddy",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "edge",
-    "inversion_enabled": True,
-    "elitism_enabled": False,
-    "population": 300,
-    "epochs": 400,
-    "run_count": 30,
-    "precision_mode": "bits",
-    "precision_bits": 26,
-})
+    "Rastrigin": _make_preset("Rastrigin", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "arithmetic",
+        "mutation_method": "swap",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 800,
+        "epochs": 400,
+        "run_count": 40,
+        "precision_bits": 30,
+    }),
 
+    "Hyperellipsoid": _make_preset("Hyperellipsoid", DEFAULT_PRESET, {
+        "selection_method": "best",
+        "crossover_method": "reduced_surro",
+        "mutation_method": "one_point",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 500,
+        "epochs": 350,
+        "run_count": 20,
+        "precision_bits": 22,
+    }),
 
-HYPERSPHERE_PRESET = _function_preset({
-    "problem_name": "Hypersphere",
-    "objective_mode": "min",
-    "selection_method": "best",
-    "crossover_method": "two_point",
-    "mutation_method": "reset",
-    "inversion_enabled": True,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 350,
-    "run_count": 35,
-    "precision_mode": "bits",
-    "precision_bits": 22,
-})
+    "MartinGaddy": _make_preset("MartinGaddy", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "edge",
+        "inversion_enabled": True,
+        "elitism_enabled": False,
+        "population": 300,
+        "epochs": 400,
+        "run_count": 30,
+        "precision_bits": 26,
+    }),
 
+    "Hypersphere": _make_preset("Hypersphere", DEFAULT_PRESET, {
+        "selection_method": "best",
+        "crossover_method": "two_point",
+        "mutation_method": "reset",
+        "inversion_enabled": True,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 350,
+        "run_count": 35,
+        "precision_bits": 22,
+    }),
 
-GOLDSTEINPRICE_PRESET = _function_preset({
-    "problem_name": "GoldsteinPrice",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "swap",
-    "inversion_enabled": True,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 400,
-    "run_count": 50,
-    "precision_mode": "bits",
-    "precision_bits": 24,
-})
+    "GoldsteinPrice": _make_preset("GoldsteinPrice", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "swap",
+        "inversion_enabled": True,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 400,
+        "run_count": 50,
+        "precision_bits": 24,
+    }),
 
+    "DeJong5": _make_preset("DeJong5", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "one_point",
+        "mutation_method": "reset",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 300,
+        "run_count": 45,
+        "precision_bits": 12,
+    }),
 
-DEJONG5_PRESET = _function_preset({
-    "problem_name": "DeJong5",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "one_point",
-    "mutation_method": "reset",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 300,
-    "run_count": 45,
-    "precision_mode": "bits",
-    "precision_bits": 12,
-})
+    "PichenyGoldsteinPrice": _make_preset("PichenyGoldsteinPrice", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "majority",
+        "mutation_method": "two_point",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 500,
+        "epochs": 300,
+        "run_count": 20,
+        "precision_bits": 22,
+    }),
 
-PICHENYGOLDSTEINPRICE_PRESET = _function_preset({
-    "problem_name": "PichenyGoldsteinPrice",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "majority",
-    "mutation_method": "two_point",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 500,
-    "epochs": 300,
-    "run_count": 20,
-    "precision_mode": "bits",
-    "precision_bits": 22,
-})
+    "Michalewicz": _make_preset("Michalewicz", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "two_point",
+        "mutation_method": "swap",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 500,
+        "epochs": 300,
+        "run_count": 50,
+        "precision_bits": 16,
+    }),
 
+    "Ackley": _make_preset("Ackley", DEFAULT_PRESET, {
+        "selection_method": "tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "reset",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 250,
+        "run_count": 15,
+        "precision_bits": 28,
+    }),
 
-MICHALEWICZ_PRESET = _function_preset({
-    "problem_name": "Michalewicz",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "two_point",
-    "mutation_method": "swap",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 500,
-    "epochs": 300,
-    "run_count": 50,
-    "precision_mode": "bits",
-    "precision_bits": 16,
-})
+    "McCormick": _make_preset("McCormick", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "majority",
+        "mutation_method": "two_point",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 350,
+        "run_count": 35,
+        "precision_bits": 26,
+    }),
 
+    "Griewank": _make_preset("Griewank", DEFAULT_PRESET, {
+        "selection_method": "sus",
+        "crossover_method": "arithmetic",
+        "mutation_method": "scramble",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 300,
+        "epochs": 300,
+        "run_count": 30,
+        "precision_bits": 16,
+    }),
 
-ACKLEY_PRESET = _function_preset({
-    "problem_name": "Ackley",
-    "objective_mode": "min",
-    "selection_method": "tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "reset",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 250,
-    "run_count": 15,
-    "precision_mode": "bits",
-    "precision_bits": 28,
-})
+    "Himmelblau": _make_preset("Himmelblau", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "swap",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 400,
+        "epochs": 200,
+        "run_count": 10,
+        "precision_bits": 18,
+    }),
 
+    "Schwefel": _make_preset("Schwefel", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "disruptive",
+        "mutation_method": "bit_flip",
+        "elitism_enabled": False,
+        "inversion_enabled": False,
+        "population": 600,
+        "epochs": 500,
+        "run_count": 15,
+        "precision_bits": 18,
+    }),
 
-MCCORMICK_PRESET = _function_preset({
-    "problem_name": "McCormick",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "majority",
-    "mutation_method": "two_point",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 350,
-    "run_count": 35,
-    "precision_mode": "bits",
-    "precision_bits": 26,
-})
+    "PitsAndHoles": _make_preset("PitsAndHoles", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "segmented",
+        "mutation_method": "scramble",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 450,
+        "run_count": 45,
+        "precision_bits": 30,
+    }),
 
+    "Easom": _make_preset("Easom", DEFAULT_PRESET, {
+        "selection_method": "sus",
+        "crossover_method": "shuffle",
+        "mutation_method": "two_point",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 200,
+        "epochs": 450,
+        "run_count": 40,
+        "precision_bits": 22,
+    }),
 
-GRIEWANK_PRESET = _function_preset({
-    "problem_name": "Griewank",
-    "objective_mode": "min",
-    "selection_method": "sus",
-    "crossover_method": "arithmetic",
-    "mutation_method": "scramble",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 300,
-    "epochs": 300,
-    "run_count": 30,
-    "precision_mode": "bits",
-    "precision_bits": 16,
-})
+    "StyblinskiTang": _make_preset("StyblinskiTang", DEFAULT_PRESET, {
+        "selection_method": "best",
+        "crossover_method": "disruptive",
+        "mutation_method": "scramble",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 600,
+        "epochs": 300,
+        "run_count": 50,
+        "precision_bits": 10,
+    }),
 
+    "Schaffer2": _make_preset("Schaffer2", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "scramble",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 300,
+        "epochs": 350,
+        "run_count": 45,
+        "precision_bits": 24,
+    }),
 
-HIMMELBLAU_PRESET = _function_preset({
-    "problem_name": "Himmelblau",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "swap",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 400,
-    "epochs": 200,
-    "run_count": 10,
-    "precision_mode": "bits",
-    "precision_bits": 18,
-})
+    "Rosenbrock": _make_preset("Rosenbrock", DEFAULT_PRESET, {
+        "selection_method": "best",
+        "crossover_method": "disruptive",
+        "mutation_method": "reset",
+        "inversion_enabled": False,
+        "elitism_enabled": False,
+        "population": 300,
+        "epochs": 450,
+        "run_count": 10,
+        "precision_bits": 16,
+    }),
 
+    "Rana": _make_preset("Rana", DEFAULT_PRESET, {
+        "selection_method": "sus",
+        "crossover_method": "one_point",
+        "mutation_method": "reset",
+        "inversion_enabled": True,
+        "elitism_enabled": True,
+        "population": 600,
+        "epochs": 400,
+        "run_count": 50,
+        "precision_bits": 14,
+    }),
 
-SCHWEFEL_PRESET = _function_preset({
-    "problem_name": "Schwefel",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "disruptive",
-    "mutation_method": "bit_flip",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 600,
-    "epochs": 500,
-    "run_count": 15,
-    "precision_mode": "bits",
-    "precision_bits": 18,
-})
-
-
-PITSANDHOLES_PRESET = _function_preset({
-    "problem_name": "PitsAndHoles",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "segmented",
-    "mutation_method": "scramble",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 450,
-    "run_count": 45,
-    "precision_mode": "bits",
-    "precision_bits": 30,
-})
-
-
-EASOM_PRESET = _function_preset({
-    "problem_name": "Easom",
-    "objective_mode": "min",
-    "selection_method": "sus",
-    "crossover_method": "shuffle",
-    "mutation_method": "two_point",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 200,
-    "epochs": 450,
-    "run_count": 40,
-    "precision_mode": "bits",
-    "precision_bits": 22,
-})
-
-
-STYBLINSKITANG_PRESET = _function_preset({
-    "problem_name": "StyblinskiTang",
-    "objective_mode": "min",
-    "selection_method": "best",
-    "crossover_method": "disruptive",
-    "mutation_method": "scramble",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 600,
-    "epochs": 300,
-    "run_count": 50,
-    "precision_mode": "bits",
-    "precision_bits": 10,
-})
-
-
-SCHAFFER2_PRESET = _function_preset({
-    "problem_name": "Schaffer2",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "scramble",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 300,
-    "epochs": 350,
-    "run_count": 45,
-    "precision_mode": "bits",
-    "precision_bits": 24,
-})
-
-
-ROSENBROCK_PRESET = _function_preset({
-    "problem_name": "Rosenbrock",
-    "objective_mode": "min",
-    "selection_method": "best",
-    "crossover_method": "disruptive",
-    "mutation_method": "reset",
-    "inversion_enabled": False,
-    "elitism_enabled": False,
-    "population": 300,
-    "epochs": 450,
-    "run_count": 10,
-    "precision_mode": "bits",
-    "precision_bits": 16,
-})
-
-
-RANA_PRESET = _function_preset({
-    "problem_name": "Rana",
-    "objective_mode": "min",
-    "selection_method": "sus",
-    "crossover_method": "one_point",
-    "mutation_method": "reset",
-    "inversion_enabled": True,
-    "elitism_enabled": True,
-    "population": 600,
-    "epochs": 400,
-    "run_count": 50,
-    "precision_mode": "bits",
-    "precision_bits": 14,
-})
-
-EGGHOLDER_PRESET = _function_preset({
-    "problem_name": "Eggholder",
-    "objective_mode": "min",
-    "selection_method": "double_tournament",
-    "crossover_method": "shuffle",
-    "mutation_method": "bit_flip",
-    "inversion_enabled": False,
-    "elitism_enabled": True,
-    "population": 700,
-    "epochs": 500,
-    "run_count": 25,
-    "precision_mode": "bits",
-    "precision_bits": 30,
-})
+    "Eggholder": _make_preset("Eggholder", DEFAULT_PRESET, {
+        "selection_method": "double_tournament",
+        "crossover_method": "shuffle",
+        "mutation_method": "bit_flip",
+        "inversion_enabled": False,
+        "elitism_enabled": True,
+        "population": 700,
+        "epochs": 500,
+        "run_count": 25,
+        "precision_bits": 30,
+    }),
+}
 
 
 PRESETS = {
     "Default": DEFAULT_PRESET,
     "test_custom": TEST_CUSTOM_PRESET,
-
-    # Presety per-funkcja
-    "DeJong3":               DEJONG3_PRESET,
-    "Rastrigin":             RASTRIGIN_PRESET,
-    "Hyperellipsoid":        HYPERELLIPSOID_PRESET,
-    "MartinGaddy":           MARTINGADDY_PRESET,
-    "Hypersphere":           HYPERSPHERE_PRESET,
-    "GoldsteinPrice":        GOLDSTEINPRICE_PRESET,
-    "DeJong5":               DEJONG5_PRESET,
-    "PichenyGoldsteinPrice": PICHENYGOLDSTEINPRICE_PRESET,
-    "Michalewicz":           MICHALEWICZ_PRESET,
-    "Ackley":                ACKLEY_PRESET,
-    "McCormick":             MCCORMICK_PRESET,
-    "Griewank":              GRIEWANK_PRESET,
-    "Himmelblau":            HIMMELBLAU_PRESET,
-    "Schwefel":              SCHWEFEL_PRESET,
-    "PitsAndHoles":          PITSANDHOLES_PRESET,
-    "Easom":                 EASOM_PRESET,
-    "StyblinskiTang":        STYBLINSKITANG_PRESET,
-    "Schaffer2":             SCHAFFER2_PRESET,
-    "Rosenbrock":            ROSENBROCK_PRESET,
-    "Rana":                  RANA_PRESET,
-    "Eggholder":             EGGHOLDER_PRESET,
+    **OPTIMAL_PRESETS,
 }
