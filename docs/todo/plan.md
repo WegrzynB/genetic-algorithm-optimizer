@@ -15,7 +15,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 0 — `docs/plan.md` i porządek startowy [Bartek] (UKOŃCZONO)
+## Krok 0 — `docs/plan.md` i porządek startowy
 
 ### Branch: `docs/plan-initial`
 **Co robimy**
@@ -31,7 +31,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 1 — uruchamialny szkielet aplikacji [Bartek] (UKOŃCZONO)
+## Krok 1 — uruchamialny szkielet aplikacji
 
 ### Branch: `feature/app-entrypoint`
 **Co robimy**
@@ -51,7 +51,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 2 — GUI: layout i panele (bez logiki GA) [Bartek] (UKOŃCZONO)
+## Krok 2 — GUI: layout i panele (bez logiki GA)
 
 ### Branch: `feature/gui-layout`
 **Co robimy**
@@ -75,7 +75,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 3 — GUI: widgety i walidacja pól (lokalnie) [Bartek] (UKOŃCZONO)
+## Krok 3 — GUI: widgety i walidacja pól (lokalnie)
 
 ### Branch: `feature/gui-widgets-validation`
 **Co robimy**
@@ -93,7 +93,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy) [Bartek] (UKOŃCZONO)
+## Krok 4 — model konfiguracji i katalog funkcji (jedno źródło prawdy)
 
 ### Branch: `feature/config-model`
 
@@ -125,7 +125,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline [Bartek, Krystian] (UKOŃCZONO)
+## Krok 5 — pula problemów i przygotowanie pod dalszy pipeline
 
 ### Branch: `feature/problem-pool-pipeline-ready`
 
@@ -163,7 +163,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok) [Paweł] (UKOŃCZONO)
+## Krok 6 — core: reprezentacje i dekodowanie (bez pętli epok)
 
 ### Branch: `feature/core-representation`
 **Co robimy**
@@ -189,7 +189,7 @@ Ten dokument opisuje **kolejność branchy**, co dokładnie na nich powstaje, ja
 
 ---
 
-# Krok 7 — ocena osobników (objective + fitness) [Kamil] (UKOŃCZONO)
+# Krok 7 — ocena osobników (objective + fitness)
 
 ### Branch: `feature/core-evaluation`
 
@@ -233,7 +233,7 @@ Sprawdź:
 
  ---
 
-# Krok 7.5 — całkowita poprawa kodu, żeby to było czytelne i jakkolwiek użyteczne [Bartek] (UKOŃCZONO)
+# Krok 7.5 — całkowita poprawa kodu, żeby to było czytelne i jakkolwiek użyteczne
 
 ### Branch: `feature/core-basic-fixes`
 
@@ -260,7 +260,7 @@ Sprawdź:
 
 ---
 
-# Krok 8 — selekcja osobników [Kamil] (UKOŃCZONO)
+# Krok 8 — selekcja osobników
 
 ### Branch: `feature/operators-selection`
 
@@ -282,7 +282,7 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 
 --
 
-# Krok 9 — krzyżowanie [Krystian] (UKOŃCZONO)
+# Krok 9 — krzyżowanie [Krystian]
 
 ### Branch: `feature/operators-crossover`
 
@@ -304,7 +304,7 @@ Selekcja zwraca listę osobników, którzy będą użyci jako rodzice w następn
 
 ---
 
-# Krok 10 — mutacja [Paweł] (UKOŃCZONO)
+# Krok 10 — mutacja [Paweł]
 
 ### Branch: `feature/operators-mutation`
 
@@ -329,7 +329,7 @@ Sprawdź:
 
 ---
 
-# Krok 11 - operatory inwersji i elitaryzm: [Krystian] (UKOŃCZONO)
+# Krok 11 - operatory inwersji i elitaryzm:
 ### Branch: `feature/operators-inversion-elitism`
 
 **Co robimy**
@@ -348,7 +348,7 @@ Sprawdź:
 
 ---
 
-# Krok 12 — poprawki w gui, spowodowane wymaganiami powyższych implementacji [Bartek] (UKOŃCZONO)
+# Krok 12 — poprawki w gui, spowodowane wymaganiami powyższych implementacji
 
 ### Branch: `feature/gui-tailoring`
 
@@ -365,7 +365,7 @@ Sprawdź:
 
 ---
 
-# Krok 13 — wyniki w GUI [Bartek] (UKOŃCZONO)
+# Krok 13 — wyniki w GUI
 
 ### Branch: `feature/gui-tailoring`
 
@@ -387,7 +387,7 @@ Uruchomić run w GUI i sprawdzić czy dane się pojawiają.
 
 ---
 
-# Krok 14 — zapis wyników [Kamil] (UKOŃCZONO)
+# Krok 14 — zapis wyników
 
 ### Branch: `feature/io-results`
 
@@ -408,7 +408,7 @@ Po runie:
 
 ---
 
-# Krok 15 — wykresy [Bartek, Kamil] (UKOŃCZONO)
+# Krok 15 — wykresy
 
 ### Branch: `feature/visualization`
 
@@ -423,7 +423,7 @@ Wykres ma przedstawiać coś co ma sens; trzeba jeszcze zobaczyć jak to rozwią
 
 ---
 
-# Krok 16 — Eksperymenty / batch runy [Bartek]
+# Krok 16 — Eksperymenty / batch runy
 
 ### Branch: `feature/experiments`
 
@@ -450,21 +450,21 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
 
 ### Co robimy
 1. Końcowe porządki:
-  - dopisanie nowych presetów w oparciu o testy
+  - dopisanie nowych presetów w oparciu o testy --- ok
   - poprawa importów
-  - poprawa nazw
-  - usunięcie niepotrzebnych plików
-  - usunięcie debugów
-  - aktualizacja README
+  - poprawa nazw --- ok
+  - usunięcie niepotrzebnych plików --- ok
+  - usunięcie debugów --- ok
+  - aktualizacja README -- ok
   - aktualizacja `.gitignore`
 
 2. Sprawdzamy działanie:
-  - GUI
+  - GUI --- ok
   - engine
   - benchmark
 
 3. Utworzenie dokumentacji
-  - w `docs` tworzymy dokumentacje całego projektu
+  - w `docs` tworzymy dokumentacje całego projektu --- ok
   - tworzymy dokładny opis jednej sprawdzanej funkcji
 
 ### Jak testować

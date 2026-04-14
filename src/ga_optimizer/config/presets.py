@@ -33,40 +33,20 @@ def _config_to_preset_dict(config: GAConfig) -> dict:
 _default_cfg = build_default_config()
 DEFAULT_PRESET = _config_to_preset_dict(_default_cfg)
 
-TEST_CUSTOM_PRESET = deepcopy(DEFAULT_PRESET)
-TEST_CUSTOM_PRESET.update(
-    {
-        "population": 20,
-        "epochs": 15,
-        "run_count": 3,
-        "seed": 123,
-        "precision_mode": "bits",
-        "precision_bits": 10,
-        "selection_method": "tournament",
-        "crossover_method": "two_point",
-        "mutation_method": "scramble",
-        "inversion_enabled": False,
-        "elitism_enabled": False,
-        "method_params": {
-            **deepcopy(DEFAULT_PRESET["method_params"]),
-            "selection_tournament_k": 8,
-            "crossover_two_point_p": 0.5,
-            "mutation_scramble_p": 0.6,
-        },
-    }
-)
 
-
-def _make_preset(name: str, base: dict, updates: dict) -> dict:
-    cfg = deepcopy(base)
+def _make_preset(name: str, range_start: float, range_end: float, updates: dict) -> dict:
+    cfg = deepcopy(DEFAULT_PRESET)
     cfg["problem_name"] = name
+    cfg["range_start"] = range_start
+    cfg["range_end"] = range_end
+    cfg["precision_mode"] = "bits"
     cfg.update(updates)
     return cfg
 
 
 OPTIMAL_PRESETS = {
 
-    "DeJong3": _make_preset("DeJong3", DEFAULT_PRESET, {
+    "DeJong3": _make_preset("DeJong3", -3.8, 3.8, {
         "selection_method": "roulette",
         "crossover_method": "three_point",
         "mutation_method": "one_point",
@@ -78,7 +58,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 10,
     }),
 
-    "Rastrigin": _make_preset("Rastrigin", DEFAULT_PRESET, {
+    "Rastrigin": _make_preset("Rastrigin", -5.12, 5.12, {
         "selection_method": "tournament",
         "crossover_method": "arithmetic",
         "mutation_method": "swap",
@@ -90,7 +70,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 30,
     }),
 
-    "Hyperellipsoid": _make_preset("Hyperellipsoid", DEFAULT_PRESET, {
+    "Hyperellipsoid": _make_preset("Hyperellipsoid", -65.536, 65.536, {
         "selection_method": "best",
         "crossover_method": "reduced_surro",
         "mutation_method": "one_point",
@@ -102,7 +82,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 22,
     }),
 
-    "MartinGaddy": _make_preset("MartinGaddy", DEFAULT_PRESET, {
+    "MartinGaddy": _make_preset("MartinGaddy", -20.0, 20.0, {
         "selection_method": "tournament",
         "crossover_method": "shuffle",
         "mutation_method": "edge",
@@ -114,7 +94,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 26,
     }),
 
-    "Hypersphere": _make_preset("Hypersphere", DEFAULT_PRESET, {
+    "Hypersphere": _make_preset("Hypersphere", -5.0, 5.0, {
         "selection_method": "best",
         "crossover_method": "two_point",
         "mutation_method": "reset",
@@ -126,7 +106,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 22,
     }),
 
-    "GoldsteinPrice": _make_preset("GoldsteinPrice", DEFAULT_PRESET, {
+    "GoldsteinPrice": _make_preset("GoldsteinPrice", -2.0, 2.0, {
         "selection_method": "tournament",
         "crossover_method": "shuffle",
         "mutation_method": "swap",
@@ -138,7 +118,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 24,
     }),
 
-    "DeJong5": _make_preset("DeJong5", DEFAULT_PRESET, {
+    "DeJong5": _make_preset("DeJong5", -65.536, 65.536, {
         "selection_method": "tournament",
         "crossover_method": "one_point",
         "mutation_method": "reset",
@@ -150,7 +130,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 12,
     }),
 
-    "PichenyGoldsteinPrice": _make_preset("PichenyGoldsteinPrice", DEFAULT_PRESET, {
+    "PichenyGoldsteinPrice": _make_preset("PichenyGoldsteinPrice", -2.0, 2.0, {
         "selection_method": "double_tournament",
         "crossover_method": "majority",
         "mutation_method": "two_point",
@@ -162,7 +142,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 22,
     }),
 
-    "Michalewicz": _make_preset("Michalewicz", DEFAULT_PRESET, {
+    "Michalewicz": _make_preset("Michalewicz", 0.0, 3.141592653589793, {
         "selection_method": "tournament",
         "crossover_method": "two_point",
         "mutation_method": "swap",
@@ -174,7 +154,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 16,
     }),
 
-    "Ackley": _make_preset("Ackley", DEFAULT_PRESET, {
+    "Ackley": _make_preset("Ackley", -32.768, 32.768, {
         "selection_method": "tournament",
         "crossover_method": "shuffle",
         "mutation_method": "reset",
@@ -186,7 +166,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 28,
     }),
 
-    "McCormick": _make_preset("McCormick", DEFAULT_PRESET, {
+    "McCormick": _make_preset("McCormick", -3.0, 4.0, {
         "selection_method": "double_tournament",
         "crossover_method": "majority",
         "mutation_method": "two_point",
@@ -198,7 +178,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 26,
     }),
 
-    "Griewank": _make_preset("Griewank", DEFAULT_PRESET, {
+    "Griewank": _make_preset("Griewank", -600.0, 600.0, {
         "selection_method": "sus",
         "crossover_method": "arithmetic",
         "mutation_method": "scramble",
@@ -210,7 +190,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 16,
     }),
 
-    "Himmelblau": _make_preset("Himmelblau", DEFAULT_PRESET, {
+    "Himmelblau": _make_preset("Himmelblau", -5.0, 5.0, {
         "selection_method": "double_tournament",
         "crossover_method": "shuffle",
         "mutation_method": "swap",
@@ -222,7 +202,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 18,
     }),
 
-    "Schwefel": _make_preset("Schwefel", DEFAULT_PRESET, {
+    "Schwefel": _make_preset("Schwefel", -500.0, 500.0, {
         "selection_method": "double_tournament",
         "crossover_method": "disruptive",
         "mutation_method": "bit_flip",
@@ -234,7 +214,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 18,
     }),
 
-    "PitsAndHoles": _make_preset("PitsAndHoles", DEFAULT_PRESET, {
+    "PitsAndHoles": _make_preset("PitsAndHoles", -20.0, 20.0, {
         "selection_method": "double_tournament",
         "crossover_method": "segmented",
         "mutation_method": "scramble",
@@ -246,7 +226,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 30,
     }),
 
-    "Easom": _make_preset("Easom", DEFAULT_PRESET, {
+    "Easom": _make_preset("Easom", -100.0, 100.0, {
         "selection_method": "sus",
         "crossover_method": "shuffle",
         "mutation_method": "two_point",
@@ -258,7 +238,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 22,
     }),
 
-    "StyblinskiTang": _make_preset("StyblinskiTang", DEFAULT_PRESET, {
+    "StyblinskiTang": _make_preset("StyblinskiTang", -5.0, 5.0, {
         "selection_method": "best",
         "crossover_method": "disruptive",
         "mutation_method": "scramble",
@@ -270,7 +250,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 10,
     }),
 
-    "Schaffer2": _make_preset("Schaffer2", DEFAULT_PRESET, {
+    "Schaffer2": _make_preset("Schaffer2", -100.0, 100.0, {
         "selection_method": "double_tournament",
         "crossover_method": "shuffle",
         "mutation_method": "scramble",
@@ -282,7 +262,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 24,
     }),
 
-    "Rosenbrock": _make_preset("Rosenbrock", DEFAULT_PRESET, {
+    "Rosenbrock": _make_preset("Rosenbrock", -2.048, 2.048, {
         "selection_method": "best",
         "crossover_method": "disruptive",
         "mutation_method": "reset",
@@ -294,7 +274,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 16,
     }),
 
-    "Rana": _make_preset("Rana", DEFAULT_PRESET, {
+    "Rana": _make_preset("Rana", -515.0, 515.0, {
         "selection_method": "sus",
         "crossover_method": "one_point",
         "mutation_method": "reset",
@@ -306,7 +286,7 @@ OPTIMAL_PRESETS = {
         "precision_bits": 14,
     }),
 
-    "Eggholder": _make_preset("Eggholder", DEFAULT_PRESET, {
+    "Eggholder": _make_preset("Eggholder", -515.0, 515.0, {
         "selection_method": "double_tournament",
         "crossover_method": "shuffle",
         "mutation_method": "bit_flip",
@@ -322,6 +302,5 @@ OPTIMAL_PRESETS = {
 
 PRESETS = {
     "Default": DEFAULT_PRESET,
-    "test_custom": TEST_CUSTOM_PRESET,
     **OPTIMAL_PRESETS,
 }
