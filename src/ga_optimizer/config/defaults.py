@@ -2,6 +2,7 @@
 # Domyślne wartości configu oraz funkcje budujące startowy config aplikacji.
 
 from copy import deepcopy
+from ga_optimizer.config.schema import GENERAL_FIELD_SPECS
 
 from ga_optimizer.config.schema import (
     CROSSOVER_METHOD_PARAM_SPECS,
@@ -63,7 +64,7 @@ def _build_default_method_params(
 
 def build_default_config(problem_name: str | None = None) -> GAConfig:
     # Tworzy domyślny config na podstawie domyślnej lub wskazanej funkcji.
-    selected_problem_name = problem_name or get_default_problem_name()
+    selected_problem_name = problem_name or GENERAL_FIELD_SPECS["problem_name"]["default"]
     problem = get_problem_definition(selected_problem_name)
 
     return GAConfig(
