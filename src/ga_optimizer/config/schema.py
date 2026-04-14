@@ -54,7 +54,7 @@ GENERAL_FIELD_SPECS = {
         "label": "Wybór funkcji",
         "type": "enum",
         "values": [],
-        "default": "Hypersphere",
+        "default": "Rastrigin",
     },
     "n_vars": {
         "label": "Liczba zmiennych",
@@ -85,13 +85,13 @@ GA_MAIN_FIELD_SPECS = {
         "label": "Wielkość populacji",
         "type": "int",
         "min": 2,
-        "default": 10,
+        "default": 100,
     },
     "epochs": {
         "label": "Liczba epok",
         "type": "int",
         "min": 1,
-        "default": 10,
+        "default": 200,
     },
     "run_count": {
         "label": "Liczba uruchomień algorytmu",
@@ -112,7 +112,7 @@ PRECISION_FIELD_SPECS = {
         "label": "Rodzaj dokładności",
         "type": "enum",
         "values": PRECISION_MODE_OPTIONS,
-        "default": "numeric",
+        "default": "bits",
     },
     "precision_numeric": {
         "label": "Dokładność (np. 0.001)",
@@ -124,7 +124,7 @@ PRECISION_FIELD_SPECS = {
         "label": "Liczba bitów",
         "type": "int",
         "min": 1,
-        "default": 10,
+        "default": 16,
     },
 }
 
