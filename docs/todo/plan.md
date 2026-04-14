@@ -454,7 +454,7 @@ Uruchomić skrypt i sprawdzić czy powstało wiele runów.
   - poprawa importów
   - poprawa nazw --- ok
   - usunięcie niepotrzebnych plików --- ok
-  - usunięcie debugów
+  - usunięcie debugów --- ok
   - aktualizacja README -- ok? Nw, trzeba sprawdzic
   - aktualizacja `.gitignore`
 

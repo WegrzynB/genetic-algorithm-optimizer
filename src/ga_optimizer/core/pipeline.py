@@ -14,7 +14,7 @@ from ga_optimizer.utils.helpers import debug_print
 def run_pipeline(
     config: GAConfig,
     progress_callback: Callable[[int, int], None] | None = None,
-    verbose: bool = True,
+    verbose: bool = False,  # tutaj zmienia się czy printować
 ) -> dict[str, Any]:
     # Składa config do prostego słownika wejściowego dla engine.
     input_dict = {
